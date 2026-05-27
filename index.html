@@ -1081,8 +1081,10 @@ function openSettings(){showSection('notifications');}
 function hashPw(pw){let h=0;for(let i=0;i<pw.length;i++){h=(h<<5)-h+pw.charCodeAt(i);h|=0}return 'h'+Math.abs(h).toString(36)+'x'+pw.length}
 function getUsers(){const def=[{id:'admin',username:'admin',name:'Administrator',role:'admin',pwHash:hashPw('admin123'),approved:true,email:''}];return JSON.parse(localStorage.getItem('agrUsers')||JSON.stringify(def)).map(u=>({...u,approved:u.approved!==false}))}
 function getPendingUsers(){return JSON.parse(localStorage.getItem('agrPendingUsers')||'[]')}
-function savePendingUsers(u){localStorage.setItem('agrPendingUsers',JSON.stringify(u))}
-function saveUsers(u){localStorage.setItem('agrUsers',JSON.stringify(u))}
+function setPendingUsers(u){localStorage.setItem('agrPendingUsers',JSON.stringify(u))}
+function setUsers(u){localStorage.setItem('agrUsers',JSON.stringify(u))}
+function savePendingUsers(u){setPendingUsers(u); if(isMSSignedIn() && odConfig.clientId) odSyncToOneDrive()}
+function saveUsers(u){setUsers(u); if(isMSSignedIn() && odConfig.clientId) odSyncToOneDrive()}
 function getSession(){const s=localStorage.getItem('agrSession');return s?JSON.parse(s):null}
 function setSession(u){localStorage.setItem('agrSession',JSON.stringify({userId:u.id,username:u.username,name:u.name,role:u.role,ts:Date.now()}))}
 function clearSession(){localStorage.removeItem('agrSession')}
@@ -2303,7 +2305,12 @@ async function odSyncToOneDrive(){
   const token=await getAccessToken(true);
   if(!token)return;
   try{
-    const body=JSON.stringify(agreements,null,2);
+    const bodyData = {
+      agreements,
+      users:getUsers(),
+      pendingUsers:getPendingUsers()
+    };
+    const body=JSON.stringify(bodyData,null,2);
     const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
       method:'PUT',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
@@ -2330,15 +2337,48 @@ async function odLoadFromOneDrive(allowInteraction = false){
     }
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
     const cloud=await r.json();
+    let cloudAgreements=[];
+    let cloudUsers=[];
+    let cloudPending=[];
     if(Array.isArray(cloud)){
-      // Merge: cloud is authoritative, but keep local-only records
-      const cloudIds=new Set(cloud.map(a=>a.id));
+      cloudAgreements=cloud;
+    } else if(cloud && typeof cloud==='object'){
+      cloudAgreements=Array.isArray(cloud.agreements)?cloud.agreements:[];
+      cloudUsers=Array.isArray(cloud.users)?cloud.users:[];
+      cloudPending=Array.isArray(cloud.pendingUsers)?cloud.pendingUsers:[];
+      if(cloudUsers.length>0){
+        const localUsers=getUsers();
+        const mergedUsers=[...localUsers];
+        for(const cu of cloudUsers){
+          const idx=mergedUsers.findIndex(u=>u.id===cu.id||u.username===cu.username);
+          if(idx>=0){
+            mergedUsers[idx]={...mergedUsers[idx],...cu};
+          } else {
+            mergedUsers.push(cu);
+          }
+        }
+        setUsers(mergedUsers);
+      }
+      if(cloudPending.length>0){
+        const localPending=getPendingUsers();
+        const mergedPending=[...localPending];
+        for(const cp of cloudPending){
+          if(!mergedPending.some(p=>p.id===cp.id||p.username===cp.username||p.email===cp.email)){
+            mergedPending.push(cp);
+          }
+        }
+        setPendingUsers(mergedPending);
+      }
+    }
+    if(cloudAgreements.length>0){
+      const cloudIds=new Set(cloudAgreements.map(a=>a.id));
       const localOnly=agreements.filter(a=>!cloudIds.has(a.id));
-      const merged=[...cloud,...localOnly];
+      const merged=[...cloudAgreements,...localOnly];
       for(const agr of merged)await dbPut('agreements',agr);
       agreements=await dbGetAll('agreements');
       renderAgreements();
     }
+    await odSyncToOneDrive();
     setSyncStatus('connected','✅ Loaded from OneDrive · '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Load failed: '+e.message)}
 }
