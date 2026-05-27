@@ -1142,8 +1142,8 @@ function startSignupVerification(){
     if(msg) msg.textContent='Sending verification code to '+email+'...';
     sendSignupVerificationEmail(signupVerificationState);
   } else {
-    if(msg) msg.innerHTML = 'Connect OneDrive in Settings to send the verification email, or use this code to continue:<br/><strong>'+code+'</strong>';
-    showToast('⚠️ Connect OneDrive to send the verification email. Code shown above for verification.');
+    if(msg) msg.innerHTML = 'Admin must connect OneDrive in Settings to send the verification email, or use this code to continue:<br/><strong>'+code+'</strong>';
+    showToast('⚠️ Admin must connect OneDrive in Settings to send verification emails. Code shown above for verification.');
   }
 }
 function editSignupRequest(){
@@ -1153,8 +1153,8 @@ function editSignupRequest(){
 }
 function sendSignupVerificationEmail(req){
   if(!req || !req.email){return}
-  if(!window.odConfig || !odConfig.clientId){showToast('⚠️ Configure OneDrive first to send verification emails.');return}
-  if(!isMSSignedIn()){showToast('⚠️ Connect Microsoft account to send verification email.');return}
+  if(!window.odConfig || !odConfig.clientId){showToast('⚠️ Admin must configure OneDrive in Settings before verification emails can be sent.');return}
+  if(!isMSSignedIn()){showToast('⚠️ Admin must sign in to Microsoft to send verification emails.');return}
   const subject='[Agreement Tracker] Verify your email address';
   const htmlBody=`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px">`+
     `<h2 style="color:#1a56db">Verify your email</h2>`+
@@ -1313,8 +1313,12 @@ function approveUserRequest(id){
 }
 function sendApprovalEmail(req){
   if(!req || !req.email){return}
+  if(!window.odConfig || !odConfig.clientId){
+    showToast('✅ User approved. Admin must configure OneDrive before approval emails can be sent.');
+    return;
+  }
   if(!isMSSignedIn()){
-    showToast('✅ User approved. Connect OneDrive to send approval email.');
+    showToast('✅ User approved. Admin must sign in to Microsoft to send approval email.');
     return;
   }
   const subject = '[Agreement Tracker] Your account request has been approved';
@@ -2696,7 +2700,7 @@ async function sendReminderEmail(agrId, silent=false){
   if(!a){showToast('Agreement not found');return}
 
   if(!isMSSignedIn()){
-    if(!silent){ showToast('⚠️ Not signed in to Microsoft. Connect OneDrive in Settings first.'); }
+    if(!silent){ showToast('⚠️ Not signed in to Microsoft. Admin must connect OneDrive in Settings first.'); }
     return;
   }
 
