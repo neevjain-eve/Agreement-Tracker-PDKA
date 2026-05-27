@@ -301,8 +301,8 @@
     .btn-upload{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
 
     /* ── LOGIN SCREEN ────────────── */
-    #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1a56db 0%,#1e40af 60%,#1347c0 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px}
-    .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1a56db 0%,#1e40af 60%,#1347c0 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px;overflow-y:auto;}
+    .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:calc(100vh - 48px);overflow:auto;}
     .login-logo{text-align:center;margin-bottom:24px}
     .login-logo .logo-icon{font-size:3rem;display:block;margin-bottom:8px}
     .login-logo h2{font-size:1.3rem;font-weight:800;color:var(--primary)}
@@ -388,10 +388,34 @@
     <div class="login-field"><label>Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-eye" onclick="togglePw('loginPass',this)" type="button">👁</button></div></div>
     <button class="btn-login" onclick="doLogin()">🔐 Sign In</button>
     <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn-secondary" onclick="openSignupModal()" style="flex:1">Create Account</button>
+      <button class="btn-secondary" onclick="toggleSignupPanel()" style="flex:1">Create Account</button>
       <button class="btn-secondary" onclick="openResetPasswordModal()" style="flex:1">Forgot Password?</button>
     </div>
-    <div class="login-hint">Default: admin / admin123</div>
+    <div id="signupPanel" style="display:none;margin-top:18px;border:1px solid var(--border);border-radius:16px;padding:18px;background:#f8fafc">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--primary)">New account request</div>
+        <button class="btn-secondary" style="padding:8px 12px;font-size:.85rem;height:auto" onclick="closeSignupPanel()">Cancel</button>
+      </div>
+      <div class="login-field"><label>Full Name</label><input type="text" id="signupName" placeholder="Your full name" autocomplete="name"/></div>
+      <div class="login-field"><label>Email Address</label><input type="email" id="signupEmail" placeholder="Your email address" autocomplete="email"/></div>
+      <div class="login-field"><label>Username</label><input type="text" id="signupUsername" placeholder="Choose a username" autocomplete="username"/></div>
+      <div class="login-field"><label>Password</label><div class="pw-wrap"><input type="password" id="signupPassword" placeholder="Create password" autocomplete="new-password"/><button class="pw-eye" onclick="togglePw('signupPassword',this)" type="button">👁</button></div></div>
+      <div class="login-field"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="signupPasswordConfirm" placeholder="Confirm password" autocomplete="new-password"/><button class="pw-eye" onclick="togglePw('signupPasswordConfirm',this)" type="button">👁</button></div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn-login" style="flex:1;min-width:180px" onclick="startSignupVerification()">➡️ Continue</button>
+      </div>
+      <div id="signupVerifyStep" style="display:none;margin-top:18px;padding:16px;background:#ffffff;border:1px solid var(--border);border-radius:14px">
+        <div style="font-weight:700;color:var(--primary);margin-bottom:10px">Email verification</div>
+        <div id="signupVerificationMessage" style="font-size:.84rem;color:var(--muted);margin-bottom:14px">A verification code will be sent to the email address you entered.</div>
+        <div class="login-field"><label>Verification Code</label><input type="text" id="signupVerificationCode" placeholder="Enter verification code" autocomplete="one-time-code"/></div>
+        <button class="btn-login" onclick="verifySignupCode()">✅ Verify & Submit</button>
+        <button class="btn-secondary" style="margin-top:10px" onclick="resendSignupCode()">🔄 Resend Code</button>
+        <button class="btn-secondary" style="margin-top:10px" onclick="editSignupRequest()">← Edit Details</button>
+      </div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:10px;line-height:1.5">
+        Your request will be sent for admin approval after email verification. The admin will then approve your account before login is enabled.
+      </div>
+    </div>
   </div>
 </div>
 
@@ -423,7 +447,7 @@
       </button>
     </nav>
     <div class="sidebar-footer">
-      <div class="sync-chip" id="syncChip" onclick="showSection('admin');setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
+      <div class="sync-chip" id="syncChip" onclick="showAdminSection()" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
         <span class="sync-dot" id="syncDot"></span>
         <span id="syncLabel">OneDrive</span>
       </div>
@@ -441,7 +465,7 @@
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button class="user-chip" id="userChip" onclick="showSection('admin')">
+      <button class="user-chip" id="userChip" onclick="showAdminSection()">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
       </button>
@@ -531,7 +555,7 @@
           <div style="margin-top:8px;padding:10px;background:#fef3c7;border-radius:8px;font-size:.75rem;color:#92400e">⚠️ Users are stored locally on this device only.</div>
         </div>
 
-        <div class="admin-panel" id="adminCredentialsPanel">
+        <div class="admin-panel" id="adminCredentialsPanel" style="display:none">
           <div class="admin-panel-title">🔐 Admin Credentials</div>
           <div class="form-group"><label>Admin Username</label><input type="text" id="adminUsername" placeholder="admin"/></div>
           <div class="form-group"><label>Admin Email</label><input type="email" id="adminEmail" placeholder="admin@company.com"/></div>
@@ -862,6 +886,35 @@
 <!-- ═══════════════════════════════════════════════════════════
      ONEDRIVE SETUP WIZARD MODAL
 ═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="signupModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📝 Create Account</div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="signupName" placeholder="Enter your full name"/></div>
+    <div class="form-group"><label>Username</label><input type="text" id="signupUsername" placeholder="Choose a username"/></div>
+    <div class="form-group"><label>Email Address</label><input type="email" id="signupEmail" placeholder="Your email address"/></div>
+    <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="signupPassword" placeholder="Create password"/><button class="pw-eye" onclick="togglePw('signupPassword',this)" type="button">👁</button></div></div>
+    <div class="form-group"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="signupPasswordConfirm" placeholder="Confirm password"/><button class="pw-eye" onclick="togglePw('signupPasswordConfirm',this)" type="button">👁</button></div></div>
+    <button class="btn-primary" onclick="submitSignupRequest()">✅ Request Access</button>
+    <button class="btn-secondary" onclick="closeModal('signupModal')">Cancel</button>
+    <div style="margin-top:10px;font-size:.8rem;color:var(--muted)">Your request will be sent for admin approval before you can sign in.</div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="resetPasswordModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔐 Reset Password</div>
+    <div class="form-group"><label>Username</label><input type="text" id="resetUsername" placeholder="Enter your username"/></div>
+    <div class="form-group"><label>Email Address</label><input type="email" id="resetEmail" placeholder="Registered email"/></div>
+    <div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="resetPassword" placeholder="New password"/><button class="pw-eye" onclick="togglePw('resetPassword',this)" type="button">👁</button></div></div>
+    <div class="form-group"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="resetPasswordConfirm" placeholder="Confirm new password"/><button class="pw-eye" onclick="togglePw('resetPasswordConfirm',this)" type="button">👁</button></div></div>
+    <button class="btn-primary" onclick="submitPasswordReset()">🔄 Reset Password</button>
+    <button class="btn-secondary" onclick="closeModal('resetPasswordModal')">Cancel</button>
+    <div style="margin-top:10px;font-size:.8rem;color:var(--muted)">Enter your registered username and email to reset your password.</div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="odSetupModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -942,6 +995,7 @@
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 function showSection(name){
+  if(name==='admin' && !isAdminUser()){showToast('⚠️ Admin settings are only available to administrators.');return;}
   ['dashboard','agreements','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
@@ -1042,11 +1096,30 @@ function doLogin(){
   if(!u.approved){err.style.display='block';err.textContent='Account pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection('dashboard');showToast('Welcome, '+u.name+'!');
 }
-function openSignupModal(){resetSignupForm();document.getElementById('signupModal').classList.add('open')}
+let signupVerificationState = null;
+function toggleSignupPanel(){
+  const panel=document.getElementById('signupPanel');
+  if(!panel) return;
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+  if(panel.style.display==='block'){resetSignupPanel();document.getElementById('signupName').focus();}
+}
+function closeSignupPanel(){
+  const panel=document.getElementById('signupPanel');
+  if(panel) panel.style.display='none';
+  resetSignupPanel();
+}
+function openSignupModal(){toggleSignupPanel()}
 function openResetPasswordModal(){resetResetForm();document.getElementById('resetPasswordModal').classList.add('open')}
-function resetSignupForm(){['signupName','signupUsername','signupEmail','signupPassword','signupPasswordConfirm'].forEach(id=>document.getElementById(id)&& (document.getElementById(id).value=''))}
+function resetSignupPanel(){
+  ['signupName','signupUsername','signupEmail','signupPassword','signupPasswordConfirm','signupVerificationCode'].forEach(id=>document.getElementById(id)&& (document.getElementById(id).value=''));
+  const verifyStep=document.getElementById('signupVerifyStep');
+  if(verifyStep) verifyStep.style.display='none';
+  const msg=document.getElementById('signupVerificationMessage');
+  if(msg) msg.textContent='A verification code will be sent to the email address you entered.';
+  signupVerificationState = null;
+}
 function resetResetForm(){['resetUsername','resetEmail','resetPassword','resetPasswordConfirm'].forEach(id=>document.getElementById(id)&& (document.getElementById(id).value=''))}
-function submitSignupRequest(){
+function startSignupVerification(){
   const name=document.getElementById('signupName').value.trim();
   const uname=document.getElementById('signupUsername').value.trim().toLowerCase();
   const email=document.getElementById('signupEmail').value.trim().toLowerCase();
@@ -1059,8 +1132,85 @@ function submitSignupRequest(){
   if(users.find(u=>u.username===uname)){showToast('Username already exists');return}
   const pending=getPendingUsers();
   if(pending.find(r=>r.username===uname||r.email===email)){showToast('A request with this username or email already exists');return}
-  pending.push({id:'req'+Date.now(),name,username:uname,email,pwHash:hashPw(pw),createdAt:new Date().toISOString()});
-  savePendingUsers(pending);resetSignupForm();closeModal('signupModal');renderPendingRequests();showToast('✅ Request submitted. Admin approval is required.');
+  const code = Math.floor(100000 + Math.random()*900000).toString();
+  signupVerificationState = {id:'tmp'+Date.now(),name,username:uname,email,pwHash:hashPw(pw),code,createdAt:new Date().toISOString()};
+  const verifyStep=document.getElementById('signupVerifyStep');
+  const msg=document.getElementById('signupVerificationMessage');
+  if(verifyStep) verifyStep.style.display='block';
+  document.getElementById('signupVerificationCode').value='';
+  if(isMSSignedIn() && window.odConfig && odConfig.clientId){
+    if(msg) msg.textContent='Sending verification code to '+email+'...';
+    sendSignupVerificationEmail(signupVerificationState);
+  } else {
+    if(msg) msg.innerHTML = 'Connect OneDrive in Settings to send the verification email, or use this code to continue:<br/><strong>'+code+'</strong>';
+    showToast('⚠️ Connect OneDrive to send the verification email. Code shown above for verification.');
+  }
+}
+function editSignupRequest(){
+  const verifyStep=document.getElementById('signupVerifyStep');
+  if(verifyStep) verifyStep.style.display='none';
+  document.getElementById('signupVerificationCode').value='';
+}
+function sendSignupVerificationEmail(req){
+  if(!req || !req.email){return}
+  if(!window.odConfig || !odConfig.clientId){showToast('⚠️ Configure OneDrive first to send verification emails.');return}
+  if(!isMSSignedIn()){showToast('⚠️ Connect Microsoft account to send verification email.');return}
+  const subject='[Agreement Tracker] Verify your email address';
+  const htmlBody=`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px">`+
+    `<h2 style="color:#1a56db">Verify your email</h2>`+
+    `<p>Hi ${req.name},</p>`+
+    `<p>Use the code below to verify your email address and complete your account request.</p>`+
+    `<p style="font-size:1.2rem;font-weight:700;background:#f8fafc;padding:12px 16px;border-radius:10px;text-align:center;letter-spacing:.08em">${req.code}</p>`+
+    `<p>If you did not request an account, you can ignore this message.</p>`+
+    `<p style="color:#6b7280;font-size:.85rem;margin-top:20px">Agreement Tracker account verification code</p>`+
+  `</div>`;
+  sendEmailViaGraph([req.email], [], subject, htmlBody).then(()=>{
+    const msg=document.getElementById('signupVerificationMessage');
+    if(msg) msg.textContent='Verification code sent to '+req.email+'. Enter it below to continue.';
+    showToast('✅ Verification email sent to '+req.email);
+  }).catch(e=>{
+    console.error(e);
+    const msg=document.getElementById('signupVerificationMessage');
+    if(msg) msg.innerHTML='Could not send email. Use this code to continue:<br/><strong>'+req.code+'</strong>';
+    showToast('⚠️ Email send failed: '+e.message);
+  });
+}
+function resendSignupCode(){
+  if(!signupVerificationState){showToast('Start signup again to generate a code.');return}
+  signupVerificationState.code = Math.floor(100000 + Math.random()*900000).toString();
+  const msg=document.getElementById('signupVerificationMessage');
+  if(isMSSignedIn() && window.odConfig && odConfig.clientId){
+    if(msg) msg.textContent='Resending verification code to '+signupVerificationState.email+'...';
+    sendSignupVerificationEmail(signupVerificationState);
+  } else {
+    if(msg) msg.innerHTML='Connect OneDrive in Settings to send the verification email, or use this code to continue:<br/><strong>'+signupVerificationState.code+'</strong>';
+    showToast('⚠️ Connect OneDrive to send the verification email. Code shown above for verification.');
+  }
+}
+function verifySignupCode(){
+  const code=document.getElementById('signupVerificationCode').value.trim();
+  if(!signupVerificationState){showToast('Start signup again to verify your email.');return}
+  if(!code){showToast('Enter the verification code.');return}
+  if(code!==signupVerificationState.code){showToast('Incorrect verification code.');return}
+  submitSignupRequest();
+}
+function submitSignupRequest(){
+  if(!signupVerificationState){showToast('Start signup again to verify your email.');return}
+  const pending=getPendingUsers();
+  pending.push({
+    id:'req'+Date.now(),
+    name:signupVerificationState.name,
+    username:signupVerificationState.username,
+    email:signupVerificationState.email,
+    pwHash:signupVerificationState.pwHash,
+    createdAt:new Date().toISOString(),
+    verifiedAt:Date.now()
+  });
+  savePendingUsers(pending);
+  resetSignupPanel();
+  closeSignupPanel();
+  renderPendingRequests();
+  showToast('✅ Request submitted. Admin approval is required.');
 }
 function submitPasswordReset(){
   const uname=document.getElementById('resetUsername').value.trim().toLowerCase();
@@ -1158,7 +1308,31 @@ function approveUserRequest(id){
   saveUsers(users);
   savePendingUsers(pending.filter(r=>r.id!==id));
   renderUserList();
+  sendApprovalEmail(req);
   showToast('✅ User approved and added');
+}
+function sendApprovalEmail(req){
+  if(!req || !req.email){return}
+  if(!isMSSignedIn()){
+    showToast('✅ User approved. Connect OneDrive to send approval email.');
+    return;
+  }
+  const subject = '[Agreement Tracker] Your account request has been approved';
+  const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px">
+    <h2 style="color:#1a56db">✅ Account Approved</h2>
+    <p>Hi ${req.name},</p>
+    <p>Your Agreement Tracker account request has been approved by the administrator.</p>
+    <p><strong>Username:</strong> ${req.username}</p>
+    <p>You can now sign in using the username and password you provided on the login page.</p>
+    <p>If you forget your password, use the Forgot Password link on the login screen.</p>
+    <p style="margin-top:20px;color:#6b7280;font-size:.85rem">This email was sent automatically when your account was approved.</p>
+  </div>`;
+  sendEmailViaGraph([req.email], [], subject, htmlBody).then(()=>{
+    showToast('✅ Approval email sent to '+req.email);
+  }).catch(e=>{
+    console.error(e);
+    showToast('⚠️ Account approved, but email send failed: '+e.message);
+  });
 }
 function rejectUserRequest(id){
   savePendingUsers(getPendingUsers().filter(r=>r.id!==id));
@@ -2180,6 +2354,7 @@ async function odSyncAttachment(fileId,name,data){
 }
 
 function odConnect(){
+  if(!isAdminUser()){showToast('⚠️ Only an admin can connect OneDrive.');return;}
   if(location.protocol==='file:'){
     showToast('⚠️ OneDrive login requires running the app via http://localhost:8080, not as a file. Start the local server first.');
     return;
@@ -2195,6 +2370,7 @@ function odConnect(){
 }
 
 function odSaveClientId(){
+  if(!isAdminUser()){showToast('⚠️ Only an admin can set up OneDrive.');return;}
   if(location.protocol==='file:'){
     showToast('⚠️ OneDrive login requires running the app via http://localhost:8080, not as a file. Start the local server first.');
     return;
@@ -2213,6 +2389,7 @@ function odSaveClientId(){
 
 
 async function odDisconnect(){
+  if(!isAdminUser()){showToast('⚠️ Only an admin can disconnect OneDrive.');return;}
   if(!confirm('Disconnect OneDrive? Your local data stays safe.'))return;
   try{
     if(msalApp){
@@ -2236,6 +2413,7 @@ async function odSyncNow(){
 }
 
 function showOdSetup(){
+  if(!isAdminUser()){showToast('⚠️ Only an admin can set up OneDrive.');return;}
   document.getElementById('redirectUriDisplay').textContent=getRedirectUri();
   closeModal('settingsModal');
   document.getElementById('odSetupModal').classList.add('open');
@@ -2279,6 +2457,20 @@ function refreshOdStatusUI(){
 
 function isMSSignedIn(){
   return !!(msalApp && msalApp.getAllAccounts().length > 0);
+}
+
+function isAdminUser(){
+  const session = getSession();
+  return !!(session && session.role === 'admin');
+}
+
+function showAdminSection(){
+  if(!isAdminUser()){
+    showToast('⚠️ OneDrive setup and admin settings are admin-only.');
+    return;
+  }
+  showSection('admin');
+  setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250);
 }
 
 function getMSAccount(){
