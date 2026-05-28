@@ -2885,15 +2885,7 @@ async function sendReminderEmail(agrId, silent=false){
   if(!isMSSignedIn()) throw new Error('Not signed in to Microsoft — connect OneDrive first');
 
   const days = getDaysLeft(a.endDate);
-  const session = getSession();
-  const users = getUsers();
-  const loggedInUser = session ? users.find(u=>u.id===session.userId) : null;
-  const rawTo = [];
-  if(a.toEmail1 && isValidEmail(a.toEmail1)) rawTo.push(a.toEmail1.trim());
-  if(a.toEmail2 && isValidEmail(a.toEmail2)) rawTo.push(a.toEmail2.trim());
-  if(a.notifEmail && isValidEmail(a.notifEmail) && !rawTo.includes(a.notifEmail.trim())) rawTo.push(a.notifEmail.trim());
-  if(loggedInUser?.email && isValidEmail(loggedInUser.email) && !rawTo.includes(loggedInUser.email)) rawTo.push(loggedInUser.email);
-  const toList = [...new Set(rawTo)];
+  const toList = getReminderRecipients(a);
   if(toList.length===0) throw new Error('NO_EMAIL:'+a.name);
   const ccList = [];
   if(a.ccEmails) a.ccEmails.split(',').forEach(e=>{const t=e.trim();if(t&&isValidEmail(t))ccList.push(t)});
