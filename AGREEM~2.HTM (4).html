@@ -634,7 +634,7 @@
       </button>
     </nav>
     <div class="sidebar-footer">
-      <div class="sync-chip" id="syncChip" onclick="openAdminSection();setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
+      <div class="sync-chip" id="syncChip" onclick="showSection('admin');setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
         <span class="sync-dot" id="syncDot"></span>
         <span id="syncLabel">OneDrive</span>
       </div>
@@ -655,7 +655,7 @@
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button class="user-chip" id="userChip" onclick="openAdminSection()">
+      <button class="user-chip" id="userChip" onclick="showSection('admin')">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
       </button>
@@ -1199,13 +1199,6 @@
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 function showSection(name){
-  if(name==='admin'){
-    const session=getSession();
-    if(!session||session.role!=='admin'){
-      showToast('Admin settings are only available to the administrator.');
-      return;
-    }
-  }
   ['dashboard','agreements','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
@@ -1327,24 +1320,10 @@ function toggleAutoEmail(cb){
   localStorage.setItem('autoEmailEnabled',cb.checked?'1':'0');
   showToast(cb.checked?'✅ Auto reminders enabled':'Auto reminders disabled');
 }
-function getReminderRecipients(a){
-  const rawTo=[];
-  if(a.toEmail1 && isValidEmail(a.toEmail1)) rawTo.push(a.toEmail1.trim());
-  if(a.toEmail2 && isValidEmail(a.toEmail2)) rawTo.push(a.toEmail2.trim());
-  if(a.notifEmail && isValidEmail(a.notifEmail)) rawTo.push(a.notifEmail.trim());
-  const session=getSession();
-  const users=getUsers();
-  const loggedInUser=session?users.find(u=>u.id===session.userId):null;
-  if(loggedInUser?.email && isValidEmail(loggedInUser.email)) rawTo.push(loggedInUser.email);
-  return [...new Set(rawTo)];
-}
 async function sendAutoRemindersManual(){
   if(!isMSSignedIn()){showToast('Connect Microsoft 365 in Admin Settings → OneDrive first');return;}
-  const alertAgreements = agreements.filter(a=>{
-    const recipients=getReminderRecipients(a);
-    return recipients.length>0 && getStatus(a)!=='renewed';
-  });
-  if(alertAgreements.length===0){showToast('No agreements found with valid reminder recipients.');return;}
+  const alertAgreements = agreements.filter(a=>{const s=getStatus(a);return s==='expiring'||s==='expired';});
+  if(alertAgreements.length===0){showToast('No expiring or expired agreements found');return;}
   showToast('Sending to '+alertAgreements.length+' agreement(s) — please wait...');
   let sent=0,noEmail=0,failed=0;
   for(const a of alertAgreements){
@@ -1361,7 +1340,7 @@ async function sendAutoRemindersManual(){
   if(sent>0)   parts.push(sent+' sent');
   if(noEmail>0) parts.push(noEmail+' skipped (no email set)');
   if(failed>0)  parts.push(failed+' failed');
-  showToast(parts.length>0
+  showToast(sent>0
     ? 'Reminders done: '+parts.join(', ')
     : 'No emails sent — '+parts.join(', ')+'. Add TO Email on agreements.'
   );
@@ -1475,11 +1454,11 @@ function getSession(){const s=localStorage.getItem('agrSession');return s?JSON.p
 function setSession(u){localStorage.setItem('agrSession',JSON.stringify({userId:u.id,username:u.username,name:u.name,role:u.role,ts:Date.now()}))}
 function clearSession(){localStorage.removeItem('agrSession')}
 function doLogin(){
-  const uname=document.getElementById('loginUser').value.trim().toLowerCase();
+  const uname=document.getElementById('loginUser').value.trim();
   const pw=document.getElementById('loginPass').value;
   const err=document.getElementById('loginError');
   if(!uname||!pw){err.style.display='block';err.textContent='Please enter username and password.';return}
-  const u=getUsers().find(x=>x.username.toLowerCase()===uname&&x.pwHash===hashPw(pw));
+  const u=getUsers().find(x=>x.username===uname&&x.pwHash===hashPw(pw));
   if(!u){err.style.display='block';err.textContent='Incorrect username or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection('dashboard');showToast('Welcome, '+u.name+'!');
@@ -1499,9 +1478,7 @@ function updateUserChip(u){
   document.getElementById('userChipName').textContent=u.name.split(' ')[0];
   const sn=document.getElementById('sidebarUserName');if(sn)sn.textContent=u.name+' ('+u.role+')';
   const an=document.getElementById('nav-admin');if(an)an.style.display=(u.role==='admin')?'flex':'none';
-  const sync=document.getElementById('syncChip');if(sync)sync.style.display=(u.role==='admin')?'flex':'none';
 }
-function openAdminSection(){const session=getSession();if(session&&session.role==='admin'){showSection('admin');}else{showToast('Admin settings are only available to the administrator.');}}
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈'}else{i.type='password';btn.textContent='👁'}}
 function switchSettingsTab(tab){
   ['notif','od','users'].forEach(t=>{
@@ -3128,4 +3105,4 @@ openDB().then(async()=>{
 }).catch(()=>showToast('⚠️ Storage error. Try refreshing.'));
 </script>
 </body>
-</html>
+</ht
