@@ -3,17 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-  <meta name="theme-color" content="#1a56db"/>
+  <meta name="theme-color" content="#6D28D9"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="Agreement Tracker"/>
   <title>Agreement Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --primary:#1a56db;--primary-dark:#1347c0;--primary-light:#eff6ff;
+      --primary:#6D28D9;--primary-dark:#5B21B6;--primary-light:#EDE9FE;
       --success:#059669;--success-bg:#ecfdf5;
       --warning:#d97706;--warning-bg:#fffbeb;
       --danger:#dc2626;--danger-bg:#fef2f2;
@@ -24,10 +28,10 @@
       --shadow:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
       --shadow-lg:0 10px 30px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
     }
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px}
 
     /* HEADER */
-    .header{background:linear-gradient(135deg,#1a56db 0%,#1e40af 100%);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(26,86,219,.35)}
+    .header{background:linear-gradient(135deg,#6D28D9 0%,#5B21B6 100%);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(109,40,217,.35)}
     .header h1{font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
     .header-icons{display:flex;gap:6px;align-items:center}
     .icon-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -106,7 +110,7 @@
     .dot-old{background:#9ca3af}.dot-current{background:var(--primary)}.dot-new{background:var(--success)}
     .chain-link{flex:1;font-weight:500}
     .chain-date{color:var(--muted);font-size:.7rem}
-    .btn-view-ver{background:#eff6ff;color:var(--primary);border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
+    .btn-view-ver{background:#EDE9FE;color:var(--primary);border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
 
     /* ATTACHMENTS */
     .attachments-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
@@ -118,9 +122,9 @@
     .file-size{font-size:.68rem;color:var(--muted)}
     .file-actions{display:flex;gap:5px;flex-shrink:0}
     .btn-view,.btn-del-file{border:none;border-radius:6px;padding:4px 9px;font-size:.72rem;font-weight:600;cursor:pointer}
-    .btn-view{background:#eff6ff;color:var(--primary)}
+    .btn-view{background:#EDE9FE;color:var(--primary)}
     .btn-del-file{background:#fee2e2;color:var(--danger)}
-    .btn-add-file{margin-top:6px;display:flex;align-items:center;gap:6px;background:#eff6ff;color:var(--primary);border:1.5px dashed var(--primary);border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:600;cursor:pointer;width:100%;justify-content:center}
+    .btn-add-file{margin-top:6px;display:flex;align-items:center;gap:6px;background:#EDE9FE;color:var(--primary);border:1.5px dashed var(--primary);border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:600;cursor:pointer;width:100%;justify-content:center}
 
     /* CARD ACTIONS */
     .card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light);flex-wrap:wrap}
@@ -138,7 +142,7 @@
     .empty-state p{font-size:.9rem;line-height:1.7}
 
     /* FAB */
-    .fab{position:fixed;bottom:24px;right:20px;background:linear-gradient(135deg,#1a56db,#1347c0);color:#fff;border:none;width:58px;height:58px;border-radius:18px;font-size:1.5rem;cursor:pointer;box-shadow:0 6px 20px rgba(26,86,219,.5);display:flex;align-items:center;justify-content:center;z-index:200;transition:all .2s}
+    .fab{position:fixed;bottom:24px;right:20px;background:linear-gradient(135deg,#6D28D9,#5B21B6);color:#fff;border:none;width:58px;height:58px;border-radius:18px;font-size:1.5rem;cursor:pointer;box-shadow:0 6px 20px rgba(26,86,219,.5);display:flex;align-items:center;justify-content:center;z-index:200;transition:all .2s}
     .fab:hover{box-shadow:0 8px 28px rgba(26,86,219,.65);transform:translateY(-2px)}
     .fab:active{transform:scale(.93)}
 
@@ -200,7 +204,7 @@
 
     /* DROP ZONE */
     .drop-zone{border:2px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.85rem}
-    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:#eff6ff;color:var(--primary)}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:#EDE9FE;color:var(--primary)}
     .drop-zone .dz-icon{font-size:1.8rem;margin-bottom:5px}
     .pending-file{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:7px 10px;margin-top:6px}
     .pending-file .pf-name{flex:1;font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -208,7 +212,7 @@
     .pf-remove{background:#fee2e2;color:var(--danger);border:none;border-radius:5px;padding:3px 8px;font-size:.72rem;cursor:pointer}
 
     /* BUTTONS */
-    .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#1a56db,#1347c0);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 2px 8px rgba(26,86,219,.35);letter-spacing:.01em}
+    .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#6D28D9,#5B21B6);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 2px 8px rgba(109,40,217,.35);letter-spacing:.01em}
     .btn-primary:hover{box-shadow:0 4px 16px rgba(26,86,219,.5);transform:translateY(-1px)}
     .btn-primary:active{background:var(--primary-dark);transform:scale(.98)}
     .btn-secondary{width:100%;padding:12px;background:var(--border-light);color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-size:.92rem;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s}
@@ -217,7 +221,7 @@
 
     /* HISTORY MODAL */
     .history-card{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--border)}
-    .history-card.is-current{border-left-color:var(--primary);background:#eff6ff}
+    .history-card.is-current{border-left-color:var(--primary);background:#EDE9FE}
     .history-card.is-expired{border-left-color:var(--danger)}
     .history-card.is-renewed{border-left-color:var(--renewed)}
     .hc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -274,7 +278,7 @@
 
     /* BULK UPLOAD */
     .bulk-drop{border:2px dashed #a5b4fc;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#f5f3ff;color:#5b21b6}
-    .bulk-drop:hover,.bulk-drop.drag-over{border-color:var(--primary);background:#eff6ff;color:var(--primary)}
+    .bulk-drop:hover,.bulk-drop.drag-over{border-color:var(--primary);background:#EDE9FE;color:var(--primary)}
     .bulk-drop .bd-icon{font-size:2.4rem;margin-bottom:8px}
     .template-btn{display:inline-flex;align-items:center;gap:6px;background:#d1fae5;color:#065f46;border:none;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:14px;width:100%;justify-content:center}
 
@@ -301,8 +305,8 @@
     .btn-upload{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
 
     /* ── LOGIN SCREEN ────────────── */
-    #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#1a56db 0%,#1e40af 60%,#1347c0 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px;overflow-y:auto;}
-    .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:calc(100vh - 48px);overflow:auto;}
+    #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#4C1D95 0%,#5B21B6 60%,#2E1065 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px}
+    .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
     .login-logo{text-align:center;margin-bottom:24px}
     .login-logo .logo-icon{font-size:3rem;display:block;margin-bottom:8px}
     .login-logo h2{font-size:1.3rem;font-weight:800;color:var(--primary)}
@@ -324,10 +328,10 @@
     .user-name{font-weight:700;font-size:.88rem}
     .user-meta{font-size:.73rem;color:var(--muted)}
     .user-role-badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase}
-    .role-admin{background:#dbeafe;color:#1e40af}
+    .role-admin{background:#EDE9FE;color:#4C1D95}
     .role-user{background:#d1fae5;color:#065f46}
     .btn-del-user{background:#fee2e2;color:#b91c1c;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:700;cursor:pointer}
-    .add-user-form{background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
+    .add-user-form{background:#f0f9ff;border:1.5px solid #DDD6FE;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
     .add-user-form .form-group{margin-bottom:10px}
     .add-user-form label{font-size:.78rem;font-weight:600;display:block;margin-bottom:4px}
     .add-user-form input,.add-user-form select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;outline:none}
@@ -339,7 +343,7 @@
     #appShell{display:none}
     .layout-row{display:flex;height:100vh;overflow:hidden}
     body{padding-bottom:0!important;min-height:unset}
-    .sidebar{width:220px;min-width:220px;height:100vh;background:linear-gradient(180deg,#1347c0 0%,#1e40af 100%);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;position:relative;z-index:100}
+    .sidebar{width:220px;min-width:220px;height:100vh;background:linear-gradient(180deg,#2E1065 0%,#4C1D95 100%);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;position:relative;z-index:100}
     .sidebar-logo{padding:18px 14px 14px;border-bottom:1px solid rgba(255,255,255,.18)}
     .sidebar-logo h2{color:#fff;font-size:.88rem;font-weight:800;letter-spacing:-.01em}
     .sidebar-logo p{color:rgba(255,255,255,.55);font-size:.7rem;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -376,46 +380,226 @@
       .sidebar.open{left:0}
       .sidebar-toggle{display:flex;align-items:center;justify-content:center}
     }
+
+    /* AUTH / SIGNUP / CHANGE PW */
+    .login-success{background:#d1fae5;color:#065f46;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;margin-bottom:14px}
+    .login-link-btn{background:none;border:none;color:var(--primary);font-size:.78rem;font-weight:700;cursor:pointer;padding:0;text-decoration:none;letter-spacing:.01em}
+    .login-link-btn:hover{text-decoration:underline}
+    .login-divider{text-align:center;font-size:.75rem;color:var(--muted);margin:10px 0}
+    .approve-btn{background:#d1fae5;color:#065f46;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .reject-btn{background:#fee2e2;color:#b91c1c;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .change-pw-btn{background:#EDE9FE;color:var(--primary);border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .pending-section{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:14px}
+    .pending-section-title{font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .pending-badge{background:#ef4444;color:#fff;border-radius:10px;font-size:.62rem;font-weight:700;padding:2px 7px}
+    .user-item.pending{background:#fef9ec;border-color:#fcd34d}
+    .pw-inline-form{background:#f0f9ff;border:1.5px solid #DDD6FE;border-radius:9px;padding:12px;margin-top:8px;display:none}
+    .pw-inline-form .form-group{margin-bottom:8px}
+    /* Change-pw modal */
+    #changePwModal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:600;align-items:center;justify-content:center;padding:16px}
+    #changePwModal.open{display:flex}
+    .cpw-box{background:#fff;border-radius:18px;width:100%;max-width:400px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);animation:fadeInUp .25s ease}
+    .cpw-title{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:18px}
+
+    /* EMAIL ERROR + ADMIN CREDS */
+    .compose-error{background:#fee2e2;color:#b91c1c;border-radius:8px;padding:8px 12px;font-size:.8rem;font-weight:600;margin-bottom:10px;display:none;line-height:1.5}
+    .od-sync-note{display:flex;align-items:center;gap:6px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:8px 12px;font-size:.75rem;color:#065f46;margin-bottom:10px}
+    .od-sync-note.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+
+    /* PDKA LOGO */
+    .pdka-logo-block{text-align:center;margin-bottom:22px}
+    .pdka-logo-mark{display:inline-flex;align-items:center;justify-content:center;gap:0;margin-bottom:8px}
+    .pdka-box{width:44px;height:44px;background:linear-gradient(135deg,#6D28D9,#5B21B6);border-radius:10px 4px 10px 4px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(109,40,217,.40)}
+    .pdka-box span{color:#fff;font-size:1.3rem;font-weight:900;letter-spacing:-.04em}
+    .pdka-brand-name{font-size:1.25rem;font-weight:900;color:var(--primary);letter-spacing:.02em;margin:0}
+    .pdka-sub{font-size:.72rem;color:var(--muted);margin-top:2px;font-weight:500;letter-spacing:.04em}
+    .pdka-login-tagline{font-size:.78rem;color:var(--muted);margin-top:2px}
+    .sidebar-pdka{display:flex;align-items:center;gap:9px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.18)}
+    .sidebar-pdka-box{width:32px;height:32px;background:rgba(255,255,255,.22);border-radius:7px 3px 7px 3px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .sidebar-pdka-box span{color:#fff;font-size:.85rem;font-weight:900}
+    .sidebar-pdka-text h2{color:#fff;font-size:.85rem;font-weight:800;letter-spacing:.01em;line-height:1.1}
+    .sidebar-pdka-text p{color:rgba(255,255,255,.55);font-size:.68rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    /* DASHBOARD PIE CHART */
+    .dash-pie-wrap{padding:0 16px 16px;display:flex;justify-content:center}
+    .dash-pie-card{background:#fff;border-radius:var(--radius);padding:18px 20px 14px;box-shadow:var(--shadow-sm);width:100%;max-width:440px}
+    .dash-pie-title{font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;text-align:center}
+    .dash-pie-canvas-wrap{position:relative;height:200px;max-width:200px;margin:0 auto}
+    .dash-pie-legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:14px}
+    .dash-pie-legend-item{display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--text)}
+    .dash-pie-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+    /* DASHBOARD QUICK PANEL */
+    .dash-quick-panel{padding:0 16px 8px}
+    .dash-quick-panel-inner{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden}
+    .dash-qp-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-light)}
+    .dash-qp-title{font-size:.78rem;font-weight:700}
+    .dash-qp-close{background:none;border:none;cursor:pointer;font-size:1rem;color:var(--muted);line-height:1}
+    .dash-qp-list{max-height:260px;overflow-y:auto}
+    .dash-qp-empty{padding:18px;text-align:center;font-size:.82rem;color:var(--muted)}
+    .summary-card.clickable-card{cursor:pointer}
+    .summary-card.clickable-card:active{transform:scale(.97)}
+    .summary-card.card-selected{outline:2.5px solid currentColor;outline-offset:2px}
+
+    /* ── PROFESSIONAL UI POLISH ────────────────────────────── */
+    :root {
+      --bg:#F4F2FA;
+      --card:#fff;
+      --radius:14px;
+      --shadow-sm:0 1px 4px rgba(109,40,217,.07),0 1px 2px rgba(0,0,0,.04);
+      --shadow:0 4px 16px rgba(109,40,217,.10),0 2px 4px rgba(0,0,0,.04);
+      --shadow-lg:0 10px 32px rgba(109,40,217,.14),0 4px 8px rgba(0,0,0,.06);
+    }
+    body{background:var(--bg)}
+
+    /* ── TOPBAR ── */
+    .topbar{background:#fff;border-bottom:1px solid rgba(109,40,217,.12);box-shadow:0 1px 8px rgba(109,40,217,.08)}
+    .topbar-title{font-size:.95rem;font-weight:800;background:linear-gradient(135deg,#6D28D9,#9333EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* ── SIDEBAR REFINEMENTS ── */
+    .sidebar{box-shadow:4px 0 24px rgba(0,0,0,.18)}
+    .sidebar-pdka-box{background:rgba(255,255,255,.25);border-radius:8px 3px 8px 3px}
+    .nav-item:hover{background:rgba(255,255,255,.16);transform:translateX(2px)}
+    .nav-item.active{background:rgba(255,255,255,.25);border-left:3px solid rgba(255,255,255,.8);padding-left:9px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+    .sync-chip{border-radius:10px;transition:opacity .2s}
+    .sidebar-footer .nav-item{font-size:.78rem}
+
+    /* ── SUMMARY CARDS ── */
+    .summary-card{border-radius:16px;padding:18px 10px 14px;border-top-width:4px;transition:transform .2s,box-shadow .2s,border-color .2s}
+    .summary-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+    .summary-card .count{font-size:2rem;font-weight:900}
+    .summary-card .label{font-size:.62rem;font-weight:700;margin-top:5px;letter-spacing:.08em}
+
+    /* ── AGREEMENT CARDS ── */
+    .agreement-card{background:#fff;border-radius:16px;box-shadow:var(--shadow-sm);border-left:4px solid transparent;transition:box-shadow .2s,transform .15s;overflow:hidden}
+    .agreement-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+    .agreement-card.status-active{border-left-color:var(--success)}
+    .agreement-card.status-expiring{border-left-color:var(--warning)}
+    .agreement-card.status-expired{border-left-color:var(--danger)}
+    .agreement-card.status-renewed{border-left-color:var(--renewed)}
+    .status-badge{font-size:.62rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
+
+    /* ── ADMIN / SECTION PANELS ── */
+    .admin-panel{border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid rgba(109,40,217,.07)}
+    .admin-panel-title{font-size:.72rem;font-weight:800;letter-spacing:.07em;border-bottom:1px solid rgba(109,40,217,.08)}
+
+    /* ── BUTTONS ── */
+    .btn-primary{background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(109,40,217,.28);letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
+    .btn-primary:hover{box-shadow:0 6px 18px rgba(109,40,217,.38);transform:translateY(-1px)}
+    .btn-primary:active{transform:scale(.97)}
+    .btn-login{background:linear-gradient(135deg,#6D28D9,#9333EA);border:none;box-shadow:0 4px 14px rgba(109,40,217,.35);letter-spacing:.02em}
+    .btn-login:hover{background:linear-gradient(135deg,#5B21B6,#7C3AED);box-shadow:0 6px 18px rgba(109,40,217,.45)}
+    .template-btn{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:10px;display:inline-block}
+    .template-btn:hover{background:#EDE9FE;border-color:#C4B5FD}
+
+    /* ── SEARCH BAR ── */
+    .search-bar input{border:1.5px solid #DDD6FE;border-radius:12px;padding:11px 16px;font-size:.88rem;transition:border-color .2s,box-shadow .2s;font-family:inherit}
+    .search-bar input:focus{border-color:#6D28D9;box-shadow:0 0 0 3px rgba(109,40,217,.12);outline:none}
+
+    /* ── FILTER BUTTONS ── */
+    .filter-btn{background:#fff;border:1.5px solid #E9E4F5;color:var(--muted);border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .filter-btn:hover{background:#F5F3FF;border-color:#C4B5FD;color:#6D28D9}
+    .filter-btn.active{background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(109,40,217,.25)}
+
+    /* ── MODALS ── */
+    .modal-box{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.28)}
+    .modal-header{border-radius:22px 22px 0 0}
+    .login-card{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.32)}
+    .login-field input{border-radius:11px;font-family:inherit}
+    .login-field input:focus{box-shadow:0 0 0 3px rgba(109,40,217,.15)}
+
+    /* ── NOTIFICATION SECTION ── */
+    .notif-setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border-light)}
+    .notif-setting-row:last-child{border-bottom:none}
+    .notif-setting-label{font-size:.85rem;font-weight:600;color:var(--text)}
+    .notif-setting-desc{font-size:.73rem;color:var(--muted);margin-top:2px}
+
+    /* ── TOAST ── */
+    .toast{border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);font-weight:600;font-size:.83rem;backdrop-filter:blur(10px)}
+
+    /* ── QUICK LIST ITEMS ── */
+    .quick-list-item{border-radius:12px;transition:box-shadow .15s,transform .15s}
+    .quick-list-item:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+
+    /* ── SYNC CHIP ── */
+    .sync-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;color:rgba(255,255,255,.9);font-size:.72rem;font-weight:600;padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
+    .sync-chip:hover{background:rgba(255,255,255,.25)}
+    .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0;transition:background .3s}
+    .sync-dot.connected{background:#34d399}
+    .sync-dot.error{background:#f87171}
+
+    /* ── FAB ── */
+    .fab{background:linear-gradient(135deg,#6D28D9,#9333EA);box-shadow:0 6px 20px rgba(109,40,217,.45);border-radius:18px;width:52px;height:52px}
+    .fab:hover{box-shadow:0 8px 26px rgba(109,40,217,.55);transform:translateY(-2px) scale(1.05)}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:#DDD6FE;border-radius:6px}
+    ::-webkit-scrollbar-thumb:hover{background:#C4B5FD}
   </style>
 </head>
 <body>
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-logo"><span class="logo-icon">📋</span><h2>Agreement Tracker</h2><p>Sign in to continue</p></div>
-    <div class="login-error" id="loginError"></div>
-    <div class="login-field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/></div>
-    <div class="login-field"><label>Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-eye" onclick="togglePw('loginPass',this)" type="button">👁</button></div></div>
-    <button class="btn-login" onclick="doLogin()">🔐 Sign In</button>
-    <div style="display:flex;gap:10px;margin-top:14px">
-      <button class="btn-secondary" onclick="toggleSignupPanel()" style="flex:1">Create Account</button>
-      <button class="btn-secondary" onclick="openResetPasswordModal()" style="flex:1">Forgot Password?</button>
+
+    <!-- ── SIGN IN VIEW ── -->
+    <div id="loginView">
+      <div class="pdka-logo-block">
+        <div class="pdka-logo-mark">
+          <div class="pdka-box"><span>PD</span></div>
+        </div>
+        <p class="pdka-brand-name">PDKA</p>
+        <p class="pdka-sub">Agreement Tracker</p>
+        <p class="pdka-login-tagline">Sign in to continue</p>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <div class="login-success" id="loginSuccess" style="display:none"></div>
+      <div class="login-field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/></div>
+      <div class="login-field"><label>Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-eye" onclick="togglePw('loginPass',this)" type="button">👁</button></div></div>
+      <button class="btn-login" onclick="doLogin()">🔐 Sign In</button>
+      <div class="login-divider">──────────────────</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <button class="login-link-btn" onclick="showLoginView('signup')">➕ Request Account Access</button>
+        <button class="login-link-btn" onclick="showLoginView('forgot')" style="color:var(--muted)">Forgot Password?</button>
+      </div>
+      <div class="login-hint" style="margin-top:10px">Default admin: admin / admin123</div>
     </div>
-    <div id="signupPanel" style="display:none;margin-top:18px;border:1px solid var(--border);border-radius:16px;padding:18px;background:#f8fafc">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:700;color:var(--primary)">New account request</div>
-        <button class="btn-secondary" style="padding:8px 12px;font-size:.85rem;height:auto" onclick="closeSignupPanel()">Cancel</button>
+
+    <!-- ── SIGN UP VIEW ── -->
+    <div id="signupView" style="display:none">
+      <div class="pdka-logo-block">
+        <div class="pdka-logo-mark">
+          <div class="pdka-box"><span>PD</span></div>
+        </div>
+        <p class="pdka-brand-name">PDKA</p>
+        <p class="pdka-sub">Request Account Access</p>
+        <p class="pdka-login-tagline">Admin will approve your account</p>
       </div>
-      <div class="login-field"><label>Full Name</label><input type="text" id="signupName" placeholder="Your full name" autocomplete="name"/></div>
-      <div class="login-field"><label>Email Address</label><input type="email" id="signupEmail" placeholder="Your email address" autocomplete="email"/></div>
-      <div class="login-field"><label>Username</label><input type="text" id="signupUsername" placeholder="Choose a username" autocomplete="username"/></div>
-      <div class="login-field"><label>Password</label><div class="pw-wrap"><input type="password" id="signupPassword" placeholder="Create password" autocomplete="new-password"/><button class="pw-eye" onclick="togglePw('signupPassword',this)" type="button">👁</button></div></div>
-      <div class="login-field"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="signupPasswordConfirm" placeholder="Confirm password" autocomplete="new-password"/><button class="pw-eye" onclick="togglePw('signupPasswordConfirm',this)" type="button">👁</button></div></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-        <button class="btn-login" style="flex:1;min-width:180px" onclick="startSignupVerification()">➡️ Continue</button>
-      </div>
-      <div id="signupVerifyStep" style="display:none;margin-top:18px;padding:16px;background:#ffffff;border:1px solid var(--border);border-radius:14px">
-        <div style="font-weight:700;color:var(--primary);margin-bottom:10px">Email verification</div>
-        <div id="signupVerificationMessage" style="font-size:.84rem;color:var(--muted);margin-bottom:14px">A verification code will be sent to the email address you entered.</div>
-        <div class="login-field"><label>Verification Code</label><input type="text" id="signupVerificationCode" placeholder="Enter verification code" autocomplete="one-time-code"/></div>
-        <button class="btn-login" onclick="verifySignupCode()">✅ Verify & Submit</button>
-        <button class="btn-secondary" style="margin-top:10px" onclick="resendSignupCode()">🔄 Resend Code</button>
-        <button class="btn-secondary" style="margin-top:10px" onclick="editSignupRequest()">← Edit Details</button>
-      </div>
-      <div style="font-size:.82rem;color:var(--muted);margin-top:10px;line-height:1.5">
-        Your request will be sent for admin approval after email verification. The admin will then approve your account before login is enabled.
-      </div>
+      <div class="login-error" id="signupError"></div>
+      <div class="login-success" id="signupSuccess" style="display:none"></div>
+      <div class="login-field"><label>Full Name *</label><input type="text" id="suName" placeholder="e.g. Naveen Reddy"/></div>
+      <div class="login-field"><label>Username *</label><input type="text" id="suUser" placeholder="e.g. naveen" autocomplete="off"/></div>
+      <div class="login-field"><label>Email Address</label><input type="email" id="suEmail" placeholder="e.g. naveen@company.com"/></div>
+      <div class="login-field"><label>Password *</label><div class="pw-wrap"><input type="password" id="suPass" placeholder="Min 4 characters"/><button class="pw-eye" onclick="togglePw('suPass',this)" type="button">👁</button></div></div>
+      <div class="login-field"><label>Confirm Password *</label><div class="pw-wrap"><input type="password" id="suPass2" placeholder="Re-enter password"/><button class="pw-eye" onclick="togglePw('suPass2',this)" type="button">👁</button></div></div>
+      <button class="btn-login" onclick="doSignup()">📩 Submit Request</button>
+      <div class="login-divider"></div>
+      <div style="text-align:center"><button class="login-link-btn" onclick="showLoginView('login')">← Back to Sign In</button></div>
     </div>
+
+    <!-- ── FORGOT PASSWORD VIEW ── -->
+    <div id="forgotView" style="display:none">
+      <div class="login-logo"><span class="logo-icon">🔑</span><h2>Forgot Password?</h2><p>Contact your administrator</p></div>
+      <div style="background:#EDE9FE;border:1.5px solid #DDD6FE;border-radius:10px;padding:16px;font-size:.83rem;color:#4C1D95;line-height:1.7;margin-bottom:16px">
+        <strong>To reset your password:</strong><br/>
+        Ask your system administrator to reset your password from <b>Admin Settings → User Management</b>.<br/><br/>
+        Your admin can set a new temporary password for you.
+      </div>
+      <button class="btn-login" onclick="showLoginView('login')" style="background:var(--border);color:var(--text)">← Back to Sign In</button>
+    </div>
+
   </div>
 </div>
 
@@ -424,9 +608,12 @@
 
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <h2>📋 Agreement Tracker</h2>
-      <p id="sidebarUserName">Loading...</p>
+    <div class="sidebar-pdka">
+      <div class="sidebar-pdka-box"><span>PD</span></div>
+      <div class="sidebar-pdka-text">
+        <h2>PDKA Tracker</h2>
+        <p id="sidebarUserName">Loading...</p>
+      </div>
     </div>
     <nav class="sidebar-nav">
       <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
@@ -447,10 +634,13 @@
       </button>
     </nav>
     <div class="sidebar-footer">
-      <div class="sync-chip" id="syncChip" onclick="showAdminSection()" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
+      <div class="sync-chip" id="syncChip" onclick="openAdminSection();setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
         <span class="sync-dot" id="syncDot"></span>
         <span id="syncLabel">OneDrive</span>
       </div>
+      <button class="nav-item" onclick="openChangePw(null)" style="color:rgba(255,255,255,.6)">
+        <span class="nav-icon">🔑</span><span class="nav-label">Change Password</span>
+      </button>
       <button class="nav-item" onclick="doLogout()">
         <span class="nav-icon">🚪</span><span class="nav-label">Sign Out</span>
       </button>
@@ -465,7 +655,7 @@
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button class="user-chip" id="userChip" onclick="showAdminSection()">
+      <button class="user-chip" id="userChip" onclick="openAdminSection()">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
       </button>
@@ -477,23 +667,44 @@
     <!-- ════ SECTION: DASHBOARD ════════════════════════════════ -->
     <div class="section active" id="sec-dashboard">
       <div class="summary" style="padding:16px 16px 12px">
-        <div class="summary-card sc-active" onclick="showSection('agreements');setFilter('active')" style="cursor:pointer">
-          <div class="count active" id="countActive">0</div><div class="label">✅ Active</div>
+        <div class="summary-card sc-active clickable-card" onclick="showSection('agreements');setFilter('active')" title="View all active agreements">
+          <div class="count active" id="countActive">0</div><div class="label">Active</div>
         </div>
-        <div class="summary-card sc-expiring" onclick="showSection('agreements');setFilter('expiring')" style="cursor:pointer">
-          <div class="count expiring" id="countExpiring">0</div><div class="label">⚠️ Expiring</div>
+        <div class="summary-card sc-expiring clickable-card" id="cardExpiring" onclick="toggleDashSection('expiring')" title="Click to expand expiring agreements">
+          <div class="count expiring" id="countExpiring">0</div><div class="label">Expiring</div>
         </div>
-        <div class="summary-card sc-expired" onclick="showSection('agreements');setFilter('expired')" style="cursor:pointer">
-          <div class="count expired" id="countExpired">0</div><div class="label">❌ Expired</div>
+        <div class="summary-card sc-expired clickable-card" id="cardExpired" onclick="toggleDashSection('expired')" title="Click to expand expired agreements">
+          <div class="count expired" id="countExpired">0</div><div class="label">Expired</div>
         </div>
-        <div class="summary-card sc-renewed" onclick="showSection('agreements');setFilter('renewed')" style="cursor:pointer">
-          <div class="count renewed" id="countRenewed">0</div><div class="label">🔄 Renewed</div>
+        <div class="summary-card sc-renewed clickable-card" onclick="showSection('agreements');setFilter('renewed')" title="View all renewed agreements">
+          <div class="count renewed" id="countRenewed">0</div><div class="label">Renewed</div>
         </div>
       </div>
-      <div class="dash-quick" id="dashExpiringSoon"></div>
-      <div class="dash-quick" id="dashExpired"></div>
-      <div style="padding:8px 16px 16px">
-        <button class="btn-primary" onclick="showSection('agreements');setTimeout(openAddModal,100)" style="max-width:260px">＋ Add New Agreement</button>
+
+      <!-- Expandable quick panel (shown on card click) -->
+      <div class="dash-quick-panel" id="dashQuickPanel" style="display:none">
+        <div class="dash-quick-panel-inner">
+          <div class="dash-qp-header">
+            <span class="dash-qp-title" id="dashQpTitle"></span>
+            <button class="dash-qp-close" onclick="closeDashPanel()">✕</button>
+          </div>
+          <div class="dash-qp-list" id="dashQpList"></div>
+        </div>
+      </div>
+
+      <!-- Pie chart -->
+      <div class="dash-pie-wrap">
+        <div class="dash-pie-card">
+          <div class="dash-pie-title">Agreement Status Overview</div>
+          <div class="dash-pie-canvas-wrap">
+            <canvas id="agreementPieChart"></canvas>
+          </div>
+          <div class="dash-pie-legend" id="dashPieLegend"></div>
+        </div>
+      </div>
+
+      <div style="padding:0 16px 16px">
+        <button class="btn-primary" onclick="showSection('agreements');setTimeout(openAddModal,100)" style="max-width:260px">+ Add New Agreement</button>
       </div>
     </div>
 
@@ -540,9 +751,13 @@
 
         <!-- User Management -->
         <div class="admin-panel" id="usersAdminPanel">
-          <div class="admin-panel-title">👤 User Management</div>
+          <div class="admin-panel-title">👤 User Management <span class="pending-badge" id="pendingBadge" style="display:none">0 pending</span></div>
+          <!-- Pending approvals -->
+          <div class="pending-section" id="pendingSection" style="display:none">
+            <div class="pending-section-title">⏳ Pending Account Requests <span class="pending-badge" id="pendingBadge2">0</span></div>
+            <div id="pendingUserList"></div>
+          </div>
           <div class="user-list" id="userList"></div>
-          <div id="pendingRequestsSection" style="margin-top:14px"></div>
           <button class="btn-primary" onclick="showAddUserForm()" id="addUserBtn" style="margin-bottom:10px;max-width:240px">➕ Add New User</button>
           <div class="add-user-form" id="addUserForm">
             <div class="form-group"><label>Full Name *</label><input type="text" id="newUserName" placeholder="e.g. Naveen Reddy"/></div>
@@ -550,19 +765,11 @@
             <div class="form-group"><label>Email Address</label><input type="email" id="newUserEmail" placeholder="e.g. naveen@company.com"/><div style="font-size:.71rem;color:var(--muted);margin-top:2px">Reminders will also be sent to this email</div></div>
             <div class="form-group"><label>Password *</label><div class="pw-wrap"><input type="password" id="newUserPass" placeholder="Min 4 characters"/><button class="pw-eye" onclick="togglePw('newUserPass',this)" type="button">👁</button></div></div>
             <div class="form-group"><label>Role</label><select id="newUserRole"><option value="admin">Admin</option><option value="user" selected>User</option></select></div>
-            <div style="display:flex;gap:8px"><button class="btn-primary" onclick="saveNewUser(true)" style="flex:1">💾 Save</button><button class="btn-secondary" onclick="hideAddUserForm()" style="flex:1">Cancel</button></div>
+            <div style="display:flex;gap:8px"><button class="btn-primary" onclick="saveNewUser()" style="flex:1">💾 Save</button><button class="btn-secondary" onclick="hideAddUserForm()" style="flex:1">Cancel</button></div>
           </div>
-          <div style="margin-top:8px;padding:10px;background:#fef3c7;border-radius:8px;font-size:.75rem;color:#92400e">⚠️ Users are stored locally on this device only.</div>
-        </div>
-
-        <div class="admin-panel" id="adminCredentialsPanel" style="display:none">
-          <div class="admin-panel-title">🔐 Admin Credentials</div>
-          <div class="form-group"><label>Admin Username</label><input type="text" id="adminUsername" placeholder="admin"/></div>
-          <div class="form-group"><label>Admin Email</label><input type="email" id="adminEmail" placeholder="admin@company.com"/></div>
-          <div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="adminPassword" placeholder="Leave blank to keep existing"/><button class="pw-eye" onclick="togglePw('adminPassword',this)" type="button">👁</button></div></div>
-          <div class="form-group"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="adminPasswordConfirm" placeholder="Confirm new password"/><button class="pw-eye" onclick="togglePw('adminPasswordConfirm',this)" type="button">👁</button></div></div>
-          <button class="btn-primary" onclick="saveAdminCredentials()" style="max-width:260px">💾 Update Admin Login</button>
-          <div style="margin-top:8px;font-size:.75rem;color:var(--muted)">Use this form to update the admin username, email, and password.</div>
+          <div class="od-sync-note" id="userSyncNote">
+            ☁️ <span id="userSyncNoteText">Connecting to OneDrive to sync user list…</span>
+          </div>
         </div>
 
         <!-- OneDrive Settings -->
@@ -627,7 +834,7 @@
         <!-- Microsoft 365 Email -->
         <div class="admin-panel">
           <div class="admin-panel-title">📧 Microsoft 365 Email</div>
-          <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.8rem;color:#1e40af;line-height:1.6">
+          <div style="background:#EDE9FE;border:1.5px solid #DDD6FE;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.8rem;color:#4C1D95;line-height:1.6">
             <strong>✅ Sends via your Microsoft 365 account</strong><br/>
             No passwords needed — emails are sent using your signed-in Microsoft account. Connect OneDrive in Admin Settings first.
           </div>
@@ -651,7 +858,7 @@
             </label>
           </div>
           <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:12px">When enabled, emails are automatically sent on your configured alert days to the TO / CC addresses set on each agreement.</p>
-          <button onclick="sendAutoRemindersManual()" style="width:100%;max-width:300px;padding:10px;background:#fef3c7;color:#92400e;border:1.5px solid #d97706;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:10px">📨 Send All Pending Reminders Now</button>
+          <button onclick="sendAutoRemindersManual()" style="width:100%;max-width:320px;padding:12px 20px;background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border:none;border-radius:12px;font-size:.83rem;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 3px 10px rgba(109,40,217,.3);letter-spacing:.01em;transition:box-shadow .2s">Send All Pending Reminders</button>
           <div style="padding:10px;background:#f0f9ff;border-radius:8px;font-size:.75rem;color:#0369a1">
             📱 <strong>Install on Android:</strong> Open in Chrome → tap ⋮ menu → "Add to Home Screen" → Add
           </div>
@@ -662,6 +869,29 @@
 
   </div><!-- end .main-content -->
 </div><!-- end .layout-row -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     CHANGE PASSWORD MODAL
+═══════════════════════════════════════════════════════════ -->
+<div id="changePwModal" onclick="if(event.target===this)closeChangePw()">
+  <div class="cpw-box">
+    <div class="cpw-title" id="cpwTitle">🔑 Change Password</div>
+    <input type="hidden" id="cpwUserId"/>
+    <div class="form-group">
+      <label>New Password *</label>
+      <div class="pw-wrap"><input type="password" id="cpwNew" placeholder="Min 4 characters"/><button class="pw-eye" onclick="togglePw('cpwNew',this)" type="button">👁</button></div>
+    </div>
+    <div class="form-group">
+      <label>Confirm New Password *</label>
+      <div class="pw-wrap"><input type="password" id="cpwNew2" placeholder="Re-enter new password"/><button class="pw-eye" onclick="togglePw('cpwNew2',this)" type="button">👁</button></div>
+    </div>
+    <div class="login-error" id="cpwError" style="font-size:.8rem;padding:8px 12px;margin-bottom:10px"></div>
+    <button class="btn-primary" onclick="saveChangePw()" style="margin-top:4px">💾 Save Password</button>
+    <button class="btn-secondary" onclick="closeChangePw()">Cancel</button>
+  </div>
+</div>
+
+
 </div><!-- end #appShell -->
 
 
@@ -699,6 +929,9 @@
         <label>Message Body (plain text)</label>
         <textarea id="composeBody" rows="6" placeholder="Email message..."></textarea>
       </div>
+    </div>
+    <div class="email-compose-body" style="padding:0 20px 4px;flex-shrink:0">
+      <div class="compose-error" id="composeError"></div>
     </div>
     <div class="email-compose-footer">
       <button class="btn-compose-cancel" onclick="closeEmailModal()">Cancel</button>
@@ -886,35 +1119,6 @@
 <!-- ═══════════════════════════════════════════════════════════
      ONEDRIVE SETUP WIZARD MODAL
 ═══════════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="signupModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">📝 Create Account</div>
-    <div class="form-group"><label>Full Name</label><input type="text" id="signupName" placeholder="Enter your full name"/></div>
-    <div class="form-group"><label>Username</label><input type="text" id="signupUsername" placeholder="Choose a username"/></div>
-    <div class="form-group"><label>Email Address</label><input type="email" id="signupEmail" placeholder="Your email address"/></div>
-    <div class="form-group"><label>Password</label><div class="pw-wrap"><input type="password" id="signupPassword" placeholder="Create password"/><button class="pw-eye" onclick="togglePw('signupPassword',this)" type="button">👁</button></div></div>
-    <div class="form-group"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="signupPasswordConfirm" placeholder="Confirm password"/><button class="pw-eye" onclick="togglePw('signupPasswordConfirm',this)" type="button">👁</button></div></div>
-    <button class="btn-primary" onclick="submitSignupRequest()">✅ Request Access</button>
-    <button class="btn-secondary" onclick="closeModal('signupModal')">Cancel</button>
-    <div style="margin-top:10px;font-size:.8rem;color:var(--muted)">Your request will be sent for admin approval before you can sign in.</div>
-  </div>
-</div>
-
-<div class="modal-overlay" id="resetPasswordModal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🔐 Reset Password</div>
-    <div class="form-group"><label>Username</label><input type="text" id="resetUsername" placeholder="Enter your username"/></div>
-    <div class="form-group"><label>Email Address</label><input type="email" id="resetEmail" placeholder="Registered email"/></div>
-    <div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="resetPassword" placeholder="New password"/><button class="pw-eye" onclick="togglePw('resetPassword',this)" type="button">👁</button></div></div>
-    <div class="form-group"><label>Confirm Password</label><div class="pw-wrap"><input type="password" id="resetPasswordConfirm" placeholder="Confirm new password"/><button class="pw-eye" onclick="togglePw('resetPasswordConfirm',this)" type="button">👁</button></div></div>
-    <button class="btn-primary" onclick="submitPasswordReset()">🔄 Reset Password</button>
-    <button class="btn-secondary" onclick="closeModal('resetPasswordModal')">Cancel</button>
-    <div style="margin-top:10px;font-size:.8rem;color:var(--muted)">Enter your registered username and email to reset your password.</div>
-  </div>
-</div>
-
 <div class="modal-overlay" id="odSetupModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -995,7 +1199,13 @@
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 function showSection(name){
-  if(name==='admin' && !isAdminUser()){showToast('⚠️ Admin settings are only available to administrators.');return;}
+  if(name==='admin'){
+    const session=getSession();
+    if(!session||session.role!=='admin'){
+      showToast('Admin settings are only available to the administrator.');
+      return;
+    }
+  }
   ['dashboard','agreements','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
@@ -1014,7 +1224,7 @@ function showSection(name){
     const tog=document.getElementById('autoEmailToggle');
     if(tog)tog.checked=localStorage.getItem('autoEmailEnabled')==='1';
   }
-  if(name==='admin'){renderUserList();refreshOdStatusUI();loadAdminCredentialsUI();}
+  if(name==='admin'){renderUserList();refreshOdStatusUI();loadAdminCredsUI();odLoadUsers().catch(()=>{});updateUserSyncNote(!!(msalApp&&msalApp.getAllAccounts().length>0));}
   if(name==='dashboard'){updateDashboard();}
   if(name==='agreements'){renderAgreements();}
   closeSidebar();
@@ -1022,29 +1232,87 @@ function showSection(name){
 
 function updateDashboard(){
   updateSummary();
-  const expiring=agreements.filter(a=>getStatus(a)==='expiring').sort((a,b)=>new Date(a.endDate)-new Date(b.endDate)).slice(0,6);
-  const expired=agreements.filter(a=>getStatus(a)==='expired').sort((a,b)=>new Date(b.endDate)-new Date(a.endDate)).slice(0,6);
-  const expEl=document.getElementById('dashExpiringSoon');
-  if(expEl){
-    expEl.innerHTML=expiring.length===0?'':
-      `<div class="dash-quick-title">⚠️ Expiring Soon</div>`+
-      expiring.map(a=>`<div class="quick-list-item qi-expiring" onclick="showSection('agreements');setFilter('expiring')">
-        <div><div class="qi-name">${a.name}</div><div class="qi-meta">👤 ${a.client} &nbsp;·&nbsp; Ends ${fDate(a.endDate)}</div></div>
-        <span class="qi-days" style="background:var(--warning-bg);color:var(--warning)">${getDaysLeft(a.endDate)}d left</span>
-      </div>`).join('');
-  }
-  const expiredEl=document.getElementById('dashExpired');
-  if(expiredEl){
-    expiredEl.innerHTML=expired.length===0?'':
-      `<div class="dash-quick-title">❌ Expired — Action Required</div>`+
-      expired.map(a=>`<div class="quick-list-item qi-expired" onclick="showSection('agreements');setFilter('expired')">
-        <div><div class="qi-name">${a.name}</div><div class="qi-meta">👤 ${a.client} &nbsp;·&nbsp; Ended ${fDate(a.endDate)}</div></div>
-        <span class="qi-days" style="background:var(--danger-bg);color:var(--danger)">${Math.abs(getDaysLeft(a.endDate))}d ago</span>
-      </div>`).join('');
-  }
+  updatePieChart();
   const urgentCount=agreements.filter(a=>['expiring','expired'].includes(getStatus(a))).length;
   const badge=document.getElementById('navBadgeCount');
   if(badge){badge.textContent=urgentCount;badge.style.display=urgentCount>0?'inline-block':'none';}
+}
+
+let _pieChart=null;
+function updatePieChart(){
+  const active=agreements.filter(a=>getStatus(a)==='active').length;
+  const expiring=agreements.filter(a=>getStatus(a)==='expiring').length;
+  const expired=agreements.filter(a=>getStatus(a)==='expired').length;
+  const renewed=agreements.filter(a=>getStatus(a)==='renewed').length;
+  const canvas=document.getElementById('agreementPieChart');
+  if(!canvas)return;
+  const data=[active,expiring,expired,renewed];
+  const labels=['Active','Expiring','Expired','Renewed'];
+  const colors=['#059669','#d97706','#dc2626','#7c3aed'];
+  const legend=document.getElementById('dashPieLegend');
+  if(legend){
+    legend.innerHTML=labels.map((l,i)=>'<div class="dash-pie-legend-item"><span class="dash-pie-dot" style="background:'+colors[i]+'"></span>'+l+' ('+data[i]+')</div>').join('');
+  }
+  if(_pieChart){_pieChart.data.datasets[0].data=data;_pieChart.update();return;}
+  _pieChart=new Chart(canvas,{
+    type:'doughnut',
+    data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.raw+(c.raw===1?' agreement':' agreements');}}}},
+      animation:{duration:600,easing:'easeInOutQuart'}
+    }
+  });
+}
+
+let _dashPanelType=null;
+function toggleDashSection(type){
+  const panel=document.getElementById('dashQuickPanel');
+  const qpList=document.getElementById('dashQpList');
+  const qpTitle=document.getElementById('dashQpTitle');
+  const cardExp=document.getElementById('cardExpiring');
+  const cardExpd=document.getElementById('cardExpired');
+  if(_dashPanelType===type&&panel.style.display!=='none'){
+    closeDashPanel();return;
+  }
+  _dashPanelType=type;
+  if(cardExp)cardExp.classList.toggle('card-selected',type==='expiring');
+  if(cardExpd)cardExpd.classList.toggle('card-selected',type==='expired');
+  let items,title,cls,bgCol,textCol,daysFn;
+  if(type==='expiring'){
+    items=agreements.filter(a=>getStatus(a)==='expiring').sort((a,b)=>new Date(a.endDate)-new Date(b.endDate));
+    title='⚠️ Expiring Soon ('+items.length+')';cls='qi-expiring';
+    bgCol='var(--warning-bg)';textCol='var(--warning)';
+    daysFn=a=>getDaysLeft(a.endDate)+'d left';
+  } else {
+    items=agreements.filter(a=>getStatus(a)==='expired').sort((a,b)=>new Date(b.endDate)-new Date(a.endDate));
+    title='❌ Expired — Action Required ('+items.length+')';cls='qi-expired';
+    bgCol='var(--danger-bg)';textCol='var(--danger)';
+    daysFn=a=>Math.abs(getDaysLeft(a.endDate))+'d ago';
+  }
+  qpTitle.textContent=title;
+  if(items.length===0){
+    qpList.innerHTML='<div class="dash-qp-empty">No '+type+' agreements.</div>';
+  } else {
+    qpList.innerHTML=items.slice(0,20).map(a=>
+      '<div class="quick-list-item '+cls+'" onclick="showSection(\'agreements\');setFilter(\''+type+'\')">' +
+      '<div><div class="qi-name">'+a.name+'</div><div class="qi-meta">'+a.client+' &nbsp;&middot;&nbsp; '+(type==='expiring'?'Ends ':'Ended ')+fDate(a.endDate)+'</div></div>' +
+      '<span class="qi-days" style="background:'+bgCol+';color:'+textCol+'">'+daysFn(a)+'</span>' +
+      '</div>'
+    ).join('');
+  }
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closeDashPanel(){
+  const panel=document.getElementById('dashQuickPanel');
+  if(panel)panel.style.display='none';
+  _dashPanelType=null;
+  const cardExp=document.getElementById('cardExpiring');
+  const cardExpd=document.getElementById('cardExpired');
+  if(cardExp)cardExp.classList.remove('card-selected');
+  if(cardExpd)cardExpd.classList.remove('card-selected');
 }
 
 function toggleSidebar(){
@@ -1060,200 +1328,147 @@ function toggleAutoEmail(cb){
   showToast(cb.checked?'✅ Auto reminders enabled':'Auto reminders disabled');
 }
 async function sendAutoRemindersManual(){
-  if(!isMSSignedIn()){showToast('⚠️ Connect Microsoft account in Admin Settings first');return;}
-  showToast('📨 Checking reminders...');
-  let sent=0;
-  for(const a of agreements){
-    if(getStatus(a)==='renewed')continue;
-    const d=getDaysLeft(a.endDate);
-    if(d<0||d===settings.alert1||d===settings.alert2||d===settings.alert3){
-      await sendReminderEmail(a.id,true);sent++;
+  if(!isMSSignedIn()){showToast('Connect Microsoft 365 in Admin Settings → OneDrive first');return;}
+  const alertAgreements = agreements.filter(a=>{const s=getStatus(a);return s==='expiring'||s==='expired';});
+  if(alertAgreements.length===0){showToast('No expiring or expired agreements found');return;}
+  showToast('Sending to '+alertAgreements.length+' agreement(s) — please wait...');
+  let sent=0,noEmail=0,failed=0;
+  for(const a of alertAgreements){
+    try{
+      await sendReminderEmail(a.id,true);
+      sent++;
+    }catch(e){
+      if(e.message.startsWith('NO_EMAIL:')) noEmail++;
+      else{ failed++; console.warn('Reminder failed for',a.name,e.message); }
     }
+    await new Promise(r=>setTimeout(r,350));
   }
-  showToast(sent>0?`✅ Sent ${sent} reminder(s)`:'ℹ️ No reminders due today');
+  let parts=[];
+  if(sent>0)   parts.push(sent+' sent');
+  if(noEmail>0) parts.push(noEmail+' skipped (no email set)');
+  if(failed>0)  parts.push(failed+' failed');
+  showToast(sent>0
+    ? 'Reminders done: '+parts.join(', ')
+    : 'No emails sent — '+parts.join(', ')+'. Add TO Email on agreements.'
+  );
 }
 function openSettings(){showSection('notifications');}
 
+
+
+// ══════════════════════════════════════════════
+// AUTH — SIGNUP / APPROVAL / CHANGE PASSWORD
+// ══════════════════════════════════════════════
+function showLoginView(view){
+  ['loginView','signupView','forgotView'].forEach(v=>document.getElementById(v).style.display='none');
+  document.getElementById(view+'View').style.display='block';
+  // Clear errors
+  ['loginError','loginSuccess','signupError','signupSuccess'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.textContent=''}});
+}
+
+function doSignup(){
+  const name=document.getElementById('suName').value.trim();
+  const uname=document.getElementById('suUser').value.trim().toLowerCase();
+  const email=document.getElementById('suEmail').value.trim();
+  const pw=document.getElementById('suPass').value;
+  const pw2=document.getElementById('suPass2').value;
+  const errEl=document.getElementById('signupError');
+  const okEl=document.getElementById('signupSuccess');
+  errEl.style.display='none'; okEl.style.display='none';
+  if(!name||!uname||!pw){errEl.style.display='block';errEl.textContent='Name, username and password are required.';return}
+  if(pw.length<4){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';return}
+  if(pw!==pw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return}
+  const users=getUsers();
+  if(users.find(u=>u.username===uname)){errEl.style.display='block';errEl.textContent='Username already taken. Choose another.';return}
+  users.push({id:'u'+Date.now(),username:uname,name,email,role:'user',pwHash:hashPw(pw),status:'pending'});
+  saveUsers(users);
+  ['suName','suUser','suEmail','suPass','suPass2'].forEach(id=>document.getElementById(id).value='');
+  okEl.style.display='block';
+  okEl.textContent='✅ Request submitted! Please wait for admin approval before signing in.';
+}
+
+function approveUser(id){
+  const users=getUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  u.status='active';
+  saveUsers(users);
+  renderUserList();
+  showToast('✅ '+u.name+' approved — they can now sign in');
+}
+
+function rejectUser(id){
+  const users=getUsers();
+  const u=users.find(x=>x.id===id);
+  if(!u)return;
+  if(!confirm('Reject and delete request from "'+u.name+'"?'))return;
+  saveUsers(users.filter(x=>x.id!==id));
+  renderUserList();
+  showToast('🗑️ Request rejected');
+}
+
+function openChangePw(userId){
+  // userId=null means change own password
+  const session=getSession();
+  if(!session)return;
+  const targetId=userId||session.userId;
+  const users=getUsers();
+  const u=users.find(x=>x.id===targetId);
+  if(!u){showToast('User not found');return}
+  document.getElementById('cpwUserId').value=targetId;
+  document.getElementById('cpwTitle').textContent=userId&&userId!==session.userId?'🔑 Reset Password — '+u.name:'🔑 Change My Password';
+  document.getElementById('cpwNew').value='';
+  document.getElementById('cpwNew2').value='';
+  const cpwErr=document.getElementById('cpwError');
+  cpwErr.style.display='none';cpwErr.textContent='';
+  document.getElementById('changePwModal').classList.add('open');
+}
+
+function closeChangePw(){
+  document.getElementById('changePwModal').classList.remove('open');
+}
+
+function saveChangePw(){
+  const uid=document.getElementById('cpwUserId').value;
+  const pw=document.getElementById('cpwNew').value;
+  const pw2=document.getElementById('cpwNew2').value;
+  const errEl=document.getElementById('cpwError');
+  errEl.style.display='none';
+  if(!pw||pw.length<4){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';return}
+  if(pw!==pw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return}
+  const users=getUsers();
+  const u=users.find(x=>x.id===uid);
+  if(!u){errEl.style.display='block';errEl.textContent='User not found.';return}
+  u.pwHash=hashPw(pw);
+  saveUsers(users);
+  closeChangePw();
+  showToast('✅ Password changed for '+u.name);
+}
 
 // ══════════════════════════════════════════════
 // USER AUTH SYSTEM
 // ══════════════════════════════════════════════
 function hashPw(pw){let h=0;for(let i=0;i<pw.length;i++){h=(h<<5)-h+pw.charCodeAt(i);h|=0}return 'h'+Math.abs(h).toString(36)+'x'+pw.length}
-function getUsers(){const def=[{id:'admin',username:'admin',name:'Administrator',role:'admin',pwHash:hashPw('admin123'),approved:true,email:''}];return JSON.parse(localStorage.getItem('agrUsers')||JSON.stringify(def)).map(u=>({...u,approved:u.approved!==false}))}
-function getPendingUsers(){return JSON.parse(localStorage.getItem('agrPendingUsers')||'[]')}
-function setPendingUsers(u){localStorage.setItem('agrPendingUsers',JSON.stringify(u))}
-function setUsers(u){localStorage.setItem('agrUsers',JSON.stringify(u))}
-function savePendingUsers(u){setPendingUsers(u); if(isMSSignedIn() && odConfig.clientId) odSyncToOneDrive()}
-function saveUsers(u){setUsers(u); if(isMSSignedIn() && odConfig.clientId) odSyncToOneDrive()}
+function getUsers(){const def=[{id:'admin',username:'admin',name:'Administrator',role:'admin',pwHash:hashPw('admin123'),status:'active'}];const u=JSON.parse(localStorage.getItem('agrUsers')||JSON.stringify(def));return u.map(x=>({...x,status:x.status||'active'}))}
+function saveUsers(u){
+  localStorage.setItem('agrUsers',JSON.stringify(u));
+  // Async sync to OneDrive (fire-and-forget)
+  if(msalApp && msalApp.getAllAccounts().length > 0){
+    odSaveUsers(u).catch(e=>console.warn('OD user save:',e));
+  }
+}
 function getSession(){const s=localStorage.getItem('agrSession');return s?JSON.parse(s):null}
 function setSession(u){localStorage.setItem('agrSession',JSON.stringify({userId:u.id,username:u.username,name:u.name,role:u.role,ts:Date.now()}))}
 function clearSession(){localStorage.removeItem('agrSession')}
 function doLogin(){
-  const uname=document.getElementById('loginUser').value.trim();
+  const uname=document.getElementById('loginUser').value.trim().toLowerCase();
   const pw=document.getElementById('loginPass').value;
   const err=document.getElementById('loginError');
   if(!uname||!pw){err.style.display='block';err.textContent='Please enter username and password.';return}
-  const u=getUsers().find(x=>x.username===uname&&x.pwHash===hashPw(pw));
+  const u=getUsers().find(x=>x.username.toLowerCase()===uname&&x.pwHash===hashPw(pw));
   if(!u){err.style.display='block';err.textContent='Incorrect username or password.';return}
-  if(!u.approved){err.style.display='block';err.textContent='Account pending admin approval. Please wait.';return}
+  if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection('dashboard');showToast('Welcome, '+u.name+'!');
-}
-let signupVerificationState = null;
-function toggleSignupPanel(){
-  const panel=document.getElementById('signupPanel');
-  if(!panel) return;
-  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-  if(panel.style.display==='block'){resetSignupPanel();document.getElementById('signupName').focus();}
-}
-function closeSignupPanel(){
-  const panel=document.getElementById('signupPanel');
-  if(panel) panel.style.display='none';
-  resetSignupPanel();
-}
-function openSignupModal(){toggleSignupPanel()}
-function openResetPasswordModal(){resetResetForm();document.getElementById('resetPasswordModal').classList.add('open')}
-function resetSignupPanel(){
-  ['signupName','signupUsername','signupEmail','signupPassword','signupPasswordConfirm','signupVerificationCode'].forEach(id=>document.getElementById(id)&& (document.getElementById(id).value=''));
-  const verifyStep=document.getElementById('signupVerifyStep');
-  if(verifyStep) verifyStep.style.display='none';
-  const msg=document.getElementById('signupVerificationMessage');
-  if(msg) msg.textContent='A verification code will be sent to the email address you entered.';
-  signupVerificationState = null;
-}
-function resetResetForm(){['resetUsername','resetEmail','resetPassword','resetPasswordConfirm'].forEach(id=>document.getElementById(id)&& (document.getElementById(id).value=''))}
-function startSignupVerification(){
-  const name=document.getElementById('signupName').value.trim();
-  const uname=document.getElementById('signupUsername').value.trim().toLowerCase();
-  const email=document.getElementById('signupEmail').value.trim().toLowerCase();
-  const pw=document.getElementById('signupPassword').value;
-  const pwc=document.getElementById('signupPasswordConfirm').value;
-  if(!name||!uname||!email||!pw||!pwc){showToast('All fields required');return}
-  if(pw.length<4){showToast('Password min 4 characters');return}
-  if(pw!==pwc){showToast('Passwords do not match');return}
-  const users=getUsers();
-  if(users.find(u=>u.username===uname)){showToast('Username already exists');return}
-  const pending=getPendingUsers();
-  if(pending.find(r=>r.username===uname||r.email===email)){showToast('A request with this username or email already exists');return}
-  const code = Math.floor(100000 + Math.random()*900000).toString();
-  signupVerificationState = {id:'tmp'+Date.now(),name,username:uname,email,pwHash:hashPw(pw),code,createdAt:new Date().toISOString()};
-  const verifyStep=document.getElementById('signupVerifyStep');
-  const msg=document.getElementById('signupVerificationMessage');
-  if(verifyStep) verifyStep.style.display='block';
-  document.getElementById('signupVerificationCode').value='';
-  if(isMSSignedIn() && window.odConfig && odConfig.clientId){
-    if(msg) msg.textContent='Sending verification code to '+email+'...';
-    sendSignupVerificationEmail(signupVerificationState);
-  } else {
-    if(msg) msg.innerHTML = 'Admin must connect OneDrive in Settings to send the verification email, or use this code to continue:<br/><strong>'+code+'</strong>';
-    showToast('⚠️ Admin must connect OneDrive in Settings to send verification emails. Code shown above for verification.');
-  }
-}
-function editSignupRequest(){
-  const verifyStep=document.getElementById('signupVerifyStep');
-  if(verifyStep) verifyStep.style.display='none';
-  document.getElementById('signupVerificationCode').value='';
-}
-function sendSignupVerificationEmail(req){
-  if(!req || !req.email){return}
-  if(!window.odConfig || !odConfig.clientId){showToast('⚠️ Admin must configure OneDrive in Settings before verification emails can be sent.');return}
-  if(!isMSSignedIn()){showToast('⚠️ Admin must sign in to Microsoft to send verification emails.');return}
-  const subject='[Agreement Tracker] Verify your email address';
-  const htmlBody=`<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px">`+
-    `<h2 style="color:#1a56db">Verify your email</h2>`+
-    `<p>Hi ${req.name},</p>`+
-    `<p>Use the code below to verify your email address and complete your account request.</p>`+
-    `<p style="font-size:1.2rem;font-weight:700;background:#f8fafc;padding:12px 16px;border-radius:10px;text-align:center;letter-spacing:.08em">${req.code}</p>`+
-    `<p>If you did not request an account, you can ignore this message.</p>`+
-    `<p style="color:#6b7280;font-size:.85rem;margin-top:20px">Agreement Tracker account verification code</p>`+
-  `</div>`;
-  sendEmailViaGraph([req.email], [], subject, htmlBody).then(()=>{
-    const msg=document.getElementById('signupVerificationMessage');
-    if(msg) msg.textContent='Verification code sent to '+req.email+'. Enter it below to continue.';
-    showToast('✅ Verification email sent to '+req.email);
-  }).catch(e=>{
-    console.error(e);
-    const msg=document.getElementById('signupVerificationMessage');
-    if(msg) msg.innerHTML='Could not send email. Use this code to continue:<br/><strong>'+req.code+'</strong>';
-    showToast('⚠️ Email send failed: '+e.message);
-  });
-}
-function resendSignupCode(){
-  if(!signupVerificationState){showToast('Start signup again to generate a code.');return}
-  signupVerificationState.code = Math.floor(100000 + Math.random()*900000).toString();
-  const msg=document.getElementById('signupVerificationMessage');
-  if(isMSSignedIn() && window.odConfig && odConfig.clientId){
-    if(msg) msg.textContent='Resending verification code to '+signupVerificationState.email+'...';
-    sendSignupVerificationEmail(signupVerificationState);
-  } else {
-    if(msg) msg.innerHTML='Connect OneDrive in Settings to send the verification email, or use this code to continue:<br/><strong>'+signupVerificationState.code+'</strong>';
-    showToast('⚠️ Connect OneDrive to send the verification email. Code shown above for verification.');
-  }
-}
-function verifySignupCode(){
-  const code=document.getElementById('signupVerificationCode').value.trim();
-  if(!signupVerificationState){showToast('Start signup again to verify your email.');return}
-  if(!code){showToast('Enter the verification code.');return}
-  if(code!==signupVerificationState.code){showToast('Incorrect verification code.');return}
-  submitSignupRequest();
-}
-function submitSignupRequest(){
-  if(!signupVerificationState){showToast('Start signup again to verify your email.');return}
-  const pending=getPendingUsers();
-  pending.push({
-    id:'req'+Date.now(),
-    name:signupVerificationState.name,
-    username:signupVerificationState.username,
-    email:signupVerificationState.email,
-    pwHash:signupVerificationState.pwHash,
-    createdAt:new Date().toISOString(),
-    verifiedAt:Date.now()
-  });
-  savePendingUsers(pending);
-  resetSignupPanel();
-  closeSignupPanel();
-  renderPendingRequests();
-  showToast('✅ Request submitted. Admin approval is required.');
-}
-function submitPasswordReset(){
-  const uname=document.getElementById('resetUsername').value.trim().toLowerCase();
-  const email=document.getElementById('resetEmail').value.trim().toLowerCase();
-  const pw=document.getElementById('resetPassword').value;
-  const pwc=document.getElementById('resetPasswordConfirm').value;
-  if(!uname||!email||!pw||!pwc){showToast('All fields required');return}
-  if(pw.length<4){showToast('Password min 4 characters');return}
-  if(pw!==pwc){showToast('Passwords do not match');return}
-  const users=getUsers();
-  const user=users.find(u=>u.username===uname&&u.email&&u.email.toLowerCase()===email);
-  if(!user){showToast('No account matches that username and email.');return}
-  user.pwHash=hashPw(pw);
-  saveUsers(users);resetResetForm();closeModal('resetPasswordModal');showToast('✅ Password reset. Please log in using your new password.');
-}
-function loadAdminCredentialsUI(){
-  const admin=getUsers().find(u=>u.id==='admin');
-  if(!admin)return;
-  const usernameEl=document.getElementById('adminUsername');if(usernameEl)usernameEl.value=admin.username||'admin';
-  const emailEl=document.getElementById('adminEmail');if(emailEl)emailEl.value=admin.email||'';
-}
-function saveAdminCredentials(){
-  const username=document.getElementById('adminUsername').value.trim().toLowerCase();
-  const email=document.getElementById('adminEmail').value.trim();
-  const pw=document.getElementById('adminPassword').value;
-  const pwc=document.getElementById('adminPasswordConfirm').value;
-  if(!username){showToast('Admin username cannot be blank');return}
-  if(pw||pwc){if(pw.length<4){showToast('Password min 4 characters');return}if(pw!==pwc){showToast('Passwords do not match');return}}
-  const users=getUsers();
-  const admin=users.find(u=>u.id==='admin');
-  if(!admin){showToast('Admin account missing');return}
-  if(users.find(u=>u.username===username && u.id!=='admin')){showToast('Username already used by another account');return}
-  admin.username=username;
-  admin.email=email;
-  if(pw)admin.pwHash=hashPw(pw);
-  saveUsers(users);
-  loadAdminCredentialsUI();
-  renderUserList();
-  const session=getSession();if(session&&session.userId==='admin'){setSession(admin);updateUserChip(admin)}
-  document.getElementById('adminPassword').value='';document.getElementById('adminPasswordConfirm').value='';
-  showToast('✅ Admin credentials updated');
 }
 function doLogout(){
   if(!confirm('Sign out?'))return;
@@ -1270,7 +1485,9 @@ function updateUserChip(u){
   document.getElementById('userChipName').textContent=u.name.split(' ')[0];
   const sn=document.getElementById('sidebarUserName');if(sn)sn.textContent=u.name+' ('+u.role+')';
   const an=document.getElementById('nav-admin');if(an)an.style.display=(u.role==='admin')?'flex':'none';
+  const sync=document.getElementById('syncChip');if(sync)sync.style.display=(u.role==='admin')?'flex':'none';
 }
+function openAdminSection(){const session=getSession();if(session&&session.role==='admin'){showSection('admin');}else{showToast('Admin settings are only available to the administrator.');}}
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈'}else{i.type='password';btn.textContent='👁'}}
 function switchSettingsTab(tab){
   ['notif','od','users'].forEach(t=>{
@@ -1286,68 +1503,41 @@ function switchSettingsTab(tab){
 }
 function renderUserList(){
   const users=getUsers(),session=getSession();
-  document.getElementById('userList').innerHTML=users.map(u=>{
-    const statusTag = u.approved? '': ' <span style="color:#ca8a04;font-weight:700">(Pending)</span>';
-    return `<div class="user-item"><div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div><div class="user-info"><div class="user-name">${u.name}${statusTag}${session&&session.userId===u.id?' <span style="color:var(--success);font-size:.65rem">(you)</span>':''}</div><div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>${u.email?` &nbsp;·&nbsp; ${u.email}`:''}</div></div>${u.id!=='admin'?`<button class="btn-del-user" onclick="deleteUser('${u.id}')">🗑</button>`:''}</div>`;
-  }).join('');
-  renderPendingRequests();
-}
-function renderPendingRequests(){
-  const pending=getPendingUsers();
-  const el=document.getElementById('pendingRequestsSection');
-  if(!el)return;
-  if(pending.length===0){el.innerHTML='';return;}
-  el.innerHTML=`<div class="admin-panel-title" style="margin-bottom:10px">🕒 Pending Sign-up Requests</div>`+
-    pending.map(req=>`<div class="user-item"><div class="user-avatar-lg">?</div><div class="user-info"><div class="user-name">${req.name}</div><div class="user-meta">@${req.username} &nbsp;·&nbsp; ${req.email}</div></div><div style="display:flex;gap:6px"><button class="btn-primary" style="padding:6px 10px;font-size:.75rem" onclick="approveUserRequest('${req.id}')">Approve</button><button class="btn-secondary" style="padding:6px 10px;font-size:.75rem" onclick="rejectUserRequest('${req.id}')">Reject</button></div></div>`).join('');
-}
-function approveUserRequest(id){
-  const pending=getPendingUsers();
-  const req=pending.find(r=>r.id===id);
-  if(!req)return;
-  const users=getUsers();
-  if(users.find(u=>u.username===req.username)){showToast('Username already exists');return}
-  users.push({id:'u'+Date.now(),username:req.username,name:req.name,role:'user',email:req.email,pwHash:req.pwHash,approved:true});
-  saveUsers(users);
-  savePendingUsers(pending.filter(r=>r.id!==id));
-  renderUserList();
-  sendApprovalEmail(req);
-  showToast('✅ User approved and added');
-}
-function sendApprovalEmail(req){
-  if(!req || !req.email){return}
-  if(!window.odConfig || !odConfig.clientId){
-    showToast('✅ User approved. Admin must configure OneDrive before approval emails can be sent.');
-    return;
-  }
-  if(!isMSSignedIn()){
-    showToast('✅ User approved. Admin must sign in to Microsoft to send approval email.');
-    return;
-  }
-  const subject = '[Agreement Tracker] Your account request has been approved';
-  const htmlBody = `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;border:1px solid #e5e7eb;border-radius:12px">
-    <h2 style="color:#1a56db">✅ Account Approved</h2>
-    <p>Hi ${req.name},</p>
-    <p>Your Agreement Tracker account request has been approved by the administrator.</p>
-    <p><strong>Username:</strong> ${req.username}</p>
-    <p>You can now sign in using the username and password you provided on the login page.</p>
-    <p>If you forget your password, use the Forgot Password link on the login screen.</p>
-    <p style="margin-top:20px;color:#6b7280;font-size:.85rem">This email was sent automatically when your account was approved.</p>
-  </div>`;
-  sendEmailViaGraph([req.email], [], subject, htmlBody).then(()=>{
-    showToast('✅ Approval email sent to '+req.email);
-  }).catch(e=>{
-    console.error(e);
-    showToast('⚠️ Account approved, but email send failed: '+e.message);
-  });
-}
-function rejectUserRequest(id){
-  savePendingUsers(getPendingUsers().filter(r=>r.id!==id));
-  renderPendingRequests();
-  showToast('Request rejected');
+  // Pending users
+  const pending=users.filter(u=>u.status==='pending');
+  const active=users.filter(u=>u.status!=='pending');
+  const pendSec=document.getElementById('pendingSection');
+  const pendBadge=document.getElementById('pendingBadge');
+  const pendBadge2=document.getElementById('pendingBadge2');
+  if(pendSec){pendSec.style.display=pending.length>0?'block':'none';}
+  if(pendBadge){pendBadge.style.display=pending.length>0?'inline':'none';pendBadge.textContent=pending.length+' pending';}
+  if(pendBadge2){pendBadge2.textContent=pending.length;}
+  const pendList=document.getElementById('pendingUserList');
+  if(pendList){pendList.innerHTML=pending.map(u=>`<div class="user-item pending" style="margin-bottom:8px">
+    <div class="user-avatar-lg" style="background:#d97706">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+    <div class="user-info"><div class="user-name">${u.name}</div>
+    <div class="user-meta">@${u.username}${u.email?' &nbsp;·&nbsp; '+u.email:''}</div></div>
+    <div style="display:flex;gap:5px;flex-shrink:0">
+      <button class="approve-btn" onclick="approveUser('${u.id}')">✅ Approve</button>
+      <button class="reject-btn" onclick="rejectUser('${u.id}')">✕ Reject</button>
+    </div>
+  </div>`).join('');}
+  // Active users
+  document.getElementById('userList').innerHTML=active.map(u=>`<div class="user-item">
+    <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+    <div class="user-info">
+      <div class="user-name">${u.name}${session&&session.userId===u.id?' <span style="color:var(--success);font-size:.65rem">(you)</span>':''}</div>
+      <div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>${u.email?' &nbsp;·&nbsp; '+u.email:''}</div>
+    </div>
+    <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
+      <button class="change-pw-btn" onclick="openChangePw('${u.id}')">🔑 Pwd</button>
+      ${u.id!=='admin'?`<button class="btn-del-user" onclick="deleteUser('${u.id}')">🗑</button>`:''}
+    </div>
+  </div>`).join('');
 }
 function showAddUserForm(){document.getElementById('addUserForm').style.display='block';document.getElementById('addUserBtn').style.display='none'}
 function hideAddUserForm(){document.getElementById('addUserForm').style.display='none';document.getElementById('addUserBtn').style.display='block';['newUserName','newUserUsername','newUserEmail','newUserPass'].forEach(id=>document.getElementById(id).value='')}
-function saveNewUser(isAdminSave=true){
+function saveNewUser(){
   const name=document.getElementById('newUserName').value.trim();
   const uname=document.getElementById('newUserUsername').value.trim().toLowerCase();
   const pw=document.getElementById('newUserPass').value;
@@ -1357,7 +1547,7 @@ function saveNewUser(isAdminSave=true){
   if(pw.length<4){showToast('Password min 4 characters');return}
   const users=getUsers();
   if(users.find(u=>u.username===uname)){showToast('Username already exists');return}
-  users.push({id:'u'+Date.now(),username:uname,name,role,email,pwHash:hashPw(pw),approved:true});
+  users.push({id:'u'+Date.now(),username:uname,name,role,email,pwHash:hashPw(pw)});
   saveUsers(users);hideAddUserForm();renderUserList();showToast('User "'+name+'" added!');
 }
 function deleteUser(id){
@@ -1876,9 +2066,8 @@ function saveSettings(){
   localStorage.setItem('agrSettings',JSON.stringify(settings));
   renderAgreements();showToast('✅ Settings saved!');
 }
-function closeModal(id){const el=document.getElementById(id);if(el)el.classList.remove('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
-
 
 // ══════════════════════════════════════════════════
 // NOTIFICATIONS
@@ -2235,13 +2424,9 @@ function getRedirectUri(){
 }
 
 function initMSAL(){
-  // Try to locate the MSAL browser global across different CDN builds
-  const msalGlobal = window.msal || window.msalBrowser || window.Msal || window.MSAL || null;
-  if(!odConfig.clientId || !msalGlobal) return false;
+  if(!odConfig.clientId||typeof msal==='undefined')return false;
   try{
-    const PublicClientApplication = msalGlobal.PublicClientApplication || msalGlobal?.PublicClientApplication;
-    if(!PublicClientApplication) return false;
-    msalApp = new PublicClientApplication({
+    msalApp=new msal.PublicClientApplication({
       auth:{
         clientId:odConfig.clientId,
         authority:'https://login.microsoftonline.com/common',
@@ -2305,12 +2490,7 @@ async function odSyncToOneDrive(){
   const token=await getAccessToken(true);
   if(!token)return;
   try{
-    const bodyData = {
-      agreements,
-      users:getUsers(),
-      pendingUsers:getPendingUsers()
-    };
-    const body=JSON.stringify(bodyData,null,2);
+    const body=JSON.stringify(agreements,null,2);
     const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
       method:'PUT',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
@@ -2337,48 +2517,15 @@ async function odLoadFromOneDrive(allowInteraction = false){
     }
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
     const cloud=await r.json();
-    let cloudAgreements=[];
-    let cloudUsers=[];
-    let cloudPending=[];
     if(Array.isArray(cloud)){
-      cloudAgreements=cloud;
-    } else if(cloud && typeof cloud==='object'){
-      cloudAgreements=Array.isArray(cloud.agreements)?cloud.agreements:[];
-      cloudUsers=Array.isArray(cloud.users)?cloud.users:[];
-      cloudPending=Array.isArray(cloud.pendingUsers)?cloud.pendingUsers:[];
-      if(cloudUsers.length>0){
-        const localUsers=getUsers();
-        const mergedUsers=[...localUsers];
-        for(const cu of cloudUsers){
-          const idx=mergedUsers.findIndex(u=>u.id===cu.id||u.username===cu.username);
-          if(idx>=0){
-            mergedUsers[idx]={...mergedUsers[idx],...cu};
-          } else {
-            mergedUsers.push(cu);
-          }
-        }
-        setUsers(mergedUsers);
-      }
-      if(cloudPending.length>0){
-        const localPending=getPendingUsers();
-        const mergedPending=[...localPending];
-        for(const cp of cloudPending){
-          if(!mergedPending.some(p=>p.id===cp.id||p.username===cp.username||p.email===cp.email)){
-            mergedPending.push(cp);
-          }
-        }
-        setPendingUsers(mergedPending);
-      }
-    }
-    if(cloudAgreements.length>0){
-      const cloudIds=new Set(cloudAgreements.map(a=>a.id));
+      // Merge: cloud is authoritative, but keep local-only records
+      const cloudIds=new Set(cloud.map(a=>a.id));
       const localOnly=agreements.filter(a=>!cloudIds.has(a.id));
-      const merged=[...cloudAgreements,...localOnly];
+      const merged=[...cloud,...localOnly];
       for(const agr of merged)await dbPut('agreements',agr);
       agreements=await dbGetAll('agreements');
       renderAgreements();
     }
-    await odSyncToOneDrive();
     setSyncStatus('connected','✅ Loaded from OneDrive · '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Load failed: '+e.message)}
 }
@@ -2398,27 +2545,16 @@ async function odSyncAttachment(fileId,name,data){
 }
 
 function odConnect(){
-  if(!isAdminUser()){showToast('⚠️ Only an admin can connect OneDrive.');return;}
-  if(location.protocol==='file:'){
-    showToast('⚠️ OneDrive login requires running the app via http://localhost:8080, not as a file. Start the local server first.');
-    return;
-  }
   const cid=(document.getElementById('odClientId').value||'').trim();
   if(!cid){showToast('⚠️ Please enter your Client ID');return}
   odConfig={clientId:cid,redirectUri:getRedirectUri()};
   localStorage.setItem('odConfig',JSON.stringify(odConfig));
   if(initMSAL()){
-    closeModal('settingsModal');
     msalApp.loginRedirect({scopes:SCOPES});
   }else showToast('⚠️ Could not initialize OneDrive. Check Client ID.');
 }
 
 function odSaveClientId(){
-  if(!isAdminUser()){showToast('⚠️ Only an admin can set up OneDrive.');return;}
-  if(location.protocol==='file:'){
-    showToast('⚠️ OneDrive login requires running the app via http://localhost:8080, not as a file. Start the local server first.');
-    return;
-  }
   const cid=(document.getElementById('odClientIdWizard').value||'').trim();
   if(!cid){showToast('⚠️ Please enter your Client ID');return}
   odConfig={clientId:cid,redirectUri:getRedirectUri()};
@@ -2426,24 +2562,13 @@ function odSaveClientId(){
   document.getElementById('odClientId').value=cid;
   closeModal('odSetupModal');
   if(initMSAL()){
-    closeModal('settingsModal');
     msalApp.loginRedirect({scopes:SCOPES});
   }else showToast('⚠️ Could not initialize. Check Client ID & open via localhost.');
 }
 
-
-async function odDisconnect(){
-  if(!isAdminUser()){showToast('⚠️ Only an admin can disconnect OneDrive.');return;}
+function odDisconnect(){
   if(!confirm('Disconnect OneDrive? Your local data stays safe.'))return;
-  try{
-    if(msalApp){
-      if(typeof msalApp.logoutRedirect==='function'){
-        await msalApp.logoutRedirect();
-      }else if(typeof msalApp.logout==='function'){
-        msalApp.logout();
-      }
-    }
-  }catch(e){console.warn('Logout error',e)}
+  msalApp?.logout();
   msalApp=null;odAccount=null;
   localStorage.removeItem('odAccount');
   odConfig={};localStorage.removeItem('odConfig');
@@ -2457,7 +2582,6 @@ async function odSyncNow(){
 }
 
 function showOdSetup(){
-  if(!isAdminUser()){showToast('⚠️ Only an admin can set up OneDrive.');return;}
   document.getElementById('redirectUriDisplay').textContent=getRedirectUri();
   closeModal('settingsModal');
   document.getElementById('odSetupModal').classList.add('open');
@@ -2501,20 +2625,6 @@ function refreshOdStatusUI(){
 
 function isMSSignedIn(){
   return !!(msalApp && msalApp.getAllAccounts().length > 0);
-}
-
-function isAdminUser(){
-  const session = getSession();
-  return !!(session && session.role === 'admin');
-}
-
-function showAdminSection(){
-  if(!isAdminUser()){
-    showToast('⚠️ OneDrive setup and admin settings are admin-only.');
-    return;
-  }
-  showSection('admin');
-  setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250);
 }
 
 function getMSAccount(){
@@ -2601,32 +2711,38 @@ function loadEmailSettingsUI(){
 }
 
 function buildEmailBody(a, days){
+  const nm = (a.name||'Unknown Agreement').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const cl = (a.client||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const nt = a.notes ? (a.notes).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
   const status = days < 0 ? 'EXPIRED' : days <= 30 ? 'EXPIRING SOON' : 'UPCOMING EXPIRY';
-  const daysMsg = days < 0 ? `Expired ${Math.abs(days)} day(s) ago` : days === 0 ? 'Expires TODAY' : `Expires in ${days} day(s)`;
-  return `
-<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
-  <div style="background:#1a56db;padding:20px 24px;color:#fff">
-    <h2 style="margin:0;font-size:1.2rem">📋 Agreement ${status}</h2>
-    <p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker — Automated Reminder</p>
-  </div>
-  <div style="padding:24px">
-    <table style="width:100%;border-collapse:collapse;font-size:.9rem">
-      <tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">${a.name}</td></tr>
-      <tr><td style="padding:8px 0;color:#6b7280">Agreement No.</td><td style="padding:8px 0">${a.number||'—'}</td></tr>
-      <tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">${a.client}</td></tr>
-      <tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">${a.startDate}</td></tr>
-      <tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>${a.endDate}</strong></td></tr>
-      ${a.value?`<tr><td style="padding:8px 0;color:#6b7280">Value</td><td style="padding:8px 0">₹${Number(a.value).toLocaleString('en-IN')}</td></tr>`:''}
-    </table>
-    <div style="margin-top:16px;padding:14px 18px;background:${days<0?'#fee2e2':days<=7?'#fef3c7':'#dbeafe'};border-radius:10px;font-weight:700;font-size:1rem;color:${days<0?'#b91c1c':days<=7?'#92400e':'#1e40af'}">
-      ⏰ ${daysMsg}
-    </div>
-    ${a.notes?`<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> ${a.notes}</p>`:''}
-  </div>
-  <div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">
-    This is an automated reminder from Agreement Tracker. Please do not reply to this email.
-  </div>
-</div>`;
+  const daysMsg = days < 0 ? 'Expired '+Math.abs(days)+' day(s) ago' : days === 0 ? 'Expires TODAY' : 'Expires in '+days+' day(s)';
+  const bgColor = days < 0 ? '#fee2e2' : days <= 7 ? '#fef3c7' : '#EDE9FE';
+  const txColor = days < 0 ? '#b91c1c' : days <= 7 ? '#92400e' : '#4C1D95';
+  let valueRow = '';
+  try{ if(a.value && !isNaN(Number(a.value))){ valueRow = '<tr><td style="padding:8px 0;color:#6b7280;width:140px">Value</td><td style="padding:8px 0">Rs. '+Number(a.value).toLocaleString('en-IN')+'</td></tr>'; } }catch(e){}
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">'
+    + '<div style="background:#6D28D9;padding:20px 24px;color:#fff">'
+    + '<h2 style="margin:0;font-size:1.2rem">Agreement ' + status + '</h2>'
+    + '<p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker - Automated Reminder</p>'
+    + '</div>'
+    + '<div style="padding:24px">'
+    + '<table style="width:100%;border-collapse:collapse;font-size:.9rem">'
+    + '<tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr>'
+    + '<tr><td style="padding:8px 0;color:#6b7280">Agreement No.</td><td style="padding:8px 0">'+(a.number||'—')+'</td></tr>'
+    + '<tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr>'
+    + '<tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr>'
+    + '<tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr>'
+    + valueRow
+    + '</table>'
+    + '<div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'
+    + daysMsg
+    + '</div>'
+    + (nt ? '<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>' : '')
+    + '</div>'
+    + '<div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">'
+    + 'This is an automated reminder from Agreement Tracker. Please do not reply to this email.'
+    + '</div>'
+    + '</div>';
 }
 
 // ── EMAIL COMPOSE MODAL ──────────────────────────────────────
@@ -2694,97 +2810,108 @@ function openEmailModal(agrId){
 
 function closeEmailModal(){
   document.getElementById('emailComposeModal').classList.remove('open');
+  showComposeError('');
   _composeAgrId = null;
 }
 
 async function submitEmailCompose(){
+  showComposeError('');
   const to1 = document.getElementById('composeToEmail1').value.trim();
   const to2 = document.getElementById('composeToEmail2').value.trim();
   const ccRaw = document.getElementById('composeCcEmails').value.trim();
   const subject = document.getElementById('composeSubject').value.trim();
   const plainBody = document.getElementById('composeBody').value;
 
-  const toList = [to1, to2].filter(Boolean);
-  if(toList.length===0){showToast('⚠️ Enter at least one recipient email');return}
-  if(!subject){showToast('⚠️ Subject cannot be empty');return}
+  const rawTo = [to1, to2].filter(Boolean);
+  if(rawTo.length===0){showComposeError('Enter at least one recipient email address in the TO field.');return;}
+  if(!subject){showComposeError('Subject line cannot be empty.');return;}
 
-  const ccList = ccRaw ? ccRaw.split(',').map(e=>e.trim()).filter(Boolean) : [];
+  // Validate email formats
+  const toList = [];
+  for(const e of rawTo){
+    if(!isValidEmail(e)){showComposeError('Invalid email address: "'+e+'" — please check and try again.');return;}
+    toList.push(e);
+  }
+  const ccList = ccRaw ? ccRaw.split(',').map(e=>e.trim()).filter(e=>{
+    if(!e) return false;
+    if(!isValidEmail(e)){showComposeError('Invalid CC email: "'+e+'"');return false;}
+    return true;
+  }) : [];
 
   const htmlBody = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">'
-    + '<div style="background:#1a56db;padding:18px 24px;border-radius:10px 10px 0 0">'
-    + '<h2 style="color:#fff;margin:0;font-size:1rem">📋 Agreement Tracker — Email Reminder</h2>'
+    + '<div style="background:#6D28D9;padding:18px 24px;border-radius:10px 10px 0 0">'
+    + '<h2 style="color:#fff;margin:0;font-size:1rem">Agreement Tracker - Email Reminder</h2>'
     + '</div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px">'
     + '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'
     + plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     + '</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/>'
-    + '<p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker · Microsoft 365</p>'
+    + '<p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker - Microsoft 365</p>'
     + '</div></div>';
 
   const btn = document.getElementById('composeSendBtn');
-  btn.disabled = true; btn.textContent = '📨 Sending…';
-  showToast('📨 Sending via Microsoft 365…');
+  btn.disabled = true; btn.textContent = 'Sending...';
+  showToast('Sending via Microsoft 365...');
 
   try{
     await sendEmailViaGraph(toList, ccList, subject, htmlBody);
     showToast('✅ Email sent to: '+toList.join(', '));
+    showComposeError('');
     closeEmailModal();
   }catch(e){
-    showToast('❌ '+e.message);
+    const msg = e.message || 'Unknown error sending email';
+    showComposeError(msg);
     btn.disabled=false; btn.textContent='📤 Send Email';
-    console.error(e);
+    console.error('[Email Error]', e);
   }
 }
 
 async function sendReminderEmail(agrId, silent=false){
   const a = agreements.find(x=>x.id===agrId);
-  if(!a){showToast('Agreement not found');return}
-
-  if(!isMSSignedIn()){
-    if(!silent){ showToast('⚠️ Not signed in to Microsoft. Admin must connect OneDrive in Settings first.'); }
-    return;
-  }
+  if(!a) throw new Error('Agreement not found');
+  if(!isMSSignedIn()) throw new Error('Not signed in to Microsoft — connect OneDrive first');
 
   const days = getDaysLeft(a.endDate);
   const session = getSession();
   const users = getUsers();
   const loggedInUser = session ? users.find(u=>u.id===session.userId) : null;
-  const toList = [];
-  if(a.toEmail1) toList.push(a.toEmail1.trim());
-  if(a.toEmail2) toList.push(a.toEmail2.trim());
-  if(a.notifEmail && !toList.includes(a.notifEmail)) toList.push(a.notifEmail.trim());
-  if(loggedInUser?.email && !toList.includes(loggedInUser.email)) toList.push(loggedInUser.email);
-  if(toList.length===0){
-    if(!silent) showToast('⚠️ No recipient email set on this agreement or your user profile');
-    return;
-  }
+  const rawTo = [];
+  if(a.toEmail1 && isValidEmail(a.toEmail1)) rawTo.push(a.toEmail1.trim());
+  if(a.toEmail2 && isValidEmail(a.toEmail2)) rawTo.push(a.toEmail2.trim());
+  if(a.notifEmail && isValidEmail(a.notifEmail) && !rawTo.includes(a.notifEmail.trim())) rawTo.push(a.notifEmail.trim());
+  if(loggedInUser?.email && isValidEmail(loggedInUser.email) && !rawTo.includes(loggedInUser.email)) rawTo.push(loggedInUser.email);
+  const toList = [...new Set(rawTo)];
+  if(toList.length===0) throw new Error('NO_EMAIL:'+a.name);
   const ccList = [];
-  if(a.ccEmails) a.ccEmails.split(',').forEach(e=>{const t=e.trim();if(t)ccList.push(t)});
-  const subject = `[Agreement Tracker] ${days<0?'EXPIRED':'Expiry Reminder'}: ${a.name} (${a.client})`;
+  if(a.ccEmails) a.ccEmails.split(',').forEach(e=>{const t=e.trim();if(t&&isValidEmail(t))ccList.push(t)});
+  const statusLabel = days<0?'EXPIRED':'Expiry Reminder';
+  const subject = '[Agreement Tracker] '+statusLabel+': '+a.name+' ('+a.client+')';
   const body = buildEmailBody(a, days);
-  if(!silent) showToast('📨 Sending reminder via Microsoft 365…');
-  try{
-    await sendEmailViaGraph(toList, ccList, subject, body);
-    if(!silent) showToast('✅ Reminder sent to: '+toList.join(', '));
-  }catch(e){
-    if(!silent) showToast('❌ '+e.message);
-    console.error(e);
-  }
+  if(!silent) showToast('Sending reminder via Microsoft 365...');
+  await sendEmailViaGraph(toList, ccList, subject, body);
+  if(!silent) showToast('Reminder sent to: '+toList.join(', '));
 }
 
 async function sendAutoReminders(){
-  if(!isMSSignedIn()) return; // silently skip if not signed in
-  if(localStorage.getItem('autoEmailEnabled')!=='1') return; // only if enabled
-  const today = new Date(); today.setHours(0,0,0,0);
-  const lastRun = localStorage.getItem('lastAutoReminderDate');
-  const todayStr = today.toISOString().split('T')[0];
-  if(lastRun === todayStr) return;
-  localStorage.setItem('lastAutoReminderDate', todayStr);
+  if(!isMSSignedIn()) return;
+  if(localStorage.getItem('autoEmailEnabled')!=='1') return;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const sentLog = JSON.parse(localStorage.getItem('autoReminderLog')||'{}');
   for(const a of agreements){
-    if(getStatus(a)==='renewed') continue;
+    const st = getStatus(a);
+    if(st==='renewed'||st==='active') continue;
     const d = getDaysLeft(a.endDate);
-    if(d < 0 || d === settings.alert1 || d === settings.alert2 || d === settings.alert3){
-      await sendReminderEmail(a.id, true);
+    if(st==='expiring'){
+      const a1=settings.alert1||60,a2=settings.alert2||30,a3=settings.alert3||7;
+      // send on threshold days (within 1 day to allow for missed runs)
+      const onThreshold=(d<=a3)||(d<=a2&&d>a3&&d===parseInt(a2))||(d<=a1&&d>a2&&d===parseInt(a1));
+      const broadThreshold=(d<=a3); // always send when very close
+      if(!onThreshold&&!broadThreshold) continue;
     }
+    if(sentLog[a.id]===todayStr) continue; // already sent today
+    sentLog[a.id]=todayStr;
+    localStorage.setItem('autoReminderLog',JSON.stringify(sentLog));
+    try{ await sendReminderEmail(a.id,true); }catch(e){ console.warn('Auto reminder failed for',a.name,e.message); }
+    await new Promise(r=>setTimeout(r,500));
   }
 }
 
@@ -2802,7 +2929,7 @@ async function sendTestEmail(){
   try{
     await sendEmailViaGraph(to, [],
       '[Agreement Tracker] Test Email',
-      '<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#1a56db">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>'
+      '<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#6D28D9">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>'
     );
     if(statusEl) statusEl.textContent = '✅ Test email sent to '+to[0];
     showToast('✅ Test email sent!');
@@ -2810,6 +2937,143 @@ async function sendTestEmail(){
     if(statusEl) statusEl.textContent = '❌ '+e.message;
     showToast('❌ '+e.message);
   }
+}
+
+
+// ══════════════════════════════════════════════════
+// ADMIN CREDENTIALS UPDATE
+// ══════════════════════════════════════════════════
+function saveAdminCreds(){
+  const session = getSession();
+  if(!session || session.role !== 'admin'){showToast('⚠️ Admin access required');return;}
+  const newUser = (document.getElementById('adminNewUser').value||'').trim().toLowerCase();
+  const newEmail = (document.getElementById('adminNewEmail').value||'').trim();
+  const newPw = document.getElementById('adminNewPw').value;
+  const newPw2 = document.getElementById('adminNewPw2').value;
+  const errEl = document.getElementById('adminCredsError');
+  errEl.style.display='none';
+  if(!newUser){errEl.style.display='block';errEl.textContent='Username cannot be empty.';return;}
+  if(newPw && newPw.length < 4){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';return;}
+  if(newPw && newPw !== newPw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return;}
+  const users = getUsers();
+  const admin = users.find(u=>u.id==='admin');
+  if(!admin){errEl.style.display='block';errEl.textContent='Admin account not found.';return;}
+  // Check new username not taken by another user
+  if(newUser !== admin.username && users.find(u=>u.username===newUser)){
+    errEl.style.display='block';errEl.textContent='That username is already taken.';return;
+  }
+  admin.username = newUser;
+  if(newEmail) admin.email = newEmail;
+  admin.name = admin.name || 'Administrator';
+  if(newPw) admin.pwHash = hashPw(newPw);
+  saveUsers(users);
+  // Update the current session to reflect new username
+  const s = getSession();
+  if(s){ s.username = newUser; localStorage.setItem('agrSession', JSON.stringify(s)); }
+  document.getElementById('adminNewPw').value='';
+  document.getElementById('adminNewPw2').value='';
+  showToast('✅ Admin credentials updated!');
+}
+
+function loadAdminCredsUI(){
+  const users = getUsers();
+  const admin = users.find(u=>u.id==='admin');
+  if(!admin) return;
+  const el = document.getElementById('adminNewUser');
+  if(el && !el.value) el.value = admin.username || 'admin';
+  const em = document.getElementById('adminNewEmail');
+  if(em && !em.value) em.value = admin.email || '';
+}
+
+// ══════════════════════════════════════════════════
+// ONEDRIVE — USER LIST SYNC
+// ══════════════════════════════════════════════════
+const OD_USERS_FILE = 'Agreement Tracker/users.json';
+
+async function odSaveUsers(users){
+  if(!msalApp) return;
+  const token = await getAccessToken(false);
+  if(!token) return;
+  try{
+    const body = JSON.stringify(users, null, 2);
+    const r = await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_USERS_FILE)}:/content`,{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body
+    });
+    if(!r.ok) throw new Error((await r.json()).error?.message || r.statusText);
+    console.log('[OD] Users saved to OneDrive');
+    updateUserSyncNote(true);
+  }catch(e){
+    console.warn('[OD] Users save failed:', e.message);
+    updateUserSyncNote(false, e.message);
+  }
+}
+
+async function odLoadUsers(){
+  if(!msalApp) return;
+  const token = await getAccessToken(false);
+  if(!token) return;
+  try{
+    const r = await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_USERS_FILE)}:/content`,{
+      headers:{'Authorization':'Bearer '+token}
+    });
+    if(r.status === 404){
+      // First time — push local users to OneDrive
+      await odSaveUsers(getUsers());
+      return;
+    }
+    if(!r.ok) throw new Error((await r.json()).error?.message || r.statusText);
+    const cloudUsers = await r.json();
+    if(Array.isArray(cloudUsers) && cloudUsers.length > 0){
+      // Merge: keep cloud as authoritative, preserve local-only admin if not in cloud
+      const hasAdmin = cloudUsers.find(u=>u.id==='admin');
+      const localUsers = JSON.parse(localStorage.getItem('agrUsers') || '[]');
+      let merged = cloudUsers;
+      if(!hasAdmin){
+        const localAdmin = localUsers.find(u=>u.id==='admin');
+        if(localAdmin) merged = [localAdmin, ...cloudUsers.filter(u=>u.id!=='admin')];
+      }
+      localStorage.setItem('agrUsers', JSON.stringify(merged));
+      renderUserList();
+      updateUserSyncNote(true);
+      console.log('[OD] Users loaded from OneDrive:', merged.length);
+    }
+  }catch(e){
+    console.warn('[OD] Users load failed:', e.message);
+    updateUserSyncNote(false, e.message);
+  }
+}
+
+function updateUserSyncNote(ok, errMsg){
+  const el = document.getElementById('userSyncNote');
+  const txt = document.getElementById('userSyncNoteText');
+  if(!el || !txt) return;
+  if(ok){
+    el.className = 'od-sync-note';
+    txt.textContent = '✅ User list synced via OneDrive — not stored on individual devices';
+  } else {
+    el.className = 'od-sync-note warn';
+    txt.textContent = '⚠️ OneDrive not connected — users stored locally. Connect OneDrive to sync across devices.'+(errMsg?' ('+errMsg+')':'');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// EMAIL HELPERS — VALIDATION + ROBUST BODY
+// ══════════════════════════════════════════════════
+function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e||'').trim())}
+
+function validateEmailList(list){
+  return list.filter(e=>e&&e.trim()).map(e=>e.trim()).filter(e=>{
+    if(!isValidEmail(e)){showToast('⚠️ Invalid email address: '+e);return false;}
+    return true;
+  });
+}
+
+function showComposeError(msg){
+  const el = document.getElementById('composeError');
+  if(el){el.textContent = msg; el.style.display = msg?'block':'none';}
+  if(msg) showToast('❌ '+msg.slice(0,60));
 }
 
 (function(){const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);}else{document.getElementById("loginScreen").style.display="flex";}})();
@@ -2828,6 +3092,7 @@ openDB().then(async()=>{
           odAccount=accounts[0];
           setSyncStatus('connected',`Connected · ${odAccount.username}`);
           await odLoadFromOneDrive(false);
+          odLoadUsers().catch(e=>console.warn('OD users load on start:',e));
         }
       }
     }
