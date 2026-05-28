@@ -240,8 +240,8 @@
     .notif-banner{display:none;background:var(--warning-bg);border-left:4px solid var(--warning);padding:11px 16px;font-size:.82rem;color:#92400e;cursor:pointer;font-weight:500}
     .notif-banner.show{display:flex;align-items:center;gap:8px}
 
-    /* TOAST */
-    .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(16px);background:#0f172a;color:#fff;padding:10px 22px;border-radius:28px;font-size:.83rem;font-weight:600;z-index:500;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.25);letter-spacing:.01em}
+    /* TOAST — fixed position, always on top, z-index above everything */
+    .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(16px);background:#0f172a;color:#fff;padding:10px 22px;border-radius:28px;font-size:.83rem;font-weight:600;z-index:99999;opacity:0;transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.25);letter-spacing:.01em;pointer-events:none}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
     /* ONEDRIVE SYNC */
@@ -451,26 +451,18 @@
       --shadow-lg:0 10px 32px rgba(109,40,217,.14),0 4px 8px rgba(0,0,0,.06);
     }
     body{background:var(--bg)}
-
-    /* ── TOPBAR ── */
     .topbar{background:#fff;border-bottom:1px solid rgba(109,40,217,.12);box-shadow:0 1px 8px rgba(109,40,217,.08)}
     .topbar-title{font-size:.95rem;font-weight:800;background:linear-gradient(135deg,#6D28D9,#9333EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-
-    /* ── SIDEBAR REFINEMENTS ── */
     .sidebar{box-shadow:4px 0 24px rgba(0,0,0,.18)}
     .sidebar-pdka-box{background:rgba(255,255,255,.25);border-radius:8px 3px 8px 3px}
     .nav-item:hover{background:rgba(255,255,255,.16);transform:translateX(2px)}
     .nav-item.active{background:rgba(255,255,255,.25);border-left:3px solid rgba(255,255,255,.8);padding-left:9px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
     .sync-chip{border-radius:10px;transition:opacity .2s}
     .sidebar-footer .nav-item{font-size:.78rem}
-
-    /* ── SUMMARY CARDS ── */
     .summary-card{border-radius:16px;padding:18px 10px 14px;border-top-width:4px;transition:transform .2s,box-shadow .2s,border-color .2s}
     .summary-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
     .summary-card .count{font-size:2rem;font-weight:900}
     .summary-card .label{font-size:.62rem;font-weight:700;margin-top:5px;letter-spacing:.08em}
-
-    /* ── AGREEMENT CARDS ── */
     .agreement-card{background:#fff;border-radius:16px;box-shadow:var(--shadow-sm);border-left:4px solid transparent;transition:box-shadow .2s,transform .15s;overflow:hidden}
     .agreement-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
     .agreement-card.status-active{border-left-color:var(--success)}
@@ -478,12 +470,8 @@
     .agreement-card.status-expired{border-left-color:var(--danger)}
     .agreement-card.status-renewed{border-left-color:var(--renewed)}
     .status-badge{font-size:.62rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
-
-    /* ── ADMIN / SECTION PANELS ── */
     .admin-panel{border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid rgba(109,40,217,.07)}
     .admin-panel-title{font-size:.72rem;font-weight:800;letter-spacing:.07em;border-bottom:1px solid rgba(109,40,217,.08)}
-
-    /* ── BUTTONS ── */
     .btn-primary{background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(109,40,217,.28);letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
     .btn-primary:hover{box-shadow:0 6px 18px rgba(109,40,217,.38);transform:translateY(-1px)}
     .btn-primary:active{transform:scale(.97)}
@@ -491,48 +479,30 @@
     .btn-login:hover{background:linear-gradient(135deg,#5B21B6,#7C3AED);box-shadow:0 6px 18px rgba(109,40,217,.45)}
     .template-btn{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:10px;display:inline-block}
     .template-btn:hover{background:#EDE9FE;border-color:#C4B5FD}
-
-    /* ── SEARCH BAR ── */
     .search-bar input{border:1.5px solid #DDD6FE;border-radius:12px;padding:11px 16px;font-size:.88rem;transition:border-color .2s,box-shadow .2s;font-family:inherit}
     .search-bar input:focus{border-color:#6D28D9;box-shadow:0 0 0 3px rgba(109,40,217,.12);outline:none}
-
-    /* ── FILTER BUTTONS ── */
     .filter-btn{background:#fff;border:1.5px solid #E9E4F5;color:var(--muted);border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
     .filter-btn:hover{background:#F5F3FF;border-color:#C4B5FD;color:#6D28D9}
     .filter-btn.active{background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(109,40,217,.25)}
-
-    /* ── MODALS ── */
     .modal-box{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.28)}
     .modal-header{border-radius:22px 22px 0 0}
     .login-card{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.32)}
     .login-field input{border-radius:11px;font-family:inherit}
     .login-field input:focus{box-shadow:0 0 0 3px rgba(109,40,217,.15)}
-
-    /* ── NOTIFICATION SECTION ── */
     .notif-setting-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border-light)}
     .notif-setting-row:last-child{border-bottom:none}
     .notif-setting-label{font-size:.85rem;font-weight:600;color:var(--text)}
     .notif-setting-desc{font-size:.73rem;color:var(--muted);margin-top:2px}
-
-    /* ── TOAST ── */
     .toast{border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);font-weight:600;font-size:.83rem;backdrop-filter:blur(10px)}
-
-    /* ── QUICK LIST ITEMS ── */
     .quick-list-item{border-radius:12px;transition:box-shadow .15s,transform .15s}
     .quick-list-item:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-
-    /* ── SYNC CHIP ── */
     .sync-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;color:rgba(255,255,255,.9);font-size:.72rem;font-weight:600;padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
     .sync-chip:hover{background:rgba(255,255,255,.25)}
     .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0;transition:background .3s}
     .sync-dot.connected{background:#34d399}
     .sync-dot.error{background:#f87171}
-
-    /* ── FAB ── */
     .fab{background:linear-gradient(135deg,#6D28D9,#9333EA);box-shadow:0 6px 20px rgba(109,40,217,.45);border-radius:18px;width:52px;height:52px}
     .fab:hover{box-shadow:0 8px 26px rgba(109,40,217,.55);transform:translateY(-2px) scale(1.05)}
-
-    /* ── SCROLLBAR ── */
     ::-webkit-scrollbar{width:5px;height:5px}
     ::-webkit-scrollbar-track{background:transparent}
     ::-webkit-scrollbar-thumb{background:#DDD6FE;border-radius:6px}
@@ -540,6 +510,16 @@
   </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     TOAST — placed here at body level, OUTSIDE #appShell,
+     so it is always in the DOM regardless of login state.
+     FIX: This element was previously missing, causing
+     "Cannot set properties of null (setting 'textContent')"
+     in showToast() whenever called before/after appShell toggled.
+═══════════════════════════════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
 <!-- LOGIN SCREEN -->
 <div id="loginScreen">
   <div class="login-card">
@@ -634,7 +614,7 @@
       </button>
     </nav>
     <div class="sidebar-footer">
-      <div class="sync-chip" id="syncChip" onclick="openAdminSection();setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
+      <div class="sync-chip" id="syncChip" onclick="showSection('admin');setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
         <span class="sync-dot" id="syncDot"></span>
         <span id="syncLabel">OneDrive</span>
       </div>
@@ -655,7 +635,7 @@
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button class="user-chip" id="userChip" onclick="openAdminSection()">
+      <button class="user-chip" id="userChip" onclick="showSection('admin')">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
       </button>
@@ -681,7 +661,6 @@
         </div>
       </div>
 
-      <!-- Expandable quick panel (shown on card click) -->
       <div class="dash-quick-panel" id="dashQuickPanel" style="display:none">
         <div class="dash-quick-panel-inner">
           <div class="dash-qp-header">
@@ -692,7 +671,6 @@
         </div>
       </div>
 
-      <!-- Pie chart -->
       <div class="dash-pie-wrap">
         <div class="dash-pie-card">
           <div class="dash-pie-title">Agreement Status Overview</div>
@@ -749,10 +727,8 @@
     <div class="section" id="sec-admin">
       <div style="padding:16px 0 0">
 
-        <!-- User Management -->
         <div class="admin-panel" id="usersAdminPanel">
           <div class="admin-panel-title">👤 User Management <span class="pending-badge" id="pendingBadge" style="display:none">0 pending</span></div>
-          <!-- Pending approvals -->
           <div class="pending-section" id="pendingSection" style="display:none">
             <div class="pending-section-title">⏳ Pending Account Requests <span class="pending-badge" id="pendingBadge2">0</span></div>
             <div id="pendingUserList"></div>
@@ -772,7 +748,6 @@
           </div>
         </div>
 
-        <!-- OneDrive Settings -->
         <div class="admin-panel" id="odAdminPanel">
           <div class="admin-panel-title">☁️ OneDrive Sync</div>
           <div class="od-section">
@@ -813,7 +788,6 @@
     <div class="section" id="sec-notifications">
       <div style="padding:16px 0 0">
 
-        <!-- Alert Days -->
         <div class="admin-panel">
           <div class="admin-panel-title">⏰ Alert Days Configuration</div>
           <div class="settings-item">
@@ -831,7 +805,6 @@
           <button class="btn-primary" onclick="saveSettings()" style="max-width:220px;margin-top:12px">💾 Save Alert Settings</button>
         </div>
 
-        <!-- Microsoft 365 Email -->
         <div class="admin-panel">
           <div class="admin-panel-title">📧 Microsoft 365 Email</div>
           <div style="background:#EDE9FE;border:1.5px solid #DDD6FE;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.8rem;color:#4C1D95;line-height:1.6">
@@ -847,7 +820,6 @@
           <div id="emailSettingsStatus" style="margin-top:8px;font-size:.76rem;color:var(--muted)"></div>
         </div>
 
-        <!-- Auto Email Reminders -->
         <div class="admin-panel">
           <div class="admin-panel-title">🤖 Automatic Email Reminders</div>
           <div class="toggle-row" style="margin-bottom:12px">
@@ -859,7 +831,6 @@
           </div>
           <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:12px">When enabled, emails are automatically sent on your configured alert days to the TO / CC addresses set on each agreement.</p>
           <button onclick="sendAutoRemindersManual()" style="width:100%;max-width:320px;padding:12px 20px;background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border:none;border-radius:12px;font-size:.83rem;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 3px 10px rgba(109,40,217,.3);letter-spacing:.01em;transition:box-shadow .2s">Send All Pending Reminders</button>
-          <div id="sendReminderStatus" style="margin-top:8px;font-size:.76rem;color:var(--muted)"></div>
           <div style="padding:10px;background:#f0f9ff;border-radius:8px;font-size:.75rem;color:#0369a1">
             📱 <strong>Install on Android:</strong> Open in Chrome → tap ⋮ menu → "Add to Home Screen" → Add
           </div>
@@ -871,9 +842,6 @@
   </div><!-- end .main-content -->
 </div><!-- end .layout-row -->
 
-<!-- ═══════════════════════════════════════════════════════════
-     CHANGE PASSWORD MODAL
-═══════════════════════════════════════════════════════════ -->
 <div id="changePwModal" onclick="if(event.target===this)closeChangePw()">
   <div class="cpw-box">
     <div class="cpw-title" id="cpwTitle">🔑 Change Password</div>
@@ -892,14 +860,9 @@
   </div>
 </div>
 
-
 </div><!-- end #appShell -->
 
-
-
-<!-- ═══════════════════════════════════════════════════════════
-     EMAIL COMPOSE MODAL
-═══════════════════════════════════════════════════════════ -->
+<!-- EMAIL COMPOSE MODAL -->
 <div id="emailComposeModal" onclick="if(event.target===this)closeEmailModal()">
   <div class="email-compose-box">
     <div class="email-compose-header">
@@ -941,34 +904,21 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     ADD / EDIT / RENEW MODAL
-═══════════════════════════════════════════════════════════ -->
+<!-- ADD / EDIT / RENEW MODAL -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modalTitle">Add New Agreement</div>
     <input type="hidden" id="editId"/>
     <input type="hidden" id="renewFromId"/>
-
-    <!-- Renewal notice (shown only on renew) -->
     <div class="renewal-notice" id="renewalNotice" style="display:none">
       <strong>🔄 Renewing Agreement</strong>
       The original agreement will be preserved as history. Update the dates and any changed details below.
     </div>
-
-    <!-- BASIC INFO -->
     <div class="form-section-title">📄 Agreement Details</div>
-    <div class="form-group">
-      <label>Agreement Name *</label>
-      <input type="text" id="agrName" placeholder="e.g. Software License Agreement"/>
-    </div>
-    <div class="form-group">
-      <label>Agreement Number</label>
-      <input type="text" id="agrNumber" placeholder="e.g. AGR-2026-001"/>
-    </div>
-    <div class="form-group">
-      <label>Type / Category</label>
+    <div class="form-group"><label>Agreement Name *</label><input type="text" id="agrName" placeholder="e.g. Software License Agreement"/></div>
+    <div class="form-group"><label>Agreement Number</label><input type="text" id="agrNumber" placeholder="e.g. AGR-2026-001"/></div>
+    <div class="form-group"><label>Type / Category</label>
       <select id="agrType">
         <option value="">Select type...</option>
         <option>Vendor Agreement</option><option>Client Agreement</option>
@@ -982,70 +932,26 @@
       <div class="form-group"><label>Start Date *</label><input type="date" id="agrStart"/></div>
       <div class="form-group"><label>End Date *</label><input type="date" id="agrEnd"/></div>
     </div>
-    <div class="form-group">
-      <label>Agreement Value (₹)</label>
-      <input type="number" id="agrValue" placeholder="e.g. 500000" min="0"/>
-    </div>
-
-    <!-- PARTY INFO -->
+    <div class="form-group"><label>Agreement Value (₹)</label><input type="number" id="agrValue" placeholder="e.g. 500000" min="0"/></div>
     <div class="form-section-title">👤 Party / Client / Vendor Details</div>
-    <div class="form-group">
-      <label>Party / Vendor / Client Name *</label>
-      <input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd."/>
-    </div>
+    <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
     <div class="form-row">
-      <div class="form-group">
-        <label>PAN Number</label>
-        <input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/>
-      </div>
-      <div class="form-group">
-        <label>Contact Person</label>
-        <input type="text" id="agrContact" placeholder="Name"/>
-      </div>
+      <div class="form-group"><label>PAN Number</label><input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
+      <div class="form-group"><label>Contact Person</label><input type="text" id="agrContact" placeholder="Name"/></div>
     </div>
-    <div class="form-group">
-      <label>Contact Email / Phone</label>
-      <input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/>
-    </div>
-
-    <!-- GST TOGGLE -->
-    <div class="form-group">
-      <label>GST Registration</label>
+    <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
+    <div class="form-group"><label>GST Registration</label>
       <label class="toggle-row" for="gstToggle">
         <span class="toggle-label" id="gstToggleLabel">Not Registered under GST</span>
-        <span class="toggle-switch">
-          <input type="checkbox" id="gstToggle" onchange="onGstToggle()"/>
-          <span class="toggle-slider"></span>
-        </span>
+        <span class="toggle-switch"><input type="checkbox" id="gstToggle" onchange="onGstToggle()"/><span class="toggle-slider"></span></span>
       </label>
     </div>
-    <div class="form-group gst-field" id="gstField">
-      <label>GST Number</label>
-      <input type="text" id="agrGst" placeholder="e.g. 29ABCDE1234F1Z5" maxlength="15" style="text-transform:uppercase"/>
-    </div>
-
-    <!-- NOTES -->
-    <div class="form-group">
-      <label>Notes / Remarks</label>
-      <textarea id="agrNotes" rows="2" placeholder="Any additional notes..."></textarea>
-    </div>
-
-    <!-- EMAIL NOTIFICATIONS -->
+    <div class="form-group gst-field" id="gstField"><label>GST Number</label><input type="text" id="agrGst" placeholder="e.g. 29ABCDE1234F1Z5" maxlength="15" style="text-transform:uppercase"/></div>
+    <div class="form-group"><label>Notes / Remarks</label><textarea id="agrNotes" rows="2" placeholder="Any additional notes..."></textarea></div>
     <div class="form-section-title">📧 Email Notifications</div>
-    <div class="form-group">
-      <label>TO — Email 1 (Primary Recipient)</label>
-      <input type="email" id="agrToEmail1" placeholder="e.g. manager@company.com"/>
-    </div>
-    <div class="form-group">
-      <label>TO — Email 2 (Second Recipient)</label>
-      <input type="email" id="agrToEmail2" placeholder="e.g. accounts@company.com"/>
-    </div>
-    <div class="form-group">
-      <label>CC Emails</label>
-      <input type="text" id="agrCcEmails" placeholder="cc1@company.com, cc2@company.com"/>
-    </div>
-
-    <!-- FILE ATTACHMENTS -->
+    <div class="form-group"><label>TO — Email 1 (Primary Recipient)</label><input type="email" id="agrToEmail1" placeholder="e.g. manager@company.com"/></div>
+    <div class="form-group"><label>TO — Email 2 (Second Recipient)</label><input type="email" id="agrToEmail2" placeholder="e.g. accounts@company.com"/></div>
+    <div class="form-group"><label>CC Emails</label><input type="text" id="agrCcEmails" placeholder="cc1@company.com, cc2@company.com"/></div>
     <div class="form-section-title">📎 Attach Documents</div>
     <div class="form-group">
       <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
@@ -1057,21 +963,16 @@
       <input type="file" id="fileInput" multiple style="display:none" onchange="onFileSelect(event)" accept="*/*"/>
       <div id="pendingFiles"></div>
     </div>
-
     <button class="btn-primary" id="saveBtn" onclick="saveAgreement()">💾 Save Agreement</button>
     <button class="btn-secondary" onclick="closeModal('addModal')">Cancel</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     BULK UPLOAD MODAL
-═══════════════════════════════════════════════════════════ -->
+<!-- BULK UPLOAD MODAL -->
 <div class="modal-overlay" id="bulkModal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">📤 Bulk Upload Agreements</div>
-
-    <!-- Step 1: Upload -->
     <div id="bulkStep1">
       <button class="template-btn" onclick="downloadTemplate()">⬇️ Download Excel Template First</button>
       <div class="bulk-drop" id="bulkDrop"
@@ -1088,25 +989,18 @@
         <span style="color:#92400e">Optional: Agreement No · Type · Value · PAN · GST Registered (Yes/No) · GST Number · Contact · Notes</span>
       </div>
     </div>
-
-    <!-- Step 2: Preview -->
     <div id="bulkStep2" style="display:none">
       <div class="import-summary" id="importSummary"></div>
-      <div class="import-table-wrap">
-        <table class="import-table" id="importTable"></table>
-      </div>
+      <div class="import-table-wrap"><table class="import-table" id="importTable"></table></div>
       <div class="import-error-note" id="importErrorNote"></div>
       <button class="btn-primary" onclick="confirmBulkImport()">✅ Import Valid Rows</button>
       <button class="btn-secondary" onclick="resetBulkUpload()">← Upload Different File</button>
     </div>
-
     <button class="btn-secondary" onclick="closeModal('bulkModal');resetBulkUpload()">Cancel</button>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     HISTORY MODAL
-═══════════════════════════════════════════════════════════ -->
+<!-- HISTORY MODAL -->
 <div class="modal-overlay" id="historyModal">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1116,21 +1010,15 @@
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════
-     ONEDRIVE SETUP WIZARD MODAL
-═══════════════════════════════════════════════════════════ -->
+<!-- ONEDRIVE SETUP WIZARD MODAL -->
 <div class="modal-overlay" id="odSetupModal">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">🔧 OneDrive Setup Guide</div>
     <div style="font-size:.82rem;color:var(--muted);margin-bottom:14px">Follow these steps once. Takes about 5 minutes.</div>
-
     <div class="wizard-step">
       <div class="wizard-step-title"><span class="wizard-step-num">1</span>Open Azure Portal</div>
-      <div class="wizard-step-body">
-        Go to <b><a href="https://portal.azure.com" target="_blank" style="color:var(--primary)">portal.azure.com</a></b> and sign in with your <b>Microsoft / Office 365 account</b>.
-      </div>
+      <div class="wizard-step-body">Go to <b><a href="https://portal.azure.com" target="_blank" style="color:var(--primary)">portal.azure.com</a></b> and sign in with your <b>Microsoft / Office 365 account</b>.</div>
     </div>
     <div class="wizard-step">
       <div class="wizard-step-title"><span class="wizard-step-num">2</span>Register New App</div>
@@ -1139,37 +1027,26 @@
         • Name: <code>Agreement Tracker</code><br/>
         • Account types: <b>Accounts in any organizational directory and personal Microsoft accounts</b><br/>
         • Redirect URI type: <b>Single-page application (SPA)</b><br/>
-        • Redirect URI: <code id="redirectUriDisplay">http://localhost:8080/agreement-tracker.html</code><br/>
+        • Redirect URI: <code id="redirectUriDisplay">https://neevjain-eve.github.io/Agreement-Tracker-PDKA/</code><br/>
         → Click <b>Register</b>
       </div>
     </div>
     <div class="wizard-step">
-      <div class="wizard-step-title"><span class="wizard-step-num">3</span>Add OneDrive Permission</div>
+      <div class="wizard-step-title"><span class="wizard-step-num">3</span>Add Permissions</div>
       <div class="wizard-step-body">
         In your new app → <b>API permissions</b> → <b>Add a permission</b><br/>
-        → <b>Microsoft Graph</b> → <b>Delegated permissions</b> → search <code>Files.ReadWrite</code> → Add<br/>
-        → Click <b>Grant admin consent</b> (or ask your IT admin)
+        → <b>Microsoft Graph</b> → <b>Delegated permissions</b><br/>
+        → Add: <code>Files.ReadWrite</code> AND <code>Mail.Send</code> AND <code>User.Read</code><br/>
+        → Click <b>Grant admin consent</b>
       </div>
     </div>
     <div class="wizard-step">
       <div class="wizard-step-title"><span class="wizard-step-num">4</span>Copy your Client ID</div>
-      <div class="wizard-step-body">
-        On the app's <b>Overview</b> page, copy the <b>Application (client) ID</b><br/>
-        It looks like: <code>a1b2c3d4-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code>
-      </div>
+      <div class="wizard-step-body">On the app's <b>Overview</b> page, copy the <b>Application (client) ID</b><br/>It looks like: <code>a1b2c3d4-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code></div>
     </div>
-    <div class="wizard-step">
-      <div class="wizard-step-title"><span class="wizard-step-num">5</span>Start the Local Server</div>
-      <div class="wizard-step-body">
-        Double-click <b>start-server.bat</b> (in the same folder as this file).<br/>
-        Then open <b><a href="http://localhost:8080/agreement-tracker.html" target="_blank" style="color:var(--primary)">http://localhost:8080/agreement-tracker.html</a></b> in your browser.
-      </div>
-    </div>
-
     <div style="background:#fef3c7;border-radius:10px;padding:12px;font-size:.8rem;color:#92400e;margin-bottom:14px;line-height:1.6">
-      <strong>⚠️ Important:</strong> The app must be opened via <code>http://localhost:8080</code> (not as a local file) for OneDrive login to work. The <b>start-server.bat</b> file handles this automatically.
+      <strong>⚠️ Important:</strong> The Redirect URI in Azure must exactly match: <code id="redirectUriDisplay2"></code>
     </div>
-
     <div class="form-group">
       <label>Paste your Client ID here</label>
       <input type="text" id="odClientIdWizard" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" style="font-family:monospace;font-size:.85rem"/>
@@ -1179,9 +1056,7 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════
-     PREVIEW MODAL
-═══════════════════════════════════════════════════════════ -->
+<!-- PREVIEW MODAL -->
 <div class="modal-overlay" id="previewModal">
   <div class="modal" style="max-height:90vh">
     <div class="modal-handle"></div>
@@ -1197,16 +1072,29 @@
 <script>
 
 // ══════════════════════════════════════════════
+// TOAST — robust null-safe implementation
+// FIX: Added null guard + auto-create fallback.
+// The toast div is now in body (outside #appShell)
+// so getElementById always finds it, but this guard
+// ensures it works even if something goes wrong.
+// ══════════════════════════════════════════════
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){
+    t=document.createElement('div');
+    t.id='toast';
+    t.className='toast';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ══════════════════════════════════════════════
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 function showSection(name){
-  if(name==='admin'){
-    const session=getSession();
-    if(!session||session.role!=='admin'){
-      showToast('Admin settings are only available to the administrator.');
-      return;
-    }
-  }
   ['dashboard','agreements','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
@@ -1273,9 +1161,7 @@ function toggleDashSection(type){
   const qpTitle=document.getElementById('dashQpTitle');
   const cardExp=document.getElementById('cardExpiring');
   const cardExpd=document.getElementById('cardExpired');
-  if(_dashPanelType===type&&panel.style.display!=='none'){
-    closeDashPanel();return;
-  }
+  if(_dashPanelType===type&&panel.style.display!=='none'){closeDashPanel();return;}
   _dashPanelType=type;
   if(cardExp)cardExp.classList.toggle('card-selected',type==='expiring');
   if(cardExpd)cardExpd.classList.toggle('card-selected',type==='expired');
@@ -1285,7 +1171,7 @@ function toggleDashSection(type){
     title='⚠️ Expiring Soon ('+items.length+')';cls='qi-expiring';
     bgCol='var(--warning-bg)';textCol='var(--warning)';
     daysFn=a=>getDaysLeft(a.endDate)+'d left';
-  } else {
+  }else{
     items=agreements.filter(a=>getStatus(a)==='expired').sort((a,b)=>new Date(b.endDate)-new Date(a.endDate));
     title='❌ Expired — Action Required ('+items.length+')';cls='qi-expired';
     bgCol='var(--danger-bg)';textCol='var(--danger)';
@@ -1294,11 +1180,11 @@ function toggleDashSection(type){
   qpTitle.textContent=title;
   if(items.length===0){
     qpList.innerHTML='<div class="dash-qp-empty">No '+type+' agreements.</div>';
-  } else {
+  }else{
     qpList.innerHTML=items.slice(0,20).map(a=>
-      '<div class="quick-list-item '+cls+'" onclick="showSection(\'agreements\');setFilter(\''+type+'\')">' +
-      '<div><div class="qi-name">'+a.name+'</div><div class="qi-meta">'+a.client+' &nbsp;&middot;&nbsp; '+(type==='expiring'?'Ends ':'Ended ')+fDate(a.endDate)+'</div></div>' +
-      '<span class="qi-days" style="background:'+bgCol+';color:'+textCol+'">'+daysFn(a)+'</span>' +
+      '<div class="quick-list-item '+cls+'" onclick="showSection(\'agreements\');setFilter(\''+type+'\')">'+
+      '<div><div class="qi-name">'+a.name+'</div><div class="qi-meta">'+a.client+' &nbsp;&middot;&nbsp; '+(type==='expiring'?'Ends ':'Ended ')+fDate(a.endDate)+'</div></div>'+
+      '<span class="qi-days" style="background:'+bgCol+';color:'+textCol+'">'+daysFn(a)+'</span>'+
       '</div>'
     ).join('');
   }
@@ -1316,80 +1202,43 @@ function closeDashPanel(){
   if(cardExpd)cardExpd.classList.remove('card-selected');
 }
 
-function toggleSidebar(){
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('open');
-}
-function closeSidebar(){
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('open');
-}
-function toggleAutoEmail(cb){
-  localStorage.setItem('autoEmailEnabled',cb.checked?'1':'0');
-  showToast(cb.checked?'✅ Auto reminders enabled':'Auto reminders disabled');
-}
-function getReminderRecipients(a){
-  const rawTo=[];
-  if(a.toEmail1 && isValidEmail(a.toEmail1)) rawTo.push(a.toEmail1.trim());
-  if(a.toEmail2 && isValidEmail(a.toEmail2)) rawTo.push(a.toEmail2.trim());
-  if(a.notifEmail && isValidEmail(a.notifEmail)) rawTo.push(a.notifEmail.trim());
-  const session=getSession();
-  const users=getUsers();
-  const loggedInUser=session?users.find(u=>u.id===session.userId):null;
-  if(loggedInUser?.email && isValidEmail(loggedInUser.email)) rawTo.push(loggedInUser.email);
-  return [...new Set(rawTo)];
-}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+function toggleAutoEmail(cb){localStorage.setItem('autoEmailEnabled',cb.checked?'1':'0');showToast(cb.checked?'✅ Auto reminders enabled':'Auto reminders disabled');}
+
 async function sendAutoRemindersManual(){
-  const statusEl = document.getElementById('sendReminderStatus');
-  if(statusEl) statusEl.textContent = '';
-  if(!isMSSignedIn()){
-    if(statusEl) statusEl.textContent = 'Not signed in to Microsoft 365. Connect OneDrive first.';
-    showToast('Connect Microsoft 365 in Admin Settings → OneDrive first');
-    return;
-  }
-  const alertAgreements = agreements.filter(a=>{
-    const recipients=getReminderRecipients(a);
-    return recipients.length>0 && getStatus(a)!=='renewed';
-  });
-  if(alertAgreements.length===0){
-    if(statusEl) statusEl.textContent = 'No pending reminders with valid recipients.';
-    showToast('No agreements found with valid reminder recipients.');
-    return;
-  }
-  if(statusEl) statusEl.textContent = 'Sending '+alertAgreements.length+' reminder(s)…';
-  showToast('Sending to '+alertAgreements.length+' agreement(s) — please wait...');
+  if(!isMSSignedIn()){showToast('Connect Microsoft 365 in Admin Settings → OneDrive first');return;}
+  const alertAgreements=agreements.filter(a=>{const s=getStatus(a);return s==='expiring'||s==='expired';});
+  if(alertAgreements.length===0){showToast('No expiring or expired agreements found');return;}
+  showToast('Sending '+alertAgreements.length+' reminder(s)...');
   let sent=0,noEmail=0,failed=0;
   for(const a of alertAgreements){
     try{
       await sendReminderEmail(a.id,true);
       sent++;
     }catch(e){
-      if(e.message.startsWith('NO_EMAIL:')) noEmail++;
-      else{ failed++; console.warn('Reminder failed for',a.name,e.message); }
+      if(e.message.startsWith('NO_EMAIL:'))noEmail++;
+      else{failed++;console.warn('Reminder failed for',a.name,e.message);}
     }
     await new Promise(r=>setTimeout(r,350));
   }
   let parts=[];
-  if(sent>0)   parts.push(sent+' sent');
-  if(noEmail>0) parts.push(noEmail+' skipped (no email set)');
-  if(failed>0)  parts.push(failed+' failed');
-  const resultText = parts.length>0
-    ? 'Reminders done: '+parts.join(', ')
-    : 'No emails sent — add TO Email on agreements.';
-  if(statusEl) statusEl.textContent = '✅ '+resultText;
-  showToast(resultText);
+  if(sent>0)parts.push(sent+' sent');
+  if(noEmail>0)parts.push(noEmail+' skipped (no email set)');
+  if(failed>0)parts.push(failed+' failed');
+  showToast(sent>0
+    ?'Reminders done: '+parts.join(', ')
+    :'No emails sent — '+parts.join(', ')+'. Add TO Email on agreements.'
+  );
 }
 function openSettings(){showSection('notifications');}
 
-
-
 // ══════════════════════════════════════════════
-// AUTH — SIGNUP / APPROVAL / CHANGE PASSWORD
+// AUTH
 // ══════════════════════════════════════════════
 function showLoginView(view){
   ['loginView','signupView','forgotView'].forEach(v=>document.getElementById(v).style.display='none');
   document.getElementById(view+'View').style.display='block';
-  // Clear errors
   ['loginError','loginSuccess','signupError','signupSuccess'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='none';el.textContent=''}});
 }
 
@@ -1401,7 +1250,7 @@ function doSignup(){
   const pw2=document.getElementById('suPass2').value;
   const errEl=document.getElementById('signupError');
   const okEl=document.getElementById('signupSuccess');
-  errEl.style.display='none'; okEl.style.display='none';
+  errEl.style.display='none';okEl.style.display='none';
   if(!name||!uname||!pw){errEl.style.display='block';errEl.textContent='Name, username and password are required.';return}
   if(pw.length<4){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';return}
   if(pw!==pw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return}
@@ -1414,62 +1263,32 @@ function doSignup(){
   okEl.textContent='✅ Request submitted! Please wait for admin approval before signing in.';
 }
 
-function approveUser(id){
-  const users=getUsers();
-  const u=users.find(x=>x.id===id);
-  if(!u)return;
-  u.status='active';
-  saveUsers(users);
-  renderUserList();
-  showToast('✅ '+u.name+' approved — they can now sign in');
-}
-
-function rejectUser(id){
-  const users=getUsers();
-  const u=users.find(x=>x.id===id);
-  if(!u)return;
-  if(!confirm('Reject and delete request from "'+u.name+'"?'))return;
-  saveUsers(users.filter(x=>x.id!==id));
-  renderUserList();
-  showToast('🗑️ Request rejected');
-}
+function approveUser(id){const users=getUsers();const u=users.find(x=>x.id===id);if(!u)return;u.status='active';saveUsers(users);renderUserList();showToast('✅ '+u.name+' approved — they can now sign in');}
+function rejectUser(id){const users=getUsers();const u=users.find(x=>x.id===id);if(!u)return;if(!confirm('Reject and delete request from "'+u.name+'"?'))return;saveUsers(users.filter(x=>x.id!==id));renderUserList();showToast('🗑️ Request rejected');}
 
 function openChangePw(userId){
-  // userId=null means change own password
-  const session=getSession();
-  if(!session)return;
+  const session=getSession();if(!session)return;
   const targetId=userId||session.userId;
   const users=getUsers();
   const u=users.find(x=>x.id===targetId);
   if(!u){showToast('User not found');return}
   document.getElementById('cpwUserId').value=targetId;
   document.getElementById('cpwTitle').textContent=userId&&userId!==session.userId?'🔑 Reset Password — '+u.name:'🔑 Change My Password';
-  document.getElementById('cpwNew').value='';
-  document.getElementById('cpwNew2').value='';
-  const cpwErr=document.getElementById('cpwError');
-  cpwErr.style.display='none';cpwErr.textContent='';
+  document.getElementById('cpwNew').value='';document.getElementById('cpwNew2').value='';
+  const cpwErr=document.getElementById('cpwError');cpwErr.style.display='none';cpwErr.textContent='';
   document.getElementById('changePwModal').classList.add('open');
 }
-
-function closeChangePw(){
-  document.getElementById('changePwModal').classList.remove('open');
-}
-
+function closeChangePw(){document.getElementById('changePwModal').classList.remove('open');}
 function saveChangePw(){
   const uid=document.getElementById('cpwUserId').value;
   const pw=document.getElementById('cpwNew').value;
   const pw2=document.getElementById('cpwNew2').value;
-  const errEl=document.getElementById('cpwError');
-  errEl.style.display='none';
+  const errEl=document.getElementById('cpwError');errEl.style.display='none';
   if(!pw||pw.length<4){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';return}
   if(pw!==pw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return}
-  const users=getUsers();
-  const u=users.find(x=>x.id===uid);
+  const users=getUsers();const u=users.find(x=>x.id===uid);
   if(!u){errEl.style.display='block';errEl.textContent='User not found.';return}
-  u.pwHash=hashPw(pw);
-  saveUsers(users);
-  closeChangePw();
-  showToast('✅ Password changed for '+u.name);
+  u.pwHash=hashPw(pw);saveUsers(users);closeChangePw();showToast('✅ Password changed for '+u.name);
 }
 
 // ══════════════════════════════════════════════
@@ -1477,22 +1296,16 @@ function saveChangePw(){
 // ══════════════════════════════════════════════
 function hashPw(pw){let h=0;for(let i=0;i<pw.length;i++){h=(h<<5)-h+pw.charCodeAt(i);h|=0}return 'h'+Math.abs(h).toString(36)+'x'+pw.length}
 function getUsers(){const def=[{id:'admin',username:'admin',name:'Administrator',role:'admin',pwHash:hashPw('admin123'),status:'active'}];const u=JSON.parse(localStorage.getItem('agrUsers')||JSON.stringify(def));return u.map(x=>({...x,status:x.status||'active'}))}
-function saveUsers(u){
-  localStorage.setItem('agrUsers',JSON.stringify(u));
-  // Async sync to OneDrive (fire-and-forget)
-  if(msalApp && msalApp.getAllAccounts().length > 0){
-    odSaveUsers(u).catch(e=>console.warn('OD user save:',e));
-  }
-}
+function saveUsers(u){localStorage.setItem('agrUsers',JSON.stringify(u));if(msalApp&&msalApp.getAllAccounts().length>0){odSaveUsers(u).catch(e=>console.warn('OD user save:',e));}}
 function getSession(){const s=localStorage.getItem('agrSession');return s?JSON.parse(s):null}
 function setSession(u){localStorage.setItem('agrSession',JSON.stringify({userId:u.id,username:u.username,name:u.name,role:u.role,ts:Date.now()}))}
 function clearSession(){localStorage.removeItem('agrSession')}
 function doLogin(){
-  const uname=document.getElementById('loginUser').value.trim().toLowerCase();
+  const uname=document.getElementById('loginUser').value.trim();
   const pw=document.getElementById('loginPass').value;
   const err=document.getElementById('loginError');
   if(!uname||!pw){err.style.display='block';err.textContent='Please enter username and password.';return}
-  const u=getUsers().find(x=>x.username.toLowerCase()===uname&&x.pwHash===hashPw(pw));
+  const u=getUsers().find(x=>x.username===uname&&x.pwHash===hashPw(pw));
   if(!u){err.style.display='block';err.textContent='Incorrect username or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection('dashboard');showToast('Welcome, '+u.name+'!');
@@ -1512,25 +1325,11 @@ function updateUserChip(u){
   document.getElementById('userChipName').textContent=u.name.split(' ')[0];
   const sn=document.getElementById('sidebarUserName');if(sn)sn.textContent=u.name+' ('+u.role+')';
   const an=document.getElementById('nav-admin');if(an)an.style.display=(u.role==='admin')?'flex':'none';
-  const sync=document.getElementById('syncChip');if(sync)sync.style.display=(u.role==='admin')?'flex':'none';
 }
-function openAdminSection(){const session=getSession();if(session&&session.role==='admin'){showSection('admin');}else{showToast('Admin settings are only available to the administrator.');}}
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈'}else{i.type='password';btn.textContent='👁'}}
-function switchSettingsTab(tab){
-  ['notif','od','users'].forEach(t=>{
-    const btn=document.getElementById(t+'Tab'),panel=document.getElementById(t+'Panel');
-    if(!btn||!panel)return;
-    const a=t===tab;
-    btn.style.background=a?'var(--primary)':'#fff';btn.style.color=a?'#fff':'var(--muted)';btn.style.borderColor=a?'var(--primary)':'var(--border)';
-    panel.style.display=a?'block':'none';
-  });
-  if(tab==='users')renderUserList();
-  if(tab==='od')refreshOdStatusUI();
-  if(tab==='notif')loadEmailSettingsUI();
-}
+
 function renderUserList(){
   const users=getUsers(),session=getSession();
-  // Pending users
   const pending=users.filter(u=>u.status==='pending');
   const active=users.filter(u=>u.status!=='pending');
   const pendSec=document.getElementById('pendingSection');
@@ -1549,7 +1348,6 @@ function renderUserList(){
       <button class="reject-btn" onclick="rejectUser('${u.id}')">✕ Reject</button>
     </div>
   </div>`).join('');}
-  // Active users
   document.getElementById('userList').innerHTML=active.map(u=>`<div class="user-item">
     <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
     <div class="user-info">
@@ -1577,10 +1375,7 @@ function saveNewUser(){
   users.push({id:'u'+Date.now(),username:uname,name,role,email,pwHash:hashPw(pw)});
   saveUsers(users);hideAddUserForm();renderUserList();showToast('User "'+name+'" added!');
 }
-function deleteUser(id){
-  if(!confirm('Delete this user?'))return;
-  saveUsers(getUsers().filter(u=>u.id!==id));renderUserList();showToast('User deleted');
-}
+function deleteUser(id){if(!confirm('Delete this user?'))return;saveUsers(getUsers().filter(u=>u.id!==id));renderUserList();showToast('User deleted');}
 
 // ══════════════════════════════════════════════════
 // DATABASE
@@ -1678,60 +1473,33 @@ async function buildCard(a){
   const badgeMap={active:'badge-active ✅ Active',expiring:'badge-expiring ⚠️ Expiring',expired:'badge-expired ❌ Expired',renewed:'badge-renewed 🔄 Renewed'};
   const[bClass,...bWords]=badgeMap[status].split(' ');
   const bText=bWords.join(' ');
-
-  // Version badge
   let versionBadge='';
   const versionNum=await getVersionNumber(a);
   if(a.renewedFrom||a.renewedTo)versionBadge=`<span class="badge-version">v${versionNum}</span>`;
-
-  // Compliance tags
   const panTag=a.pan
     ?`<span class="compliance-tag ${validatePAN(a.pan)?'verified':'missing'}">🪪 PAN: ${a.pan.toUpperCase()}</span>`
     :`<span class="compliance-tag missing">🪪 PAN: Not Added</span>`;
   const gstTag=a.gstRegistered
     ?(a.gst?`<span class="compliance-tag ${validateGST(a.gst)?'verified':'missing'}">🏢 GST: ${a.gst.toUpperCase()}</span>`:`<span class="compliance-tag missing">🏢 GST: Number Missing</span>`)
     :`<span class="compliance-tag">🏢 GST: Not Registered</span>`;
-
-  // Renewal chain
   let chainHtml='';
   const hasHistory=a.renewedFrom||a.renewedTo;
-  if(hasHistory){
-    const chainItems=await buildChainItems(a);
-    chainHtml=`<div class="chain-section">
-      <div class="chain-title">🔗 Agreement History Chain</div>
-      ${chainItems}
-    </div>`;
-  }
-
-  // Files
+  if(hasHistory){const chainItems=await buildChainItems(a);chainHtml=`<div class="chain-section"><div class="chain-title">🔗 Agreement History Chain</div>${chainItems}</div>`;}
   let filesHtml='';
   if(a.fileIds&&a.fileIds.length>0){
     const fItems=await Promise.all(a.fileIds.map(async fid=>{
       const f=await dbGet('files',fid);if(!f)return'';
-      return`<div class="attachment-item">
-        <span class="file-icon">${fileIcon(f.type,f.name)}</span>
-        <div class="file-info"><div class="file-name">${f.name}</div><div class="file-size">${fSize(f.size)}</div></div>
-        <div class="file-actions">
-          <button class="btn-view" onclick="previewFile('${fid}')">👁️</button>
-          <button class="btn-del-file" onclick="deleteFile('${a.id}','${fid}')">✕</button>
-        </div>
-      </div>`;
+      return`<div class="attachment-item"><span class="file-icon">${fileIcon(f.type,f.name)}</span><div class="file-info"><div class="file-name">${f.name}</div><div class="file-size">${fSize(f.size)}</div></div><div class="file-actions"><button class="btn-view" onclick="previewFile('${fid}')">👁️</button><button class="btn-del-file" onclick="deleteFile('${a.id}','${fid}')">✕</button></div></div>`;
     }));
     filesHtml=`<div class="attachments-section"><div class="section-title">📎 Attachments (${a.fileIds.length})</div>${fItems.join('')}</div>`;
   }
-
-  // Actions
-  const renewBtn=( status==='expired')?`<button class="btn-renew" onclick="openRenewModal('${a.id}')">🔄 Renew</button>`:'';
+  const renewBtn=(status==='expired')?`<button class="btn-renew" onclick="openRenewModal('${a.id}')">🔄 Renew</button>`:'';
   const histBtn=(a.renewedFrom||a.renewedTo)?`<button class="btn-history" onclick="showHistory('${a.id}')">📜 History</button>`:'';
   const remindBtn=`<button class="btn-edit" onclick="openEmailModal('${a.id}')" style="background:#e0f2fe;color:#0369a1" title="Compose &amp; Send reminder email">📧</button>`;
   const editBtn=`<button class="btn-edit" onclick="openEditModal('${a.id}')">✏️ Edit</button>`;
   const delBtn=`<button class="btn-delete" onclick="deleteAgreement('${a.id}')">🗑️ Delete</button>`;
-
   return`<div class="agreement-card status-${status}" id="card-${a.id}">
-    <div class="card-top">
-      <div class="card-title">${a.name}</div>
-      <div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div>
-    </div>
+    <div class="card-top"><div class="card-title">${a.name}</div><div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div></div>
     <div class="card-client">👤 ${a.client}${a.number?' · #'+a.number:''}${a.type?' · '+a.type:''}</div>
     <div class="card-details">
       <div class="detail-item"><div class="detail-label">Start Date</div><div class="detail-value">${fDate(a.startDate)}</div></div>
@@ -1742,63 +1510,28 @@ async function buildCard(a){
     <div class="compliance-row">${panTag}${gstTag}</div>
     <div class="days-left ${daysClass}">${daysText}</div>
     ${a.notes?`<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>`:''}
-    ${chainHtml}
-    ${filesHtml}
+    ${chainHtml}${filesHtml}
     <button class="btn-add-file" onclick="quickAddFile('${a.id}')">📎 Attach Files</button>
     <div class="card-actions">${editBtn}${renewBtn}${histBtn}${remindBtn}${delBtn}</div>
   </div>`;
 }
 
-async function getVersionNumber(agr){
-  let v=1,cur=agr;
-  while(cur.renewedFrom){
-    v++;
-    cur=agreements.find(a=>a.id===cur.renewedFrom)||{};
-    if(!cur.id)break;
-  }
-  return v;
-}
+async function getVersionNumber(agr){let v=1,cur=agr;while(cur.renewedFrom){v++;cur=agreements.find(a=>a.id===cur.renewedFrom)||{};if(!cur.id)break;}return v;}
 
 async function buildChainItems(agr){
-  // Walk to root
-  const chain=[];
-  let cur=agr;
-  while(cur.renewedFrom){
-    const prev=agreements.find(a=>a.id===cur.renewedFrom);
-    if(!prev)break;
-    chain.unshift(prev);
-    cur=prev;
-  }
-  chain.push(agr);
-  // Walk forward
-  cur=agr;
-  while(cur.renewedTo){
-    const next=agreements.find(a=>a.id===cur.renewedTo);
-    if(!next)break;
-    chain.push(next);
-    cur=next;
-  }
+  const chain=[];let cur=agr;
+  while(cur.renewedFrom){const prev=agreements.find(a=>a.id===cur.renewedFrom);if(!prev)break;chain.unshift(prev);cur=prev;}
+  chain.push(agr);cur=agr;
+  while(cur.renewedTo){const next=agreements.find(a=>a.id===cur.renewedTo);if(!next)break;chain.push(next);cur=next;}
   return chain.map((a,i)=>{
     const isCurrent=a.id===agr.id;
     const dotClass=isCurrent?'dot-current':(i===chain.length-1?'dot-new':'dot-old');
     const label=isCurrent?`<b>${a.name}</b> (this)`:`${a.name}`;
-    const dateRange=`${fDate(a.startDate)} → ${fDate(a.endDate)}`;
-    return`<div class="chain-item">
-      <span class="chain-dot ${dotClass}"></span>
-      <span class="chain-link">${label}</span>
-      <span class="chain-date">${dateRange}</span>
-      ${!isCurrent?`<button class="btn-view-ver" onclick="scrollToCard('${a.id}');closeModal('historyModal')">View</button>`:''}
-    </div>`;
+    return`<div class="chain-item"><span class="chain-dot ${dotClass}"></span><span class="chain-link">${label}</span><span class="chain-date">${fDate(a.startDate)} → ${fDate(a.endDate)}</span>${!isCurrent?`<button class="btn-view-ver" onclick="scrollToCard('${a.id}');closeModal('historyModal')">View</button>`:''}</div>`;
   }).join('');
 }
 
-function scrollToCard(id){
-  closeModal('historyModal');
-  setTimeout(()=>{
-    const el=document.getElementById('card-'+id);
-    if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
-  },350);
-}
+function scrollToCard(id){closeModal('historyModal');setTimeout(()=>{const el=document.getElementById('card-'+id);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},350);}
 
 function updateSummary(){
   const c={active:0,expiring:0,expired:0,renewed:0};
@@ -1825,29 +1558,18 @@ function setFilter(f){
   renderAgreements();
 }
 
-// ══════════════════════════════════════════════════
-// HISTORY MODAL
-// ══════════════════════════════════════════════════
 async function showHistory(agrId){
   const agr=agreements.find(a=>a.id===agrId);if(!agr)return;
-  // Get all versions for this client
   const clientAgreements=agreements.filter(a=>a.client.toLowerCase()===agr.client.toLowerCase());
-  // Build chain
   document.getElementById('historyTitle').textContent=`📜 History — ${agr.client}`;
   const content=document.getElementById('historyContent');
   if(clientAgreements.length===0){content.innerHTML='<p>No history found.</p>';return;}
-  // Sort by creation date
   clientAgreements.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
   const html=clientAgreements.map((a,i)=>{
-    const status=getStatus(a);
-    const isCurrent=a.id===agrId;
+    const status=getStatus(a);const isCurrent=a.id===agrId;
     const cardClass=isCurrent?'is-current':(status==='renewed'?'is-renewed':'is-expired');
-    const verNum=i+1;
     return`<div class="history-card ${cardClass}">
-      <div class="hc-header">
-        <div class="hc-title">v${verNum}: ${a.name}</div>
-        <span class="status-badge badge-${status}">${{active:'✅ Active',expiring:'⚠️ Expiring',expired:'❌ Expired',renewed:'🔄 Renewed'}[status]}</span>
-      </div>
+      <div class="hc-header"><div class="hc-title">v${i+1}: ${a.name}</div><span class="status-badge badge-${status}">${{active:'✅ Active',expiring:'⚠️ Expiring',expired:'❌ Expired',renewed:'🔄 Renewed'}[status]}</span></div>
       <div class="hc-meta">
         <div><div class="hc-label">Start Date</div><div class="hc-value">${fDate(a.startDate)}</div></div>
         <div><div class="hc-label">End Date</div><div class="hc-value">${fDate(a.endDate)}</div></div>
@@ -1857,18 +1579,13 @@ async function showHistory(agrId){
         <div><div class="hc-label">GST</div><div class="hc-value">${a.gstRegistered?(a.gst?a.gst.toUpperCase():'Registered'):'Not Registered'}</div></div>
       </div>
       ${a.notes?`<div style="margin-top:8px;font-size:.76rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>`:''}
-      <div style="margin-top:8px">
-        <button class="btn-view" onclick="scrollToCard('${a.id}');closeModal('historyModal')" style="font-size:.75rem;padding:5px 12px">View Card</button>
-      </div>
+      <div style="margin-top:8px"><button class="btn-view" onclick="scrollToCard('${a.id}');closeModal('historyModal')" style="font-size:.75rem;padding:5px 12px">View Card</button></div>
     </div>`;
   }).join('');
   content.innerHTML=html;
   document.getElementById('historyModal').classList.add('open');
 }
 
-// ══════════════════════════════════════════════════
-// GST TOGGLE
-// ══════════════════════════════════════════════════
 function onGstToggle(){
   const checked=document.getElementById('gstToggle').checked;
   document.getElementById('gstToggleLabel').textContent=checked?'Registered under GST':'Not Registered under GST';
@@ -1882,35 +1599,15 @@ function onFileSelect(e){addPendingFiles([...e.target.files]);e.target.value='';
 function onDragOver(e){e.preventDefault();document.getElementById('dropZone').classList.add('drag-over')}
 function onDragLeave(){document.getElementById('dropZone').classList.remove('drag-over')}
 function onDrop(e){e.preventDefault();document.getElementById('dropZone').classList.remove('drag-over');addPendingFiles([...e.dataTransfer.files])}
-function addPendingFiles(files){
-  files.forEach(f=>{
-    const r=new FileReader();
-    r.onload=ev=>{pendingFiles.push({name:f.name,size:f.size,type:f.type,data:ev.target.result});renderPendingFiles()};
-    r.readAsArrayBuffer(f);
-  });
-}
-function renderPendingFiles(){
-  document.getElementById('pendingFiles').innerHTML=pendingFiles.map((f,i)=>
-    `<div class="pending-file"><span>${fileIcon(f.type,f.name)}</span><span class="pf-name">${f.name}</span><span class="pf-size">${fSize(f.size)}</span><button class="pf-remove" onclick="removePending(${i})">✕</button></div>`
-  ).join('');
-}
+function addPendingFiles(files){files.forEach(f=>{const r=new FileReader();r.onload=ev=>{pendingFiles.push({name:f.name,size:f.size,type:f.type,data:ev.target.result});renderPendingFiles()};r.readAsArrayBuffer(f)});}
+function renderPendingFiles(){document.getElementById('pendingFiles').innerHTML=pendingFiles.map((f,i)=>`<div class="pending-file"><span>${fileIcon(f.type,f.name)}</span><span class="pf-name">${f.name}</span><span class="pf-size">${fSize(f.size)}</span><button class="pf-remove" onclick="removePending(${i})">✕</button></div>`).join('');}
 function removePending(i){pendingFiles.splice(i,1);renderPendingFiles()}
 function quickAddFile(agrId){
   const inp=document.createElement('input');inp.type='file';inp.multiple=true;inp.accept='*/*';
   inp.onchange=async e=>{
-    const files=[...e.target.files];
-    const agr=agreements.find(a=>a.id===agrId);if(!agr)return;
-    for(const f of files){
-      const data=await f.arrayBuffer();
-      const fid=Date.now().toString()+Math.random().toString(36).slice(2);
-      await dbPut('files',{fileId:fid,name:f.name,size:f.size,type:f.type,data,agrId});
-      if(!agr.fileIds)agr.fileIds=[];
-      agr.fileIds.push(fid);
-    }
-    await dbPut('agreements',agr);
-    showToast(`📎 ${files.length} file(s) attached`);
-    renderAgreements();
-    odSyncToOneDrive(); // sync updated agreement list
+    const files=[...e.target.files];const agr=agreements.find(a=>a.id===agrId);if(!agr)return;
+    for(const f of files){const data=await f.arrayBuffer();const fid=Date.now().toString()+Math.random().toString(36).slice(2);await dbPut('files',{fileId:fid,name:f.name,size:f.size,type:f.type,data,agrId});if(!agr.fileIds)agr.fileIds=[];agr.fileIds.push(fid);}
+    await dbPut('agreements',agr);showToast(`📎 ${files.length} file(s) attached`);renderAgreements();odSyncToOneDrive();
   };inp.click();
 }
 
@@ -1929,21 +1626,17 @@ async function saveAgreement(){
   const gstRegistered=document.getElementById('gstToggle').checked;
   const gst=document.getElementById('agrGst').value.trim().toUpperCase();
   if(gstRegistered&&gst&&!validateGST(gst)){showToast('⚠️ Invalid GST format (15 chars)');return}
-
   const editId=document.getElementById('editId').value;
   const renewFromId=document.getElementById('renewFromId').value;
   const existing=editId?agreements.find(a=>a.id===editId):null;
-
   const agr={
-    id:editId||Date.now().toString(),
-    name,client,startDate,endDate,
+    id:editId||Date.now().toString(),name,client,startDate,endDate,
     number:document.getElementById('agrNumber').value.trim(),
     value:document.getElementById('agrValue').value,
     type:document.getElementById('agrType').value,
     contact:document.getElementById('agrContact').value.trim(),
     contactInfo:document.getElementById('agrContactInfo').value.trim(),
-    pan,gstRegistered,
-    gst:gstRegistered?gst:'',
+    pan,gstRegistered,gst:gstRegistered?gst:'',
     notes:document.getElementById('agrNotes').value.trim(),
     toEmail1:document.getElementById('agrToEmail1').value.trim(),
     toEmail2:document.getElementById('agrToEmail2').value.trim(),
@@ -1953,27 +1646,18 @@ async function saveAgreement(){
     renewedFrom:renewFromId||existing?.renewedFrom||null,
     renewedTo:existing?.renewedTo||null
   };
-
-  // Save new files
   for(const pf of pendingFiles){
     const fid=Date.now().toString()+Math.random().toString(36).slice(2);
     await dbPut('files',{fileId:fid,name:pf.name,size:pf.size,type:pf.type,data:pf.data,agrId:agr.id});
     agr.fileIds.push(fid);
   }
   pendingFiles=[];
-
-  // If renewing — mark old agreement as renewed
-  if(renewFromId&&!editId){
-    const oldAgr=agreements.find(a=>a.id===renewFromId);
-    if(oldAgr){oldAgr.renewedTo=agr.id;await dbPut('agreements',oldAgr);}
-  }
-
+  if(renewFromId&&!editId){const oldAgr=agreements.find(a=>a.id===renewFromId);if(oldAgr){oldAgr.renewedTo=agr.id;await dbPut('agreements',oldAgr);}}
   await dbPut('agreements',agr);
   agreements=await dbGetAll('agreements');
-  closeModal('addModal');
-  renderAgreements();
+  closeModal('addModal');renderAgreements();
   showToast(renewFromId&&!editId?'🔄 Agreement renewed & old record preserved!':editId?'✅ Updated!':'✅ Agreement added!');
-  odSyncToOneDrive(); // auto-sync to OneDrive
+  odSyncToOneDrive();
 }
 
 // ══════════════════════════════════════════════════
@@ -1983,22 +1667,16 @@ async function deleteAgreement(id){
   if(!confirm('Delete this agreement and all its attachments?'))return;
   const agr=agreements.find(a=>a.id===id);
   if(agr?.fileIds)for(const fid of agr.fileIds)await dbDelete('files',fid);
-  // Unlink from chain
   if(agr?.renewedFrom){const prev=agreements.find(a=>a.id===agr.renewedFrom);if(prev){prev.renewedTo=null;await dbPut('agreements',prev);}}
   if(agr?.renewedTo){const next=agreements.find(a=>a.id===agr.renewedTo);if(next){next.renewedFrom=null;await dbPut('agreements',next);}}
-  await dbDelete('agreements',id);
-  agreements=await dbGetAll('agreements');
-  renderAgreements();
-  showToast('🗑️ Deleted');
-  odSyncToOneDrive(); // auto-sync to OneDrive
+  await dbDelete('agreements',id);agreements=await dbGetAll('agreements');renderAgreements();showToast('🗑️ Deleted');odSyncToOneDrive();
 }
 async function deleteFile(agrId,fileId){
   if(!confirm('Remove this attachment?'))return;
   const agr=agreements.find(a=>a.id===agrId);if(!agr)return;
   agr.fileIds=(agr.fileIds||[]).filter(f=>f!==fileId);
   await dbDelete('files',fileId);await dbPut('agreements',agr);
-  agreements=await dbGetAll('agreements');renderAgreements();
-  showToast('🗑️ Attachment removed');
+  agreements=await dbGetAll('agreements');renderAgreements();showToast('🗑️ Attachment removed');
 }
 
 // ══════════════════════════════════════════════════
@@ -2010,88 +1688,43 @@ function resetForm(){
   document.getElementById('gstToggle').checked=false;
   document.getElementById('gstField').classList.remove('visible');
   document.getElementById('gstToggleLabel').textContent='Not Registered under GST';
-  document.getElementById('editId').value='';
-  document.getElementById('renewFromId').value='';
+  document.getElementById('editId').value='';document.getElementById('renewFromId').value='';
   document.getElementById('renewalNotice').style.display='none';
   pendingFiles=[];renderPendingFiles();
 }
-
-function openAddModal(){
-  resetForm();
-  document.getElementById('modalTitle').textContent='Add New Agreement';
-  document.getElementById('saveBtn').textContent='💾 Save Agreement';
-  document.getElementById('addModal').classList.add('open');
-}
-
+function openAddModal(){resetForm();document.getElementById('modalTitle').textContent='Add New Agreement';document.getElementById('saveBtn').textContent='💾 Save Agreement';document.getElementById('addModal').classList.add('open');}
 function openEditModal(id){
   const a=agreements.find(x=>x.id===id);if(!a)return;
-  resetForm();
-  document.getElementById('modalTitle').textContent='✏️ Edit Agreement';
-  document.getElementById('saveBtn').textContent='💾 Save Changes';
+  resetForm();document.getElementById('modalTitle').textContent='✏️ Edit Agreement';document.getElementById('saveBtn').textContent='💾 Save Changes';
   document.getElementById('editId').value=a.id;
-  document.getElementById('agrName').value=a.name||'';
-  document.getElementById('agrNumber').value=a.number||'';
-  document.getElementById('agrClient').value=a.client||'';
-  document.getElementById('agrStart').value=a.startDate||'';
-  document.getElementById('agrEnd').value=a.endDate||'';
-  document.getElementById('agrValue').value=a.value||'';
-  document.getElementById('agrType').value=a.type||'';
-  document.getElementById('agrContact').value=a.contact||'';
-  document.getElementById('agrContactInfo').value=a.contactInfo||'';
-  document.getElementById('agrPan').value=a.pan||'';
+  document.getElementById('agrName').value=a.name||'';document.getElementById('agrNumber').value=a.number||'';
+  document.getElementById('agrClient').value=a.client||'';document.getElementById('agrStart').value=a.startDate||'';
+  document.getElementById('agrEnd').value=a.endDate||'';document.getElementById('agrValue').value=a.value||'';
+  document.getElementById('agrType').value=a.type||'';document.getElementById('agrContact').value=a.contact||'';
+  document.getElementById('agrContactInfo').value=a.contactInfo||'';document.getElementById('agrPan').value=a.pan||'';
   document.getElementById('agrNotes').value=a.notes||'';
   document.getElementById('agrToEmail1').value=a.toEmail1||a.notifEmail||'';
-  document.getElementById('agrToEmail2').value=a.toEmail2||'';
-  document.getElementById('agrCcEmails').value=a.ccEmails||'';
-  if(a.gstRegistered){
-    document.getElementById('gstToggle').checked=true;
-    document.getElementById('gstField').classList.add('visible');
-    document.getElementById('gstToggleLabel').textContent='Registered under GST';
-    document.getElementById('agrGst').value=a.gst||'';
-  }
+  document.getElementById('agrToEmail2').value=a.toEmail2||'';document.getElementById('agrCcEmails').value=a.ccEmails||'';
+  if(a.gstRegistered){document.getElementById('gstToggle').checked=true;document.getElementById('gstField').classList.add('visible');document.getElementById('gstToggleLabel').textContent='Registered under GST';document.getElementById('agrGst').value=a.gst||'';}
   document.getElementById('addModal').classList.add('open');
 }
-
 function openRenewModal(id){
   const a=agreements.find(x=>x.id===id);if(!a)return;
-  resetForm();
-  document.getElementById('modalTitle').textContent='🔄 Renew Agreement';
-  document.getElementById('saveBtn').textContent='🔄 Create Renewed Agreement';
-  document.getElementById('renewFromId').value=a.id;
-  document.getElementById('renewalNotice').style.display='block';
-  // Pre-fill with old data
-  document.getElementById('agrName').value=a.name||'';
-  document.getElementById('agrNumber').value=''; // New number
-  document.getElementById('agrClient').value=a.client||'';
-  document.getElementById('agrValue').value=a.value||'';
-  document.getElementById('agrType').value=a.type||'';
-  document.getElementById('agrContact').value=a.contact||'';
-  document.getElementById('agrContactInfo').value=a.contactInfo||'';
-  document.getElementById('agrPan').value=a.pan||'';
-  document.getElementById('agrNotes').value='';
+  resetForm();document.getElementById('modalTitle').textContent='🔄 Renew Agreement';document.getElementById('saveBtn').textContent='🔄 Create Renewed Agreement';
+  document.getElementById('renewFromId').value=a.id;document.getElementById('renewalNotice').style.display='block';
+  document.getElementById('agrName').value=a.name||'';document.getElementById('agrClient').value=a.client||'';
+  document.getElementById('agrValue').value=a.value||'';document.getElementById('agrType').value=a.type||'';
+  document.getElementById('agrContact').value=a.contact||'';document.getElementById('agrContactInfo').value=a.contactInfo||'';
+  document.getElementById('agrPan').value=a.pan||'';document.getElementById('agrNotes').value='';
   document.getElementById('agrToEmail1').value=a.toEmail1||a.notifEmail||'';
-  document.getElementById('agrToEmail2').value=a.toEmail2||'';
-  document.getElementById('agrCcEmails').value=a.ccEmails||'';
-  document.getElementById('agrStart').value=a.endDate||''; // Start from old end date
-  if(a.gstRegistered){
-    document.getElementById('gstToggle').checked=true;
-    document.getElementById('gstField').classList.add('visible');
-    document.getElementById('gstToggleLabel').textContent='Registered under GST';
-    document.getElementById('agrGst').value=a.gst||'';
-  }
+  document.getElementById('agrToEmail2').value=a.toEmail2||'';document.getElementById('agrCcEmails').value=a.ccEmails||'';
+  document.getElementById('agrStart').value=a.endDate||'';
+  if(a.gstRegistered){document.getElementById('gstToggle').checked=true;document.getElementById('gstField').classList.add('visible');document.getElementById('gstToggleLabel').textContent='Registered under GST';document.getElementById('agrGst').value=a.gst||'';}
   document.getElementById('addModal').classList.add('open');
-}
-
-function openSettings(){
-  document.getElementById('alert1').value=settings.alert1;
-  document.getElementById('alert2').value=settings.alert2;
-  document.getElementById('alert3').value=settings.alert3;
-  document.getElementById('settingsModal').classList.add('open');
 }
 function saveSettings(){
   settings={alert1:parseInt(document.getElementById('alert1').value)||60,alert2:parseInt(document.getElementById('alert2').value)||30,alert3:parseInt(document.getElementById('alert3').value)||7};
-  localStorage.setItem('agrSettings',JSON.stringify(settings));
-  renderAgreements();showToast('✅ Settings saved!');
+  localStorage.setItem('agrSettings',JSON.stringify(settings));renderAgreements();showToast('✅ Settings saved!');
 }
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
@@ -2103,16 +1736,14 @@ function checkNotifications(){
   if(!('Notification'in window)){showToast('ℹ️ Notifications not supported');return}
   Notification.requestPermission().then(p=>{
     if(p==='granted'){
-      let sent=0;
-      const alertDays=[settings.alert1,settings.alert2,settings.alert3];
+      let sent=0;const alertDays=[settings.alert1,settings.alert2,settings.alert3];
       agreements.forEach(a=>{
         if(getStatus(a)==='renewed')return;
         const d=getDaysLeft(a.endDate);
         if(d<0){new Notification('❌ Expired',{body:`"${a.name}" with ${a.client} expired ${Math.abs(d)} day(s) ago.`});sent++;}
         else if(alertDays.includes(d)){new Notification('⚠️ Expiring Soon',{body:`"${a.name}" with ${a.client} expires in ${d} day(s).`});sent++;}
       });
-      if(!sent)showToast('✅ No urgent notifications');
-      else showToast(`🔔 ${sent} notification(s) sent`);
+      if(!sent)showToast('✅ No urgent notifications');else showToast(`🔔 ${sent} notification(s) sent`);
     }else showToast('⚠️ Allow notifications in browser settings');
   });
 }
@@ -2134,36 +1765,23 @@ async function previewFile(fileId){
 }
 
 // ══════════════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════════════
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
-
-// ══════════════════════════════════════════════════
 // TEMPLATE DOWNLOAD
 // ══════════════════════════════════════════════════
 function downloadTemplate(){
-  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded. Check internet connection.');return}
+  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
   const headers=[['Agreement Name*','Agreement Number','Client/Vendor Name*','Type','Start Date* (DD/MM/YYYY)','End Date* (DD/MM/YYYY)','Value (₹)','PAN Number','GST Registered (Yes/No)','GST Number','Contact Person','Contact Email/Phone','Notes']];
   const sample=[['Software License Agreement','AGR-2026-001','TechCorp Pvt. Ltd.','Service Agreement','01/04/2026','31/03/2027','500000','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
                 ['Office Lease Agreement','AGR-2026-002','Property Holdings Ltd.','Lease Agreement','01/01/2026','31/12/2026','1200000','FGHIJ5678K','No','','Sunita Sharma','+91 9876543210','3-year lock-in waived']];
   const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
-  // Column widths
   ws['!cols']=[{wch:28},{wch:18},{wch:26},{wch:20},{wch:22},{wch:22},{wch:14},{wch:14},{wch:22},{wch:20},{wch:18},{wch:24},{wch:30}];
-  // Style header row
-  ['A1','B1','C1','D1','E1','F1','G1','H1','I1','J1','K1','L1','M1'].forEach(cell=>{
-    if(ws[cell])ws[cell].s={fill:{fgColor:{rgb:'1A56DB'}},font:{color:{rgb:'FFFFFF'},bold:true}};
-  });
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Agreements Template');
-  XLSX.writeFile(wb,'Agreement_Upload_Template.xlsx');
-  showToast('✅ Template downloaded!');
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Agreements Template');
+  XLSX.writeFile(wb,'Agreement_Upload_Template.xlsx');showToast('✅ Template downloaded!');
 }
 
 // ══════════════════════════════════════════════════
-// BULK UPLOAD - PARSE
+// BULK UPLOAD
 // ══════════════════════════════════════════════════
 let parsedRows=[];
-
 function openBulkModal(){parsedRows=[];resetBulkUpload();document.getElementById('bulkModal').classList.add('open')}
 function bulkDragOver(e){e.preventDefault();document.getElementById('bulkDrop').classList.add('drag-over')}
 function bulkDragLeave(){document.getElementById('bulkDrop').classList.remove('drag-over')}
@@ -2171,7 +1789,7 @@ function bulkDrop(e){e.preventDefault();document.getElementById('bulkDrop').clas
 function parseBulkFile(e){const f=e.target.files[0];if(f)processBulkFile(f);e.target.value=''}
 
 function processBulkFile(file){
-  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded. Check internet connection.');return}
+  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
   const reader=new FileReader();
   reader.onload=ev=>{
     try{
@@ -2179,446 +1797,169 @@ function processBulkFile(file){
       const ws=wb.Sheets[wb.SheetNames[0]];
       const raw=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'DD/MM/YYYY'});
       if(raw.length<2){showToast('⚠️ File is empty or has no data rows');return}
-      // Map headers (case-insensitive, partial match)
       const headerRow=raw[0].map(h=>(h||'').toString().toLowerCase().trim());
-      const col=name=>{
-        const idx=headerRow.findIndex(h=>h.includes(name));
-        return idx>=0?idx:null;
-      };
-      const colMap={
-        name:col('agreement name'),
-        number:col('agreement number')||col('agr. no')||col('agreement no'),
-        client:col('client')||col('vendor')||col('party'),
-        type:col('type'),
-        startDate:col('start date')||col('start'),
-        endDate:col('end date')||col('end'),
-        value:col('value'),
-        pan:col('pan'),
-        gstReg:col('gst registered')||col('gst reg'),
-        gst:col('gst number')||col('gstin'),
-        contact:col('contact person')||col('contact'),
-        contactInfo:col('email')||col('phone')||col('contact email'),
-        notes:col('notes')||col('remarks')
-      };
-
+      const col=name=>{const idx=headerRow.findIndex(h=>h.includes(name));return idx>=0?idx:null;};
+      const colMap={name:col('agreement name'),number:col('agreement number')||col('agr. no')||col('agreement no'),client:col('client')||col('vendor')||col('party'),type:col('type'),startDate:col('start date')||col('start'),endDate:col('end date')||col('end'),value:col('value'),pan:col('pan'),gstReg:col('gst registered')||col('gst reg'),gst:col('gst number')||col('gstin'),contact:col('contact person')||col('contact'),contactInfo:col('email')||col('phone')||col('contact email'),notes:col('notes')||col('remarks')};
       parsedRows=[];
       for(let i=1;i<raw.length;i++){
-        const r=raw[i];
-        if(!r||r.every(c=>!c))continue; // skip empty rows
+        const r=raw[i];if(!r||r.every(c=>!c))continue;
         const get=k=>colMap[k]!==null&&colMap[k]!==undefined?((r[colMap[k]]||'').toString().trim()):'';
-        const parseDate=s=>{
-          if(!s)return null;
-          // Try DD/MM/YYYY
-          const m1=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-          if(m1)return`${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`;
-          // Try YYYY-MM-DD
-          const m2=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
-          if(m2)return`${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`;
-          // Try Excel serial
-          if(!isNaN(s)&&Number(s)>10000){
-            const d=new Date(Math.round((Number(s)-25569)*86400*1000));
-            return d.toISOString().split('T')[0];
-          }
-          return null;
-        };
-        const name=get('name');
-        const client=get('client');
-        const startDate=parseDate(get('startDate'));
-        const endDate=parseDate(get('endDate'));
-        const errors=[];
-        if(!name)errors.push('Agreement Name required');
-        if(!client)errors.push('Client Name required');
-        if(!startDate)errors.push('Invalid Start Date');
-        if(!endDate)errors.push('Invalid End Date');
-        if(startDate&&endDate&&new Date(endDate)<=new Date(startDate))errors.push('End must be after Start');
-        const pan=get('pan').toUpperCase();
-        if(pan&&!validatePAN(pan))errors.push('Invalid PAN');
-        const gstRegRaw=get('gstReg').toLowerCase();
-        const gstRegistered=gstRegRaw==='yes'||gstRegRaw==='y'||gstRegRaw==='true'||gstRegRaw==='1';
-        const gstNum=get('gst').toUpperCase();
-        if(gstRegistered&&gstNum&&!validateGST(gstNum))errors.push('Invalid GST');
-        parsedRows.push({
-          rowNum:i+1,name,client,startDate,endDate,
-          number:get('number'),type:get('type'),
-          value:get('value').replace(/[^0-9.]/g,''),
-          pan,gstRegistered,gst:gstRegistered?gstNum:'',
-          contact:get('contact'),contactInfo:get('contactInfo'),
-          notes:get('notes'),errors
-        });
+        const parseDate=s=>{if(!s)return null;const m1=s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);if(m1)return`${m1[3]}-${m1[2].padStart(2,'0')}-${m1[1].padStart(2,'0')}`;const m2=s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);if(m2)return`${m2[1]}-${m2[2].padStart(2,'0')}-${m2[3].padStart(2,'0')}`;if(!isNaN(s)&&Number(s)>10000){const d=new Date(Math.round((Number(s)-25569)*86400*1000));return d.toISOString().split('T')[0];}return null;};
+        const name=get('name');const client=get('client');const startDate=parseDate(get('startDate'));const endDate=parseDate(get('endDate'));
+        const errors=[];if(!name)errors.push('Agreement Name required');if(!client)errors.push('Client Name required');if(!startDate)errors.push('Invalid Start Date');if(!endDate)errors.push('Invalid End Date');if(startDate&&endDate&&new Date(endDate)<=new Date(startDate))errors.push('End must be after Start');
+        const pan=get('pan').toUpperCase();if(pan&&!validatePAN(pan))errors.push('Invalid PAN');
+        const gstRegRaw=get('gstReg').toLowerCase();const gstRegistered=gstRegRaw==='yes'||gstRegRaw==='y'||gstRegRaw==='true'||gstRegRaw==='1';
+        const gstNum=get('gst').toUpperCase();if(gstRegistered&&gstNum&&!validateGST(gstNum))errors.push('Invalid GST');
+        parsedRows.push({rowNum:i+1,name,client,startDate,endDate,number:get('number'),type:get('type'),value:get('value').replace(/[^0-9.]/g,''),pan,gstRegistered,gst:gstRegistered?gstNum:'',contact:get('contact'),contactInfo:get('contactInfo'),notes:get('notes'),errors});
       }
       showImportPreview();
     }catch(err){showToast('⚠️ Could not read file: '+err.message)}
-  };
-  reader.readAsArrayBuffer(file);
+  };reader.readAsArrayBuffer(file);
 }
 
 function showImportPreview(){
-  const valid=parsedRows.filter(r=>r.errors.length===0);
-  const invalid=parsedRows.filter(r=>r.errors.length>0);
-  document.getElementById('importSummary').innerHTML=
-    `<b>📊 ${parsedRows.length} rows found</b> &nbsp;·&nbsp; ✅ <b>${valid.length} valid</b> &nbsp;·&nbsp; ❌ <b>${invalid.length} with errors</b>`;
-  const thead=`<thead><tr>
-    <th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th>
-    <th>Start Date</th><th>End Date</th><th>Value (₹)</th>
-    <th>PAN</th><th>GST</th><th>Type</th><th>Notes</th>
-  </tr></thead>`;
-  const tbody=parsedRows.map(r=>{
-    const ok=r.errors.length===0;
-    return`<tr class="${ok?'row-ok':'row-error'}">
-      <td>${r.rowNum}</td>
-      <td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td>
-      <td>${r.name||'—'}</td><td>${r.client||'—'}</td>
-      <td>${r.startDate?fDate(r.startDate):'—'}</td>
-      <td>${r.endDate?fDate(r.endDate):'—'}</td>
-      <td>${r.value?'₹'+Number(r.value).toLocaleString('en-IN'):'—'}</td>
-      <td>${r.pan||'—'}</td>
-      <td>${r.gstRegistered?(r.gst||'Registered'):'Not Reg.'}</td>
-      <td>${r.type||'—'}</td>
-      <td>${r.notes||'—'}</td>
-    </tr>`;
-  }).join('');
+  const valid=parsedRows.filter(r=>r.errors.length===0);const invalid=parsedRows.filter(r=>r.errors.length>0);
+  document.getElementById('importSummary').innerHTML=`<b>📊 ${parsedRows.length} rows found</b> &nbsp;·&nbsp; ✅ <b>${valid.length} valid</b> &nbsp;·&nbsp; ❌ <b>${invalid.length} with errors</b>`;
+  const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Start Date</th><th>End Date</th><th>Value (₹)</th><th>PAN</th><th>GST</th><th>Type</th><th>Notes</th></tr></thead>`;
+  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.value?'₹'+Number(r.value).toLocaleString('en-IN'):'—'}</td><td>${r.pan||'—'}</td><td>${r.gstRegistered?(r.gst||'Registered'):'Not Reg.'}</td><td>${r.type||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
   document.getElementById('importTable').innerHTML=thead+`<tbody>${tbody}</tbody>`;
-  if(invalid.length>0)document.getElementById('importErrorNote').textContent=`⚠️ ${invalid.length} row(s) with errors will be skipped. Fix them in Excel and re-upload if needed.`;
+  if(invalid.length>0)document.getElementById('importErrorNote').textContent=`⚠️ ${invalid.length} row(s) with errors will be skipped.`;
   else document.getElementById('importErrorNote').textContent='';
-  document.getElementById('bulkStep1').style.display='none';
-  document.getElementById('bulkStep2').style.display='block';
+  document.getElementById('bulkStep1').style.display='none';document.getElementById('bulkStep2').style.display='block';
 }
 
 async function confirmBulkImport(){
-  const valid=parsedRows.filter(r=>r.errors.length===0);
-  if(valid.length===0){showToast('⚠️ No valid rows to import');return}
-  for(const r of valid){
-    const agr={
-      id:Date.now().toString()+Math.random().toString(36).slice(2),
-      name:r.name,client:r.client,startDate:r.startDate,endDate:r.endDate,
-      number:r.number,type:r.type,value:r.value,
-      pan:r.pan,gstRegistered:r.gstRegistered,gst:r.gst,
-      contact:r.contact,contactInfo:r.contactInfo,notes:r.notes,
-      createdAt:new Date().toISOString(),fileIds:[],renewedFrom:null,renewedTo:null
-    };
-    await dbPut('agreements',agr);
-  }
-  agreements=await dbGetAll('agreements');
-  closeModal('bulkModal');
-  resetBulkUpload();
-  renderAgreements();
-  showToast(`✅ ${valid.length} agreement(s) imported successfully!`);
-  odSyncToOneDrive(); // auto-sync bulk upload to OneDrive
+  const valid=parsedRows.filter(r=>r.errors.length===0);if(valid.length===0){showToast('⚠️ No valid rows to import');return}
+  for(const r of valid){await dbPut('agreements',{id:Date.now().toString()+Math.random().toString(36).slice(2),name:r.name,client:r.client,startDate:r.startDate,endDate:r.endDate,number:r.number,type:r.type,value:r.value,pan:r.pan,gstRegistered:r.gstRegistered,gst:r.gst,contact:r.contact,contactInfo:r.contactInfo,notes:r.notes,createdAt:new Date().toISOString(),fileIds:[],renewedFrom:null,renewedTo:null});}
+  agreements=await dbGetAll('agreements');closeModal('bulkModal');resetBulkUpload();renderAgreements();showToast(`✅ ${valid.length} agreement(s) imported successfully!`);odSyncToOneDrive();
 }
 
-function resetBulkUpload(){
-  parsedRows=[];
-  document.getElementById('bulkStep1').style.display='block';
-  document.getElementById('bulkStep2').style.display='none';
-  document.getElementById('importTable').innerHTML='';
-  document.getElementById('importErrorNote').textContent='';
-  document.getElementById('bulkFileInput').value='';
-}
+function resetBulkUpload(){parsedRows=[];document.getElementById('bulkStep1').style.display='block';document.getElementById('bulkStep2').style.display='none';document.getElementById('importTable').innerHTML='';document.getElementById('importErrorNote').textContent='';document.getElementById('bulkFileInput').value='';}
 
 // ══════════════════════════════════════════════════
 // DOWNLOAD REPORT
 // ══════════════════════════════════════════════════
 function downloadReport(){
-  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded. Check internet connection.');return}
+  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
   if(agreements.length===0){showToast('⚠️ No agreements to export');return}
-
-  // Sort: expiring first, then active, then expired, then renewed
-  const sorted=[...agreements].sort((a,b)=>{
-    const o={expiring:0,active:1,expired:2,renewed:3};
-    return o[getStatus(a)]-o[getStatus(b)]||new Date(a.endDate)-new Date(b.endDate);
-  });
-
+  const sorted=[...agreements].sort((a,b)=>{const o={expiring:0,active:1,expired:2,renewed:3};return o[getStatus(a)]-o[getStatus(b)]||new Date(a.endDate)-new Date(b.endDate);});
   const now=new Date().toLocaleDateString('en-IN');
-  // Summary sheet data
-  const counts={active:0,expiring:0,expired:0,renewed:0};
-  sorted.forEach(a=>counts[getStatus(a)]++);
-
-  // ── Main data sheet ──
+  const counts={active:0,expiring:0,expired:0,renewed:0};sorted.forEach(a=>counts[getStatus(a)]++);
   const headers=['#','Agreement Name','Agreement No.','Client / Vendor','Type','Start Date','End Date','Days Left','Status','Value (₹)','PAN','GST Registered','GST Number','Contact Person','Contact Info','Notes','Renewal Of','Renewed To'];
   const rows=sorted.map((a,i)=>{
-    const status=getStatus(a);
-    const days=getDaysLeft(a.endDate);
+    const status=getStatus(a);const days=getDaysLeft(a.endDate);
     const statusLabel={active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[status];
     const daysLabel=status==='renewed'?'Renewed':status==='expired'?`-${Math.abs(days)} (Expired)`:`${days} days`;
     const prevAgr=a.renewedFrom?agreements.find(x=>x.id===a.renewedFrom):null;
     const nextAgr=a.renewedTo?agreements.find(x=>x.id===a.renewedTo):null;
-    return[
-      i+1, a.name, a.number||'', a.client, a.type||'',
-      fDate(a.startDate), fDate(a.endDate), daysLabel, statusLabel,
-      a.value?Number(a.value):'',
-      a.pan||'', a.gstRegistered?'Yes':'No', a.gst||'',
-      a.contact||'', a.contactInfo||'', a.notes||'',
-      prevAgr?prevAgr.name:'', nextAgr?nextAgr.name:''
-    ];
+    return[i+1,a.name,a.number||'',a.client,a.type||'',fDate(a.startDate),fDate(a.endDate),daysLabel,statusLabel,a.value?Number(a.value):'',a.pan||'',a.gstRegistered?'Yes':'No',a.gst||'',a.contact||'',a.contactInfo||'',a.notes||'',prevAgr?prevAgr.name:'',nextAgr?nextAgr.name:''];
   });
-
-  const wsData=[headers,...rows];
-  const ws=XLSX.utils.aoa_to_sheet(wsData);
-
-  // Column widths
+  const wsData=[headers,...rows];const ws=XLSX.utils.aoa_to_sheet(wsData);
   ws['!cols']=[{wch:4},{wch:30},{wch:16},{wch:28},{wch:20},{wch:13},{wch:13},{wch:14},{wch:15},{wch:14},{wch:14},{wch:14},{wch:18},{wch:18},{wch:24},{wch:28},{wch:26},{wch:26}];
-
-  // Color-code status cells (col I = index 8, 1-indexed col 9)
-  for(let r=1;r<rows.length+1;r++){
-    const cell=XLSX.utils.encode_cell({r,c:8});
-    if(ws[cell]){
-      const v=ws[cell].v;
-      const rgb={Active:'D1FAE5',Expired:'FEE2E2','Expiring Soon':'FEF3C7',Renewed:'F3E8FF'}[v]||'FFFFFF';
-      ws[cell].s={fill:{fgColor:{rgb}},font:{bold:true}};
-    }
-  }
-
-  // ── Summary sheet ──
-  const sumData=[
-    ['Agreement Tracker — Report Summary'],
-    ['Generated on:', now],['',''],
-    ['Total Agreements', agreements.length],
-    ['Active', counts.active],
-    ['Expiring Soon', counts.expiring],
-    ['Expired', counts.expired],
-    ['Renewed (Historical)', counts.renewed],
-  ];
-  const wsSummary=XLSX.utils.aoa_to_sheet(sumData);
-  wsSummary['!cols']=[{wch:28},{wch:20}];
-
-  // ── Expiring Soon sheet ──
+  const sumData=[['Agreement Tracker — Report Summary'],['Generated on:',now],['',''],['Total Agreements',agreements.length],['Active',counts.active],['Expiring Soon',counts.expiring],['Expired',counts.expired],['Renewed (Historical)',counts.renewed]];
+  const wsSummary=XLSX.utils.aoa_to_sheet(sumData);wsSummary['!cols']=[{wch:28},{wch:20}];
   const expiringRows=sorted.filter(a=>getStatus(a)==='expiring');
-  let wsExpiring=null;
-  if(expiringRows.length>0){
-    const expData=[['Agreement Name','Client','End Date','Days Left','Value (₹)','PAN','GST','Contact'],
-      ...expiringRows.map(a=>[a.name,a.client,fDate(a.endDate),getDaysLeft(a.endDate),a.value?Number(a.value):'',a.pan||'',a.gstRegistered?(a.gst||'Yes - Number Missing'):'Not Registered',a.contact||''])];
-    wsExpiring=XLSX.utils.aoa_to_sheet(expData);
-    wsExpiring['!cols']=[{wch:28},{wch:26},{wch:13},{wch:12},{wch:14},{wch:14},{wch:22},{wch:20}];
-  }
-
-  // ── Expired sheet ──
   const expiredRows=sorted.filter(a=>getStatus(a)==='expired');
-  let wsExpired=null;
-  if(expiredRows.length>0){
-    const expiredData=[['Agreement Name','Client','End Date','Expired (days ago)','Value (₹)','PAN','GST','Renewal Status'],
-      ...expiredRows.map(a=>[a.name,a.client,fDate(a.endDate),Math.abs(getDaysLeft(a.endDate)),a.value?Number(a.value):'',a.pan||'',a.gstRegistered?(a.gst||'Yes'):'Not Registered',a.renewedTo?'Renewed':'Pending Renewal'])];
-    wsExpired=XLSX.utils.aoa_to_sheet(expiredData);
-    wsExpired['!cols']=[{wch:28},{wch:26},{wch:13},{wch:18},{wch:14},{wch:14},{wch:22},{wch:18}];
-  }
-
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,wsSummary,'Summary');
   XLSX.utils.book_append_sheet(wb,ws,'All Agreements');
-  if(wsExpiring)XLSX.utils.book_append_sheet(wb,wsExpiring,'Expiring Soon');
-  if(wsExpired)XLSX.utils.book_append_sheet(wb,wsExpired,'Expired');
-
+  if(expiringRows.length>0){const expData=[['Agreement Name','Client','End Date','Days Left','Value (₹)','PAN','GST','Contact'],...expiringRows.map(a=>[a.name,a.client,fDate(a.endDate),getDaysLeft(a.endDate),a.value?Number(a.value):'',a.pan||'',a.gstRegistered?(a.gst||'Yes - Number Missing'):'Not Registered',a.contact||''])];const wsExpiring=XLSX.utils.aoa_to_sheet(expData);XLSX.utils.book_append_sheet(wb,wsExpiring,'Expiring Soon');}
+  if(expiredRows.length>0){const expiredData=[['Agreement Name','Client','End Date','Expired (days ago)','Value (₹)','PAN','GST','Renewal Status'],...expiredRows.map(a=>[a.name,a.client,fDate(a.endDate),Math.abs(getDaysLeft(a.endDate)),a.value?Number(a.value):'',a.pan||'',a.gstRegistered?(a.gst||'Yes'):'Not Registered',a.renewedTo?'Renewed':'Pending Renewal'])];const wsExpired=XLSX.utils.aoa_to_sheet(expiredData);XLSX.utils.book_append_sheet(wb,wsExpired,'Expired');}
   const fileName=`Agreement_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
-  XLSX.writeFile(wb,fileName);
-  showToast(`✅ Report downloaded: ${fileName}`);
+  XLSX.writeFile(wb,fileName);showToast(`✅ Report downloaded: ${fileName}`);
 }
 
 // ══════════════════════════════════════════════════
-// SETTINGS TAB SWITCHER
-// ══════════════════════════════════════════════════
-function switchTab(tab){switchSettingsTab(tab);return;} function _origSwitchTab(tab){
-  const isNotif=tab==='notif';
-  document.getElementById('notifPanel').style.display=isNotif?'block':'none';
-  document.getElementById('odPanel').style.display=isNotif?'none':'block';
-  document.getElementById('notifTab').style.background=isNotif?'var(--primary)':'#fff';
-  document.getElementById('notifTab').style.color=isNotif?'#fff':'var(--muted)';
-  document.getElementById('notifTab').style.borderColor=isNotif?'var(--primary)':'var(--border)';
-  document.getElementById('odTab').style.background=isNotif?'#fff':'var(--primary)';
-  document.getElementById('odTab').style.color=isNotif?'var(--muted)':'#fff';
-  document.getElementById('odTab').style.borderColor=isNotif?'var(--border)':'var(--primary)';
-  if(!isNotif)refreshOdStatusUI();
-}
-
-// ══════════════════════════════════════════════════
-// ONEDRIVE SYNC (MSAL.js + Microsoft Graph)
+// ONEDRIVE SYNC
 // ══════════════════════════════════════════════════
 const GRAPH='https://graph.microsoft.com/v1.0';
-function encodePath(path) {
-  return path.split('/').map(encodeURIComponent).join('/');
-}
+function encodePath(path){return path.split('/').map(encodeURIComponent).join('/');}
 const OD_FILE='Agreement Tracker/agreements.json';
 const OD_ATTACH_FOLDER='Agreement Tracker/Attachments';
 const SCOPES=['Files.ReadWrite','User.Read','Mail.Send'];
-
-let msalApp=null;
-let odAccount=null;
+let msalApp=null;let odAccount=null;
 let odConfig=JSON.parse(localStorage.getItem('odConfig')||'{}');
-// odConfig = { clientId, redirectUri }
 
-function getRedirectUri(){
-  // If served via http/https use current URL; else default to localhost
-  if(location.protocol.startsWith('http'))return location.href.split('?')[0].split('#')[0];
-  return'http://localhost:8080/agreement-tracker.html';
-}
+function getRedirectUri(){if(location.protocol.startsWith('http'))return location.href.split('?')[0].split('#')[0];return'http://localhost:8080/agreement-tracker.html';}
 
 function initMSAL(){
   if(!odConfig.clientId||typeof msal==='undefined')return false;
-  try{
-    msalApp=new msal.PublicClientApplication({
-      auth:{
-        clientId:odConfig.clientId,
-        authority:'https://login.microsoftonline.com/common',
-        redirectUri:odConfig.redirectUri||getRedirectUri()
-      },
-      cache:{cacheLocation:'localStorage',storeAuthStateInCookie:true}
-    });
-    return true;
-  }catch(e){console.error('MSAL init error',e);return false;}
+  try{msalApp=new msal.PublicClientApplication({auth:{clientId:odConfig.clientId,authority:'https://login.microsoftonline.com/common',redirectUri:odConfig.redirectUri||getRedirectUri()},cache:{cacheLocation:'localStorage',storeAuthStateInCookie:true}});return true;}
+  catch(e){console.error('MSAL init error',e);return false;}
 }
 
 async function handleMSALRedirect(){
   if(!msalApp)return false;
   try{
     const resp=await msalApp.handleRedirectPromise();
-    if(resp){
-      odAccount=resp.account;
-      localStorage.setItem('odAccount',JSON.stringify({username:resp.account.username,name:resp.account.name}));
-      setSyncStatus('connected',`Connected as ${resp.account.username}`);
-      await odLoadFromOneDrive(false);
-      return true;
-    }else{
-      const accounts=msalApp.getAllAccounts();
-      if(accounts.length>0){
-        odAccount=accounts[0];
-        setSyncStatus('connected',`Synced · ${odAccount.username}`);
-      }
-    }
+    if(resp){odAccount=resp.account;localStorage.setItem('odAccount',JSON.stringify({username:resp.account.username,name:resp.account.name}));setSyncStatus('connected',`Connected as ${resp.account.username}`);await odLoadFromOneDrive(false);return true;}
+    else{const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Synced · ${odAccount.username}`);}}
   }catch(e){setSyncStatus('error','Auth error: '+e.message)}
   return false;
 }
 
-async function getAccessToken(allowInteraction = false){
+async function getAccessToken(allowInteraction=false){
   if(!msalApp)return null;
   const accounts=msalApp.getAllAccounts();
-  if(accounts.length===0){
-    if(allowInteraction){
-      await msalApp.loginRedirect({scopes:SCOPES});
-    }
-    return null;
-  }
-  try{
-    const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
-    odAccount=r.account;
-    return r.accessToken;
-  }catch(e){
-    if(allowInteraction){
-      try{
-        await msalApp.loginRedirect({scopes:SCOPES});
-      }catch(e2){setSyncStatus('error','Login failed: '+e2.message)}
-    }else{
-      setSyncStatus('error','Session expired. Please sync manually.');
-    }
-    return null;
-  }
+  if(accounts.length===0){if(allowInteraction){await msalApp.loginRedirect({scopes:SCOPES});}return null;}
+  try{const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});odAccount=r.account;return r.accessToken;}
+  catch(e){if(allowInteraction){try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e2){setSyncStatus('error','Login failed: '+e2.message)}}else{setSyncStatus('error','Session expired. Please sync manually.');}return null;}
 }
 
 async function odSyncToOneDrive(){
-  if(!msalApp)return;
-  setSyncStatus('syncing','Saving to OneDrive...');
-  const token=await getAccessToken(true);
-  if(!token)return;
+  if(!msalApp)return;setSyncStatus('syncing','Saving to OneDrive...');
+  const token=await getAccessToken(true);if(!token)return;
   try{
-    const body=JSON.stringify(agreements,null,2);
-    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
-      method:'PUT',
-      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body
-    });
+    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{method:'PUT',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(agreements,null,2)});
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
     setSyncStatus('connected','✅ Saved to OneDrive · '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Sync failed: '+e.message)}
 }
 
-async function odLoadFromOneDrive(allowInteraction = false){
-  if(!msalApp)return;
-  setSyncStatus('syncing','Loading from OneDrive...');
-  const token=await getAccessToken(allowInteraction);
-  if(!token)return;
+async function odLoadFromOneDrive(allowInteraction=false){
+  if(!msalApp)return;setSyncStatus('syncing','Loading from OneDrive...');
+  const token=await getAccessToken(allowInteraction);if(!token)return;
   try{
-    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
-      headers:{'Authorization':'Bearer '+token}
-    });
-    if(r.status===404){
-      // First time — push local data to OneDrive
-      await odSyncToOneDrive();
-      return;
-    }
+    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{headers:{'Authorization':'Bearer '+token}});
+    if(r.status===404){await odSyncToOneDrive();return;}
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
     const cloud=await r.json();
-    if(Array.isArray(cloud)){
-      // Merge: cloud is authoritative, but keep local-only records
-      const cloudIds=new Set(cloud.map(a=>a.id));
-      const localOnly=agreements.filter(a=>!cloudIds.has(a.id));
-      const merged=[...cloud,...localOnly];
-      for(const agr of merged)await dbPut('agreements',agr);
-      agreements=await dbGetAll('agreements');
-      renderAgreements();
-    }
+    if(Array.isArray(cloud)){const cloudIds=new Set(cloud.map(a=>a.id));const localOnly=agreements.filter(a=>!cloudIds.has(a.id));const merged=[...cloud,...localOnly];for(const agr of merged)await dbPut('agreements',agr);agreements=await dbGetAll('agreements');renderAgreements();}
     setSyncStatus('connected','✅ Loaded from OneDrive · '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Load failed: '+e.message)}
 }
 
-async function odSyncAttachment(fileId,name,data){
-  if(!msalApp)return;
-  const token=await getAccessToken(false);
-  if(!token)return;
-  try{
-    const safeName=fileId+'_'+name.replace(/[^a-zA-Z0-9._-]/g,'_');
-    await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_ATTACH_FOLDER+'/'+safeName)}:/content`,{
-      method:'PUT',
-      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/octet-stream'},
-      body:data
-    });
-  }catch(e){console.error('Attachment sync error',e)}
-}
-
 function odConnect(){
-  const cid=(document.getElementById('odClientId').value||'').trim();
-  if(!cid){showToast('⚠️ Please enter your Client ID');return}
-  odConfig={clientId:cid,redirectUri:getRedirectUri()};
-  localStorage.setItem('odConfig',JSON.stringify(odConfig));
-  if(initMSAL()){
-    msalApp.loginRedirect({scopes:SCOPES});
-  }else showToast('⚠️ Could not initialize OneDrive. Check Client ID.');
+  const cid=(document.getElementById('odClientId').value||'').trim();if(!cid){showToast('⚠️ Please enter your Client ID');return}
+  odConfig={clientId:cid,redirectUri:getRedirectUri()};localStorage.setItem('odConfig',JSON.stringify(odConfig));
+  if(initMSAL()){msalApp.loginRedirect({scopes:SCOPES});}else showToast('⚠️ Could not initialize OneDrive. Check Client ID.');
 }
 
 function odSaveClientId(){
-  const cid=(document.getElementById('odClientIdWizard').value||'').trim();
-  if(!cid){showToast('⚠️ Please enter your Client ID');return}
-  odConfig={clientId:cid,redirectUri:getRedirectUri()};
-  localStorage.setItem('odConfig',JSON.stringify(odConfig));
-  document.getElementById('odClientId').value=cid;
-  closeModal('odSetupModal');
-  if(initMSAL()){
-    msalApp.loginRedirect({scopes:SCOPES});
-  }else showToast('⚠️ Could not initialize. Check Client ID & open via localhost.');
+  const cid=(document.getElementById('odClientIdWizard').value||'').trim();if(!cid){showToast('⚠️ Please enter your Client ID');return}
+  odConfig={clientId:cid,redirectUri:getRedirectUri()};localStorage.setItem('odConfig',JSON.stringify(odConfig));
+  document.getElementById('odClientId').value=cid;closeModal('odSetupModal');
+  if(initMSAL()){msalApp.loginRedirect({scopes:SCOPES});}else showToast('⚠️ Could not initialize. Check Client ID.');
 }
 
 function odDisconnect(){
   if(!confirm('Disconnect OneDrive? Your local data stays safe.'))return;
-  msalApp?.logout();
-  msalApp=null;odAccount=null;
-  localStorage.removeItem('odAccount');
-  odConfig={};localStorage.removeItem('odConfig');
-  setSyncStatus('off','Not connected');
-  refreshOdStatusUI();
-  showToast('OneDrive disconnected');
+  msalApp?.logout();msalApp=null;odAccount=null;
+  localStorage.removeItem('odAccount');odConfig={};localStorage.removeItem('odConfig');
+  setSyncStatus('off','Not connected');refreshOdStatusUI();showToast('OneDrive disconnected');
 }
-
-async function odSyncNow(){
-  await odLoadFromOneDrive(true);
-}
+async function odSyncNow(){await odLoadFromOneDrive(true);}
 
 function showOdSetup(){
-  document.getElementById('redirectUriDisplay').textContent=getRedirectUri();
-  closeModal('settingsModal');
+  const uri=getRedirectUri();
+  const el=document.getElementById('redirectUriDisplay');if(el)el.textContent=uri;
+  const el2=document.getElementById('redirectUriDisplay2');if(el2)el2.textContent=uri;
   document.getElementById('odSetupModal').classList.add('open');
 }
 
 function setSyncStatus(state,msg){
-  const dot=document.getElementById('syncDot');
-  const label=document.getElementById('syncLabel');
-  const bar=document.getElementById('syncBar');
-  const barText=document.getElementById('syncBarText');
+  const dot=document.getElementById('syncDot');const label=document.getElementById('syncLabel');
+  const bar=document.getElementById('syncBar');const barText=document.getElementById('syncBarText');
   dot.className='sync-dot';
   if(state==='connected'){dot.classList.add('connected');label.textContent='OneDrive ✓';bar.className='sync-bar show';barText.textContent='☁️ '+msg;setTimeout(()=>bar.classList.remove('show'),4000)}
   else if(state==='syncing'){dot.classList.add('syncing');label.textContent='Syncing...';bar.className='sync-bar show';barText.textContent='🔄 '+msg}
@@ -2627,8 +1968,7 @@ function setSyncStatus(state,msg){
 }
 
 function refreshOdStatusUI(){
-  const saved=localStorage.getItem('odAccount');
-  const acc=saved?JSON.parse(saved):null;
+  const saved=localStorage.getItem('odAccount');const acc=saved?JSON.parse(saved):null;
   const connected=!!(msalApp&&msalApp.getAllAccounts().length>0);
   document.getElementById('odStatusText').textContent=connected?'🟢 Connected':'⚪ Not connected';
   document.getElementById('odAccountRow').style.display=acc?'flex':'none';
@@ -2639,495 +1979,225 @@ function refreshOdStatusUI(){
   if(odConfig.clientId)document.getElementById('odClientId').value=odConfig.clientId;
 }
 
-// ══════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════
-
 // ══════════════════════════════════════════════
-// EMAIL REMINDER SYSTEM
+// EMAIL SYSTEM
 // ══════════════════════════════════════════════
-// ── EMAIL VIA MICROSOFT GRAPH ────────────────────────────────
-// No Python server needed — sends directly through your signed-in
-// Microsoft 365 account using the Graph API.
-
-function isMSSignedIn(){
-  return !!(msalApp && msalApp.getAllAccounts().length > 0);
-}
-
-function getMSAccount(){
-  if(!msalApp) return null;
-  const accs = msalApp.getAllAccounts();
-  return accs.length > 0 ? accs[0] : null;
-}
+function isMSSignedIn(){return !!(msalApp&&msalApp.getAllAccounts().length>0);}
+function getMSAccount(){if(!msalApp)return null;const accs=msalApp.getAllAccounts();return accs.length>0?accs[0]:null;}
 
 async function getMailToken(){
-  // Requests a token with Mail.Send scope (same session as OneDrive)
-  if(!msalApp) return null;
-  const accounts = msalApp.getAllAccounts();
-  if(accounts.length === 0){
-    try{ await msalApp.loginRedirect({scopes:SCOPES}); }catch(e){}
-    return null;
-  }
-  try{
-    const r = await msalApp.acquireTokenSilent({scopes:SCOPES, account:accounts[0]});
-    return r.accessToken;
-  }catch(e){
-    try{ await msalApp.loginRedirect({scopes:SCOPES}); }catch(e2){}
-    return null;
-  }
+  if(!msalApp)return null;
+  const accounts=msalApp.getAllAccounts();
+  if(accounts.length===0){try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e){}return null;}
+  try{const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});return r.accessToken;}
+  catch(e){try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e2){}return null;}
 }
 
-async function sendEmailViaGraph(toList, ccList, subject, htmlBody){
-  if(!odConfig.clientId){
-    throw new Error('Microsoft account not configured. Go to Settings → ☁️ OneDrive and enter your Azure App (Client) ID first.');
-  }
-  if(!isMSSignedIn()){
-    throw new Error('Not signed in to Microsoft. Go to Settings → ☁️ OneDrive and click Connect OneDrive.');
-  }
-  const token = await getMailToken();
-  if(!token) throw new Error('Could not get Microsoft access token. Please reconnect OneDrive.');
-
-  const payload = {
-    message:{
-      subject,
-      body:{ contentType:'HTML', content:htmlBody },
-      toRecipients: toList.map(a=>({emailAddress:{address:a}})),
-      ccRecipients: ccList.map(a=>({emailAddress:{address:a}}))
-    },
-    saveToSentItems: true
-  };
-
-  const resp = await fetch('https://graph.microsoft.com/v1.0/me/sendMail',{
-    method:'POST',
-    headers:{
-      'Authorization':'Bearer '+token,
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify(payload)
-  });
-
-  // 202 Accepted = success for sendMail
-  if(resp.status === 202 || resp.ok) return {ok:true};
-  let errMsg = `HTTP ${resp.status}`;
-  try{
-    const j = await resp.json();
-    errMsg = j.error?.message || errMsg;
-    // Common M365 issues
-    if(resp.status===403) errMsg = 'Permission denied. Make sure Mail.Send is added to your Azure app registration and admin consent is granted.';
-    if(resp.status===401) errMsg = 'Session expired. Please reconnect OneDrive to refresh your Microsoft login.';
-  }catch(e){}
+async function sendEmailViaGraph(toList,ccList,subject,htmlBody){
+  if(!odConfig.clientId)throw new Error('Microsoft account not configured. Go to Admin Settings → OneDrive and enter your Azure App (Client) ID first.');
+  if(!isMSSignedIn())throw new Error('Not signed in to Microsoft. Go to Admin Settings → OneDrive and click Connect OneDrive.');
+  const token=await getMailToken();
+  if(!token)throw new Error('Could not get Microsoft access token. Please reconnect OneDrive.');
+  const payload={message:{subject,body:{contentType:'HTML',content:htmlBody},toRecipients:toList.map(a=>({emailAddress:{address:a}})),ccRecipients:ccList.map(a=>({emailAddress:{address:a}}))},saveToSentItems:true};
+  const resp=await fetch('https://graph.microsoft.com/v1.0/me/sendMail',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(resp.status===202||resp.ok)return{ok:true};
+  let errMsg=`HTTP ${resp.status}`;
+  try{const j=await resp.json();errMsg=j.error?.message||errMsg;if(resp.status===403)errMsg='Permission denied. Make sure Mail.Send is added to your Azure app and admin consent is granted.';if(resp.status===401)errMsg='Session expired. Please reconnect OneDrive to refresh your Microsoft login.';}catch(e){}
   throw new Error(errMsg);
 }
 
-// ── SETTINGS HELPERS (simplified — no SMTP) ──────────────────
-function getEmailSettings(){
-  // Only alert-day prefs kept; no SMTP credentials
-  return JSON.parse(localStorage.getItem('agrEmailConfig')||'{}');
-}
-function saveEmailSettings(){
-  showToast('✅ Email settings saved');
-}
+function getEmailSettings(){return JSON.parse(localStorage.getItem('agrEmailConfig')||'{}');}
 function loadEmailSettingsUI(){
-  // Show the connected Microsoft account in the panel
-  const el = document.getElementById('emailFromDisplay');
-  if(el){
-    const acc = getMSAccount();
-    el.textContent = acc ? acc.username : '— Not connected';
-    el.style.color = acc ? 'var(--success)' : 'var(--muted)';
-  }
+  const el=document.getElementById('emailFromDisplay');
+  if(el){const acc=getMSAccount();el.textContent=acc?acc.username:'— Not connected';el.style.color=acc?'var(--success)':'var(--muted)';}
 }
 
-function buildEmailBody(a, days){
-  const nm = (a.name||'Unknown Agreement').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const cl = (a.client||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const nt = a.notes ? (a.notes).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
-  const status = days < 0 ? 'EXPIRED' : days <= 30 ? 'EXPIRING SOON' : 'UPCOMING EXPIRY';
-  const daysMsg = days < 0 ? 'Expired '+Math.abs(days)+' day(s) ago' : days === 0 ? 'Expires TODAY' : 'Expires in '+days+' day(s)';
-  const bgColor = days < 0 ? '#fee2e2' : days <= 7 ? '#fef3c7' : '#EDE9FE';
-  const txColor = days < 0 ? '#b91c1c' : days <= 7 ? '#92400e' : '#4C1D95';
-  let valueRow = '';
-  try{ if(a.value && !isNaN(Number(a.value))){ valueRow = '<tr><td style="padding:8px 0;color:#6b7280;width:140px">Value</td><td style="padding:8px 0">Rs. '+Number(a.value).toLocaleString('en-IN')+'</td></tr>'; } }catch(e){}
-  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">'
-    + '<div style="background:#6D28D9;padding:20px 24px;color:#fff">'
-    + '<h2 style="margin:0;font-size:1.2rem">Agreement ' + status + '</h2>'
-    + '<p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker - Automated Reminder</p>'
-    + '</div>'
-    + '<div style="padding:24px">'
-    + '<table style="width:100%;border-collapse:collapse;font-size:.9rem">'
-    + '<tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr>'
-    + '<tr><td style="padding:8px 0;color:#6b7280">Agreement No.</td><td style="padding:8px 0">'+(a.number||'—')+'</td></tr>'
-    + '<tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr>'
-    + '<tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr>'
-    + '<tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr>'
-    + valueRow
-    + '</table>'
-    + '<div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'
-    + daysMsg
-    + '</div>'
-    + (nt ? '<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>' : '')
-    + '</div>'
-    + '<div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">'
-    + 'This is an automated reminder from Agreement Tracker. Please do not reply to this email.'
-    + '</div>'
-    + '</div>';
+function buildEmailBody(a,days){
+  const nm=(a.name||'Unknown Agreement').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const cl=(a.client||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const nt=a.notes?(a.notes).replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';
+  const status=days<0?'EXPIRED':days<=30?'EXPIRING SOON':'UPCOMING EXPIRY';
+  const daysMsg=days<0?'Expired '+Math.abs(days)+' day(s) ago':days===0?'Expires TODAY':'Expires in '+days+' day(s)';
+  const bgColor=days<0?'#fee2e2':days<=7?'#fef3c7':'#EDE9FE';
+  const txColor=days<0?'#b91c1c':days<=7?'#92400e':'#4C1D95';
+  let valueRow='';try{if(a.value&&!isNaN(Number(a.value))){valueRow='<tr><td style="padding:8px 0;color:#6b7280;width:140px">Value</td><td style="padding:8px 0">Rs. '+Number(a.value).toLocaleString('en-IN')+'</td></tr>';}}catch(e){}
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#6D28D9;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Agreement No.</td><td style="padding:8px 0">'+(a.number||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr>'+valueRow+'</table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">This is an automated reminder from Agreement Tracker. Please do not reply to this email.</div></div>';
 }
 
-// ── EMAIL COMPOSE MODAL ──────────────────────────────────────
-let _composeAgrId = null;
-
+let _composeAgrId=null;
 function openEmailModal(agrId){
-  const a = agreements.find(x=>x.id===agrId);
-  if(!a){showToast('Agreement not found');return}
-
-  if(!odConfig.clientId){
-    showToast('⚠️ Set up OneDrive (Azure Client ID) in Settings → ☁️ OneDrive to enable email');
-    openSettings(); setTimeout(()=>switchSettingsTab('od'),200);
-    return;
-  }
-  if(!isMSSignedIn()){
-    showToast('⚠️ Sign in to Microsoft first — Settings → ☁️ OneDrive → Connect');
-    openSettings(); setTimeout(()=>switchSettingsTab('od'),200);
-    return;
-  }
-
-  _composeAgrId = agrId;
-  const days = getDaysLeft(a.endDate);
-
-  // Build recipient list from agreement
-  const session = getSession();
-  const users = getUsers();
-  const loggedInUser = session ? users.find(u=>u.id===session.userId) : null;
-  const toList = [];
-  if(a.toEmail1) toList.push(a.toEmail1.trim());
-  if(a.toEmail2) toList.push(a.toEmail2.trim());
-  if(a.notifEmail && !toList.includes(a.notifEmail)) toList.push(a.notifEmail.trim());
-  if(loggedInUser?.email && !toList.includes(loggedInUser.email)) toList.push(loggedInUser.email);
-
-  document.getElementById('composeToEmail1').value = toList[0] || '';
-  document.getElementById('composeToEmail2').value = toList[1] || '';
-  document.getElementById('composeCcEmails').value = a.ccEmails || '';
-  document.getElementById('composeSubject').value = `[Agreement Tracker] ${days<0?'EXPIRED':'Expiry Reminder'}: ${a.name} (${a.client})`;
-
-  const statusLabel = days<0 ? `EXPIRED ${Math.abs(days)} day(s) ago` : `expires in ${days} day(s)`;
-  const bodyText = [
-    `Dear Recipient,`,``,
-    `This is a reminder regarding the following agreement:`,``,
-    `  Agreement : ${a.name}`,
-    `  Client    : ${a.client}`,
-    `  Start Date: ${a.startDate||'—'}`,
-    `  End Date  : ${a.endDate||'—'}`,
-    `  Status    : ${statusLabel}`,
-    a.value ? `  Value     : ₹${Number(a.value).toLocaleString('en-IN')}` : null,
-    a.agrNumber ? `  Ref. No.  : ${a.agrNumber}` : null,
-    ``,`Please take the necessary action at the earliest.`,``,`— Agreement Tracker`
-  ].filter(l=>l!==null).join('\n');
-
-  document.getElementById('composeBody').value = bodyText;
-
-  const btn = document.getElementById('composeSendBtn');
-  btn.disabled = false; btn.textContent = '📤 Send Email';
-
-  // Show sending account
-  const acc = getMSAccount();
-  const fromLine = document.getElementById('composeFromLine');
-  if(fromLine) fromLine.textContent = acc ? 'From: '+acc.username : '';
-
+  const a=agreements.find(x=>x.id===agrId);if(!a){showToast('Agreement not found');return}
+  if(!odConfig.clientId){showToast('⚠️ Set up OneDrive (Azure Client ID) in Admin Settings first');showSection('admin');return;}
+  if(!isMSSignedIn()){showToast('⚠️ Sign in to Microsoft first — Admin Settings → OneDrive → Connect');showSection('admin');return;}
+  _composeAgrId=agrId;const days=getDaysLeft(a.endDate);
+  const session=getSession();const users=getUsers();const loggedInUser=session?users.find(u=>u.id===session.userId):null;
+  const toList=[];if(a.toEmail1)toList.push(a.toEmail1.trim());if(a.toEmail2)toList.push(a.toEmail2.trim());if(a.notifEmail&&!toList.includes(a.notifEmail))toList.push(a.notifEmail.trim());if(loggedInUser?.email&&!toList.includes(loggedInUser.email))toList.push(loggedInUser.email);
+  document.getElementById('composeToEmail1').value=toList[0]||'';document.getElementById('composeToEmail2').value=toList[1]||'';
+  document.getElementById('composeCcEmails').value=a.ccEmails||'';
+  document.getElementById('composeSubject').value=`[Agreement Tracker] ${days<0?'EXPIRED':'Expiry Reminder'}: ${a.name} (${a.client})`;
+  const statusLabel=days<0?`EXPIRED ${Math.abs(days)} day(s) ago`:`expires in ${days} day(s)`;
+  const bodyText=['Dear Recipient,','','This is a reminder regarding the following agreement:','',`  Agreement : ${a.name}`,`  Client    : ${a.client}`,`  Start Date: ${a.startDate||'—'}`,`  End Date  : ${a.endDate||'—'}`,`  Status    : ${statusLabel}`,a.value?`  Value     : ₹${Number(a.value).toLocaleString('en-IN')}`:null,'','Please take the necessary action at the earliest.','','— Agreement Tracker'].filter(l=>l!==null).join('\n');
+  document.getElementById('composeBody').value=bodyText;
+  const btn=document.getElementById('composeSendBtn');btn.disabled=false;btn.textContent='📤 Send Email';
+  const acc=getMSAccount();const fromLine=document.getElementById('composeFromLine');if(fromLine)fromLine.textContent=acc?'From: '+acc.username:'';
   document.getElementById('emailComposeModal').classList.add('open');
 }
-
-function closeEmailModal(){
-  document.getElementById('emailComposeModal').classList.remove('open');
-  showComposeError('');
-  _composeAgrId = null;
-}
+function closeEmailModal(){document.getElementById('emailComposeModal').classList.remove('open');showComposeError('');_composeAgrId=null;}
 
 async function submitEmailCompose(){
   showComposeError('');
-  const to1 = document.getElementById('composeToEmail1').value.trim();
-  const to2 = document.getElementById('composeToEmail2').value.trim();
-  const ccRaw = document.getElementById('composeCcEmails').value.trim();
-  const subject = document.getElementById('composeSubject').value.trim();
-  const plainBody = document.getElementById('composeBody').value;
-
-  const rawTo = [to1, to2].filter(Boolean);
+  const to1=document.getElementById('composeToEmail1').value.trim();
+  const to2=document.getElementById('composeToEmail2').value.trim();
+  const ccRaw=document.getElementById('composeCcEmails').value.trim();
+  const subject=document.getElementById('composeSubject').value.trim();
+  const plainBody=document.getElementById('composeBody').value;
+  const rawTo=[to1,to2].filter(Boolean);
   if(rawTo.length===0){showComposeError('Enter at least one recipient email address in the TO field.');return;}
   if(!subject){showComposeError('Subject line cannot be empty.');return;}
-
-  // Validate email formats
-  const toList = [];
-  for(const e of rawTo){
-    if(!isValidEmail(e)){showComposeError('Invalid email address: "'+e+'" — please check and try again.');return;}
-    toList.push(e);
-  }
-  const ccList = ccRaw ? ccRaw.split(',').map(e=>e.trim()).filter(e=>{
-    if(!e) return false;
-    if(!isValidEmail(e)){showComposeError('Invalid CC email: "'+e+'"');return false;}
-    return true;
-  }) : [];
-
-  const htmlBody = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">'
-    + '<div style="background:#6D28D9;padding:18px 24px;border-radius:10px 10px 0 0">'
-    + '<h2 style="color:#fff;margin:0;font-size:1rem">Agreement Tracker - Email Reminder</h2>'
-    + '</div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px">'
-    + '<pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'
-    + plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    + '</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/>'
-    + '<p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker - Microsoft 365</p>'
-    + '</div></div>';
-
-  const btn = document.getElementById('composeSendBtn');
-  btn.disabled = true; btn.textContent = 'Sending...';
+  const toList=[];
+  for(const e of rawTo){if(!isValidEmail(e)){showComposeError('Invalid email address: "'+e+'" — please check and try again.');return;}toList.push(e);}
+  const ccList=ccRaw?ccRaw.split(',').map(e=>e.trim()).filter(e=>{if(!e)return false;if(!isValidEmail(e)){showComposeError('Invalid CC email: "'+e+'"');return false;}return true;}):[];
+  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#6D28D9;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">Agreement Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker - Microsoft 365</p></div></div>';
+  const btn=document.getElementById('composeSendBtn');btn.disabled=true;btn.textContent='Sending...';
   showToast('Sending via Microsoft 365...');
-
   try{
-    await sendEmailViaGraph(toList, ccList, subject, htmlBody);
-    showToast('✅ Email sent to: '+toList.join(', '));
-    showComposeError('');
-    closeEmailModal();
+    await sendEmailViaGraph(toList,ccList,subject,htmlBody);
+    showToast('✅ Email sent to: '+toList.join(', '));showComposeError('');closeEmailModal();
   }catch(e){
-    const msg = e.message || 'Unknown error sending email';
-    showComposeError(msg);
-    btn.disabled=false; btn.textContent='📤 Send Email';
-    console.error('[Email Error]', e);
+    const msg=e.message||'Unknown error sending email';
+    showComposeError(msg);btn.disabled=false;btn.textContent='📤 Send Email';
+    console.error('[Email Error]',e);
   }
 }
 
-async function sendReminderEmail(agrId, silent=false){
-  const a = agreements.find(x=>x.id===agrId);
-  if(!a) throw new Error('Agreement not found');
-  if(!isMSSignedIn()) throw new Error('Not signed in to Microsoft — connect OneDrive first');
-
-  const days = getDaysLeft(a.endDate);
-  const toList = getReminderRecipients(a);
-  if(toList.length===0) throw new Error('NO_EMAIL:'+a.name);
-  const ccList = [];
-  if(a.ccEmails) a.ccEmails.split(',').forEach(e=>{const t=e.trim();if(t&&isValidEmail(t))ccList.push(t)});
-  const statusLabel = days<0?'EXPIRED':'Expiry Reminder';
-  const subject = '[Agreement Tracker] '+statusLabel+': '+a.name+' ('+a.client+')';
-  const body = buildEmailBody(a, days);
-  if(!silent) showToast('Sending reminder via Microsoft 365...');
-  await sendEmailViaGraph(toList, ccList, subject, body);
-  if(!silent) showToast('Reminder sent to: '+toList.join(', '));
+async function sendReminderEmail(agrId,silent=false){
+  const a=agreements.find(x=>x.id===agrId);if(!a)throw new Error('Agreement not found');
+  if(!isMSSignedIn())throw new Error('Not signed in to Microsoft — connect OneDrive first');
+  const days=getDaysLeft(a.endDate);
+  const session=getSession();const users=getUsers();const loggedInUser=session?users.find(u=>u.id===session.userId):null;
+  const rawTo=[];
+  if(a.toEmail1&&isValidEmail(a.toEmail1))rawTo.push(a.toEmail1.trim());
+  if(a.toEmail2&&isValidEmail(a.toEmail2))rawTo.push(a.toEmail2.trim());
+  if(a.notifEmail&&isValidEmail(a.notifEmail)&&!rawTo.includes(a.notifEmail.trim()))rawTo.push(a.notifEmail.trim());
+  if(loggedInUser?.email&&isValidEmail(loggedInUser.email)&&!rawTo.includes(loggedInUser.email))rawTo.push(loggedInUser.email);
+  const toList=[...new Set(rawTo)];if(toList.length===0)throw new Error('NO_EMAIL:'+a.name);
+  const ccList=[];if(a.ccEmails)a.ccEmails.split(',').forEach(e=>{const t=e.trim();if(t&&isValidEmail(t))ccList.push(t)});
+  const statusLabel=days<0?'EXPIRED':'Expiry Reminder';
+  const subject='[Agreement Tracker] '+statusLabel+': '+a.name+' ('+a.client+')';
+  const body=buildEmailBody(a,days);
+  if(!silent)showToast('Sending reminder via Microsoft 365...');
+  await sendEmailViaGraph(toList,ccList,subject,body);
+  if(!silent)showToast('Reminder sent to: '+toList.join(', '));
 }
 
 async function sendAutoReminders(){
-  if(!isMSSignedIn()) return;
-  if(localStorage.getItem('autoEmailEnabled')!=='1') return;
-  const todayStr = new Date().toISOString().split('T')[0];
-  const sentLog = JSON.parse(localStorage.getItem('autoReminderLog')||'{}');
+  if(!isMSSignedIn())return;if(localStorage.getItem('autoEmailEnabled')!=='1')return;
+  const todayStr=new Date().toISOString().split('T')[0];
+  const sentLog=JSON.parse(localStorage.getItem('autoReminderLog')||'{}');
   for(const a of agreements){
-    const st = getStatus(a);
-    if(st==='renewed'||st==='active') continue;
-    const d = getDaysLeft(a.endDate);
-    if(st==='expiring'){
-      const a1=settings.alert1||60,a2=settings.alert2||30,a3=settings.alert3||7;
-      // send on threshold days (within 1 day to allow for missed runs)
-      const onThreshold=(d<=a3)||(d<=a2&&d>a3&&d===parseInt(a2))||(d<=a1&&d>a2&&d===parseInt(a1));
-      const broadThreshold=(d<=a3); // always send when very close
-      if(!onThreshold&&!broadThreshold) continue;
-    }
-    if(sentLog[a.id]===todayStr) continue; // already sent today
-    sentLog[a.id]=todayStr;
-    localStorage.setItem('autoReminderLog',JSON.stringify(sentLog));
-    try{ await sendReminderEmail(a.id,true); }catch(e){ console.warn('Auto reminder failed for',a.name,e.message); }
+    const st=getStatus(a);if(st==='renewed'||st==='active')continue;
+    const d=getDaysLeft(a.endDate);
+    if(st==='expiring'){const a1=settings.alert1||60,a2=settings.alert2||30,a3=settings.alert3||7;const broadThreshold=(d<=a3);if(!broadThreshold)continue;}
+    if(sentLog[a.id]===todayStr)continue;
+    sentLog[a.id]=todayStr;localStorage.setItem('autoReminderLog',JSON.stringify(sentLog));
+    try{await sendReminderEmail(a.id,true);}catch(e){console.warn('Auto reminder failed for',a.name,e.message);}
     await new Promise(r=>setTimeout(r,500));
   }
 }
 
 async function sendTestEmail(){
-  const statusEl = document.getElementById('emailSettingsStatus');
-  if(!isMSSignedIn()){
-    if(statusEl) statusEl.textContent = '⚠️ Not signed in to Microsoft. Connect OneDrive first.';
-    showToast('⚠️ Connect OneDrive to enable email');
-    return;
-  }
-  const acc = getMSAccount();
-  const to = acc ? [acc.username] : [];
-  if(to.length===0){if(statusEl) statusEl.textContent='Cannot determine your email address.'; return;}
-  if(statusEl) statusEl.textContent = '📨 Sending test email to '+to[0]+'…';
+  const statusEl=document.getElementById('emailSettingsStatus');
+  if(!isMSSignedIn()){if(statusEl)statusEl.textContent='⚠️ Not signed in to Microsoft. Connect OneDrive first.';showToast('⚠️ Connect OneDrive to enable email');return;}
+  const acc=getMSAccount();const to=acc?[acc.username]:[];
+  if(to.length===0){if(statusEl)statusEl.textContent='Cannot determine your email address.';return;}
+  if(statusEl)statusEl.textContent='📨 Sending test email to '+to[0]+'…';
   try{
-    await sendEmailViaGraph(to, [],
-      '[Agreement Tracker] Test Email',
-      '<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#6D28D9">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>'
-    );
-    if(statusEl) statusEl.textContent = '✅ Test email sent to '+to[0];
-    showToast('✅ Test email sent!');
-  }catch(e){
-    if(statusEl) statusEl.textContent = '❌ '+e.message;
-    showToast('❌ '+e.message);
-  }
+    await sendEmailViaGraph(to,[],'[Agreement Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#6D28D9">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
+    if(statusEl)statusEl.textContent='✅ Test email sent to '+to[0];showToast('✅ Test email sent!');
+  }catch(e){if(statusEl)statusEl.textContent='❌ '+e.message;showToast('❌ '+e.message);}
 }
 
-
 // ══════════════════════════════════════════════════
-// ADMIN CREDENTIALS UPDATE
+// ADMIN CREDENTIALS
 // ══════════════════════════════════════════════════
 function saveAdminCreds(){
-  const session = getSession();
-  if(!session || session.role !== 'admin'){showToast('⚠️ Admin access required');return;}
-  const newUser = (document.getElementById('adminNewUser').value||'').trim().toLowerCase();
-  const newEmail = (document.getElementById('adminNewEmail').value||'').trim();
-  const newPw = document.getElementById('adminNewPw').value;
-  const newPw2 = document.getElementById('adminNewPw2').value;
-  const errEl = document.getElementById('adminCredsError');
-  errEl.style.display='none';
-  if(!newUser){errEl.style.display='block';errEl.textContent='Username cannot be empty.';return;}
-  if(newPw && newPw.length < 4){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';return;}
-  if(newPw && newPw !== newPw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return;}
-  const users = getUsers();
-  const admin = users.find(u=>u.id==='admin');
-  if(!admin){errEl.style.display='block';errEl.textContent='Admin account not found.';return;}
-  // Check new username not taken by another user
-  if(newUser !== admin.username && users.find(u=>u.username===newUser)){
-    errEl.style.display='block';errEl.textContent='That username is already taken.';return;
-  }
-  admin.username = newUser;
-  if(newEmail) admin.email = newEmail;
-  admin.name = admin.name || 'Administrator';
-  if(newPw) admin.pwHash = hashPw(newPw);
-  saveUsers(users);
-  // Update the current session to reflect new username
-  const s = getSession();
-  if(s){ s.username = newUser; localStorage.setItem('agrSession', JSON.stringify(s)); }
-  document.getElementById('adminNewPw').value='';
-  document.getElementById('adminNewPw2').value='';
+  const session=getSession();if(!session||session.role!=='admin'){showToast('⚠️ Admin access required');return;}
+  const newUser=(document.getElementById('adminNewUser')?.value||'').trim().toLowerCase();
+  const newEmail=(document.getElementById('adminNewEmail')?.value||'').trim();
+  const newPw=document.getElementById('adminNewPw')?.value||'';
+  const newPw2=document.getElementById('adminNewPw2')?.value||'';
+  const errEl=document.getElementById('adminCredsError');if(errEl)errEl.style.display='none';
+  if(!newUser){if(errEl){errEl.style.display='block';errEl.textContent='Username cannot be empty.';}return;}
+  if(newPw&&newPw.length<4){if(errEl){errEl.style.display='block';errEl.textContent='Password must be at least 4 characters.';}return;}
+  if(newPw&&newPw!==newPw2){if(errEl){errEl.style.display='block';errEl.textContent='Passwords do not match.';}return;}
+  const users=getUsers();const admin=users.find(u=>u.id==='admin');if(!admin)return;
+  if(newUser!==admin.username&&users.find(u=>u.username===newUser)){if(errEl){errEl.style.display='block';errEl.textContent='That username is already taken.';}return;}
+  admin.username=newUser;if(newEmail)admin.email=newEmail;if(newPw)admin.pwHash=hashPw(newPw);
+  saveUsers(users);const s=getSession();if(s){s.username=newUser;localStorage.setItem('agrSession',JSON.stringify(s));}
   showToast('✅ Admin credentials updated!');
 }
-
 function loadAdminCredsUI(){
-  const users = getUsers();
-  const admin = users.find(u=>u.id==='admin');
-  if(!admin) return;
-  const el = document.getElementById('adminNewUser');
-  if(el && !el.value) el.value = admin.username || 'admin';
-  const em = document.getElementById('adminNewEmail');
-  if(em && !em.value) em.value = admin.email || '';
+  const users=getUsers();const admin=users.find(u=>u.id==='admin');if(!admin)return;
+  const el=document.getElementById('adminNewUser');if(el&&!el.value)el.value=admin.username||'admin';
+  const em=document.getElementById('adminNewEmail');if(em&&!em.value)em.value=admin.email||'';
 }
 
 // ══════════════════════════════════════════════════
 // ONEDRIVE — USER LIST SYNC
 // ══════════════════════════════════════════════════
-const OD_USERS_FILE = 'Agreement Tracker/users.json';
+const OD_USERS_FILE='Agreement Tracker/users.json';
 
 async function odSaveUsers(users){
-  if(!msalApp) return;
-  const token = await getAccessToken(false);
-  if(!token) return;
-  try{
-    const body = JSON.stringify(users, null, 2);
-    const r = await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_USERS_FILE)}:/content`,{
-      method:'PUT',
-      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body
-    });
-    if(!r.ok) throw new Error((await r.json()).error?.message || r.statusText);
-    console.log('[OD] Users saved to OneDrive');
-    updateUserSyncNote(true);
-  }catch(e){
-    console.warn('[OD] Users save failed:', e.message);
-    updateUserSyncNote(false, e.message);
-  }
+  if(!msalApp)return;const token=await getAccessToken(false);if(!token)return;
+  try{const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_USERS_FILE)}:/content`,{method:'PUT',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(users,null,2)});if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);updateUserSyncNote(true);}
+  catch(e){console.warn('[OD] Users save failed:',e.message);updateUserSyncNote(false,e.message);}
 }
 
 async function odLoadUsers(){
-  if(!msalApp) return;
-  const token = await getAccessToken(false);
-  if(!token) return;
+  if(!msalApp)return;const token=await getAccessToken(false);if(!token)return;
   try{
-    const r = await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_USERS_FILE)}:/content`,{
-      headers:{'Authorization':'Bearer '+token}
-    });
-    if(r.status === 404){
-      // First time — push local users to OneDrive
-      await odSaveUsers(getUsers());
-      return;
+    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_USERS_FILE)}:/content`,{headers:{'Authorization':'Bearer '+token}});
+    if(r.status===404){await odSaveUsers(getUsers());return;}
+    if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
+    const cloudUsers=await r.json();
+    if(Array.isArray(cloudUsers)&&cloudUsers.length>0){
+      const hasAdmin=cloudUsers.find(u=>u.id==='admin');const localUsers=JSON.parse(localStorage.getItem('agrUsers')||'[]');
+      let merged=cloudUsers;if(!hasAdmin){const localAdmin=localUsers.find(u=>u.id==='admin');if(localAdmin)merged=[localAdmin,...cloudUsers.filter(u=>u.id!=='admin')];}
+      localStorage.setItem('agrUsers',JSON.stringify(merged));renderUserList();updateUserSyncNote(true);
     }
-    if(!r.ok) throw new Error((await r.json()).error?.message || r.statusText);
-    const cloudUsers = await r.json();
-    if(Array.isArray(cloudUsers) && cloudUsers.length > 0){
-      // Merge: keep cloud as authoritative, preserve local-only admin if not in cloud
-      const hasAdmin = cloudUsers.find(u=>u.id==='admin');
-      const localUsers = JSON.parse(localStorage.getItem('agrUsers') || '[]');
-      let merged = cloudUsers;
-      if(!hasAdmin){
-        const localAdmin = localUsers.find(u=>u.id==='admin');
-        if(localAdmin) merged = [localAdmin, ...cloudUsers.filter(u=>u.id!=='admin')];
-      }
-      localStorage.setItem('agrUsers', JSON.stringify(merged));
-      renderUserList();
-      updateUserSyncNote(true);
-      console.log('[OD] Users loaded from OneDrive:', merged.length);
-    }
-  }catch(e){
-    console.warn('[OD] Users load failed:', e.message);
-    updateUserSyncNote(false, e.message);
-  }
+  }catch(e){console.warn('[OD] Users load failed:',e.message);updateUserSyncNote(false,e.message);}
 }
 
-function updateUserSyncNote(ok, errMsg){
-  const el = document.getElementById('userSyncNote');
-  const txt = document.getElementById('userSyncNoteText');
-  if(!el || !txt) return;
-  if(ok){
-    el.className = 'od-sync-note';
-    txt.textContent = '✅ User list synced via OneDrive — not stored on individual devices';
-  } else {
-    el.className = 'od-sync-note warn';
-    txt.textContent = '⚠️ OneDrive not connected — users stored locally. Connect OneDrive to sync across devices.'+(errMsg?' ('+errMsg+')':'');
-  }
+function updateUserSyncNote(ok,errMsg){
+  const el=document.getElementById('userSyncNote');const txt=document.getElementById('userSyncNoteText');if(!el||!txt)return;
+  if(ok){el.className='od-sync-note';txt.textContent='✅ User list synced via OneDrive — not stored on individual devices';}
+  else{el.className='od-sync-note warn';txt.textContent='⚠️ OneDrive not connected — users stored locally. Connect OneDrive to sync across devices.'+(errMsg?' ('+errMsg+')':'');}
 }
 
 // ══════════════════════════════════════════════════
-// EMAIL HELPERS — VALIDATION + ROBUST BODY
+// EMAIL HELPERS
 // ══════════════════════════════════════════════════
 function isValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e||'').trim())}
+function showComposeError(msg){const el=document.getElementById('composeError');if(el){el.textContent=msg;el.style.display=msg?'block':'none';}if(msg)showToast('❌ '+msg.slice(0,60));}
 
-function validateEmailList(list){
-  return list.filter(e=>e&&e.trim()).map(e=>e.trim()).filter(e=>{
-    if(!isValidEmail(e)){showToast('⚠️ Invalid email address: '+e);return false;}
-    return true;
-  });
-}
-
-function showComposeError(msg){
-  const el = document.getElementById('composeError');
-  if(el){el.textContent = msg; el.style.display = msg?'block':'none';}
-  if(msg) showToast('❌ '+msg.slice(0,60));
-}
-
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
 (function(){const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);}else{document.getElementById("loginScreen").style.display="flex";}})();
 
 openDB().then(async()=>{
   agreements=await dbGetAll('agreements');
-
-  // Init OneDrive / MSAL
   if(odConfig.clientId){
     if(initMSAL()){
-      const redirectHandled = await handleMSALRedirect(); // handles post-login redirect
-      // If already logged in and we didn't just handle a redirect, load from OneDrive
-      if (!redirectHandled) {
-        const accounts=msalApp.getAllAccounts();
-        if(accounts.length>0){
-          odAccount=accounts[0];
-          setSyncStatus('connected',`Connected · ${odAccount.username}`);
-          await odLoadFromOneDrive(false);
-          odLoadUsers().catch(e=>console.warn('OD users load on start:',e));
-        }
-      }
+      const redirectHandled=await handleMSALRedirect();
+      if(!redirectHandled){const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Connected · ${odAccount.username}`);await odLoadFromOneDrive(false);odLoadUsers().catch(e=>console.warn('OD users load on start:',e));}}
     }
   }
-
-  renderAgreements();
-  refreshOdStatusUI();
-  setTimeout(sendAutoReminders, 2000);
-
+  renderAgreements();refreshOdStatusUI();
+  setTimeout(sendAutoReminders,2000);
   setTimeout(()=>{
     if('Notification'in window&&Notification.permission==='granted'){
-      agreements.forEach(a=>{
-        if(getStatus(a)==='renewed')return;
-        const d=getDaysLeft(a.endDate);
-        if(d<0||d<=settings.alert3)new Notification(d<0?'❌ Expired':'⚠️ Urgent',{body:`"${a.name}" — ${d<0?'expired '+Math.abs(d)+' days ago':'expires in '+d+' day(s)'}`});
-      });
+      agreements.forEach(a=>{if(getStatus(a)==='renewed')return;const d=getDaysLeft(a.endDate);if(d<0||d<=settings.alert3)new Notification(d<0?'❌ Expired':'⚠️ Urgent',{body:`"${a.name}" — ${d<0?'expired '+Math.abs(d)+' days ago':'expires in '+d+' day(s)'}`});});
     }
   },1200);
 }).catch(()=>showToast('⚠️ Storage error. Try refreshing.'));
