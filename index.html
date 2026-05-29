@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
-  <meta name="theme-color" content="#6D28D9"/>
+  <meta name="theme-color" content="#f8a006"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="Agreement Tracker"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <title>Agreement Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,11 +20,11 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --primary:#6D28D9;--primary-dark:#5B21B6;--primary-light:#EDE9FE;
+      --primary:#f8a006;--primary-dark:#c2410c;--primary-light:#fff7ed;
       --success:#059669;--success-bg:#ecfdf5;
       --warning:#d97706;--warning-bg:#fffbeb;
       --danger:#dc2626;--danger-bg:#fef2f2;
-      --renewed:#7c3aed;--renewed-bg:#f5f3ff;
+      --renewed:#f59e0b;--renewed-bg:#fff7ed;
       --bg:#f0f4f8;--card:#fff;--text:#0f172a;--muted:#64748b;
       --border:#e2e8f0;--border-light:#f1f5f9;--radius:14px;
       --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
@@ -31,7 +34,7 @@
     body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px}
 
     /* HEADER */
-    .header{background:linear-gradient(135deg,#6D28D9 0%,#5B21B6 100%);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(109,40,217,.35)}
+    .header{background:linear-gradient(135deg,#f8a006 0%,#c2410c 100%);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(109,40,217,.35)}
     .header h1{font-size:1.05rem;font-weight:800;letter-spacing:-.01em}
     .header-icons{display:flex;gap:6px;align-items:center}
     .icon-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;width:34px;height:34px;border-radius:10px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
@@ -110,7 +113,7 @@
     .dot-old{background:#9ca3af}.dot-current{background:var(--primary)}.dot-new{background:var(--success)}
     .chain-link{flex:1;font-weight:500}
     .chain-date{color:var(--muted);font-size:.7rem}
-    .btn-view-ver{background:#EDE9FE;color:var(--primary);border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
+    .btn-view-ver{background:#fff7ed;color:var(--primary);border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
 
     /* ATTACHMENTS */
     .attachments-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
@@ -122,9 +125,9 @@
     .file-size{font-size:.68rem;color:var(--muted)}
     .file-actions{display:flex;gap:5px;flex-shrink:0}
     .btn-view,.btn-del-file{border:none;border-radius:6px;padding:4px 9px;font-size:.72rem;font-weight:600;cursor:pointer}
-    .btn-view{background:#EDE9FE;color:var(--primary)}
+    .btn-view{background:#fff7ed;color:var(--primary)}
     .btn-del-file{background:#fee2e2;color:var(--danger)}
-    .btn-add-file{margin-top:6px;display:flex;align-items:center;gap:6px;background:#EDE9FE;color:var(--primary);border:1.5px dashed var(--primary);border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:600;cursor:pointer;width:100%;justify-content:center}
+    .btn-add-file{margin-top:6px;display:flex;align-items:center;gap:6px;background:#fff7ed;color:var(--primary);border:1.5px dashed var(--primary);border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:600;cursor:pointer;width:100%;justify-content:center}
 
     /* CARD ACTIONS */
     .card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light);flex-wrap:wrap}
@@ -142,7 +145,7 @@
     .empty-state p{font-size:.9rem;line-height:1.7}
 
     /* FAB */
-    .fab{position:fixed;bottom:24px;right:20px;background:linear-gradient(135deg,#6D28D9,#5B21B6);color:#fff;border:none;width:58px;height:58px;border-radius:18px;font-size:1.5rem;cursor:pointer;box-shadow:0 6px 20px rgba(26,86,219,.5);display:flex;align-items:center;justify-content:center;z-index:200;transition:all .2s}
+    .fab{position:fixed;bottom:24px;right:20px;background:linear-gradient(135deg,#f8a006,#c2410c);color:#fff;border:none;width:58px;height:58px;border-radius:18px;font-size:1.5rem;cursor:pointer;box-shadow:0 6px 20px rgba(26,86,219,.5);display:flex;align-items:center;justify-content:center;z-index:200;transition:all .2s}
     .fab:hover{box-shadow:0 8px 28px rgba(26,86,219,.65);transform:translateY(-2px)}
     .fab:active{transform:scale(.93)}
 
@@ -177,7 +180,7 @@
     .gst-field.visible{display:block}
 
     /* RENEWAL NOTICE */
-    .renewal-notice{background:#f8f4ff;border:1.5px solid #c4b5fd;border-radius:10px;padding:12px;margin-bottom:14px;font-size:.83rem;color:#5b21b6;line-height:1.5}
+    .renewal-notice{background:#f8f4ff;border:1.5px solid #fdba74;border-radius:10px;padding:12px;margin-bottom:14px;font-size:.83rem;color:#c2410c;line-height:1.5}
     .renewal-notice strong{display:block;margin-bottom:4px}
 
     /* EMAIL COMPOSE MODAL */
@@ -204,7 +207,7 @@
 
     /* DROP ZONE */
     .drop-zone{border:2px dashed var(--border);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.85rem}
-    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:#EDE9FE;color:var(--primary)}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:var(--primary);background:#fff7ed;color:var(--primary)}
     .drop-zone .dz-icon{font-size:1.8rem;margin-bottom:5px}
     .pending-file{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:7px 10px;margin-top:6px}
     .pending-file .pf-name{flex:1;font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -212,16 +215,16 @@
     .pf-remove{background:#fee2e2;color:var(--danger);border:none;border-radius:5px;padding:3px 8px;font-size:.72rem;cursor:pointer}
 
     /* BUTTONS */
-    .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#6D28D9,#5B21B6);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 2px 8px rgba(109,40,217,.35);letter-spacing:.01em}
+    .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#f8a006,#c2410c);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 2px 8px rgba(109,40,217,.35);letter-spacing:.01em}
     .btn-primary:hover{box-shadow:0 4px 16px rgba(26,86,219,.5);transform:translateY(-1px)}
     .btn-primary:active{background:var(--primary-dark);transform:scale(.98)}
     .btn-secondary{width:100%;padding:12px;background:var(--border-light);color:var(--muted);border:1.5px solid var(--border);border-radius:12px;font-size:.92rem;font-weight:600;cursor:pointer;margin-top:8px;transition:all .2s}
     .btn-secondary:hover{background:var(--border);color:var(--text)}
-    .btn-renew-action{width:100%;padding:13px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;box-shadow:0 2px 8px rgba(124,58,237,.35)}
+    .btn-renew-action{width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#f8a006);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;box-shadow:0 2px 8px rgba(124,58,237,.35)}
 
     /* HISTORY MODAL */
     .history-card{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:10px;border-left:4px solid var(--border)}
-    .history-card.is-current{border-left-color:var(--primary);background:#EDE9FE}
+    .history-card.is-current{border-left-color:var(--primary);background:#fff7ed}
     .history-card.is-expired{border-left-color:var(--danger)}
     .history-card.is-renewed{border-left-color:var(--renewed)}
     .hc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
@@ -264,7 +267,7 @@
     .wizard-step-body{font-size:.8rem;color:#374151;line-height:1.7;padding-left:32px}
     .wizard-step-body code{background:#e5e7eb;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.82rem;color:var(--primary)}
     .wizard-step-body b{color:var(--text)}
-    .od-section{border:1.5px solid #c4b5fd;border-radius:10px;padding:14px;margin-top:4px;background:#faf5ff}
+    .od-section{border:1.5px solid #fdba74;border-radius:10px;padding:14px;margin-top:4px;background:#faf5ff}
     .od-section-title{font-size:.78rem;font-weight:700;color:var(--renewed);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
     .od-status-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e9d5ff}
     .od-status-label{font-weight:600;font-size:.9rem}
@@ -277,8 +280,8 @@
     .preview-img{width:100%;max-height:62vh;object-fit:contain;border-radius:8px}
 
     /* BULK UPLOAD */
-    .bulk-drop{border:2px dashed #a5b4fc;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#f5f3ff;color:#5b21b6}
-    .bulk-drop:hover,.bulk-drop.drag-over{border-color:var(--primary);background:#EDE9FE;color:var(--primary)}
+    .bulk-drop{border:2px dashed #fdba74;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fff7ed;color:#c2410c}
+    .bulk-drop:hover,.bulk-drop.drag-over{border-color:var(--primary);background:#fff7ed;color:var(--primary)}
     .bulk-drop .bd-icon{font-size:2.4rem;margin-bottom:8px}
     .template-btn{display:inline-flex;align-items:center;gap:6px;background:#d1fae5;color:#065f46;border:none;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:14px;width:100%;justify-content:center}
 
@@ -302,10 +305,10 @@
     .report-btn:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
     .report-btn:active{transform:scale(.97)}
     .btn-excel{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff}
-    .btn-upload{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff}
+    .btn-upload{background:linear-gradient(135deg,#f59e0b,#f8a006);color:#fff}
 
     /* ── LOGIN SCREEN ────────────── */
-    #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#4C1D95 0%,#5B21B6 60%,#2E1065 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px}
+    #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#c2410c 0%,#c2410c 60%,#2E1065 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px}
     .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
     .login-logo{text-align:center;margin-bottom:24px}
     .login-logo .logo-icon{font-size:3rem;display:block;margin-bottom:8px}
@@ -328,10 +331,10 @@
     .user-name{font-weight:700;font-size:.88rem}
     .user-meta{font-size:.73rem;color:var(--muted)}
     .user-role-badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase}
-    .role-admin{background:#EDE9FE;color:#4C1D95}
+    .role-admin{background:#fff7ed;color:#c2410c}
     .role-user{background:#d1fae5;color:#065f46}
     .btn-del-user{background:#fee2e2;color:#b91c1c;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:700;cursor:pointer}
-    .add-user-form{background:#f0f9ff;border:1.5px solid #DDD6FE;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
+    .add-user-form{background:#f0f9ff;border:1.5px solid #fdba74;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
     .add-user-form .form-group{margin-bottom:10px}
     .add-user-form label{font-size:.78rem;font-weight:600;display:block;margin-bottom:4px}
     .add-user-form input,.add-user-form select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;outline:none}
@@ -343,7 +346,7 @@
     #appShell{display:none}
     .layout-row{display:flex;height:100vh;overflow:hidden}
     body{padding-bottom:0!important;min-height:unset}
-    .sidebar{width:220px;min-width:220px;height:100vh;background:linear-gradient(180deg,#2E1065 0%,#4C1D95 100%);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;position:relative;z-index:100}
+    .sidebar{width:220px;min-width:220px;height:100vh;background:#c2410c;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;position:relative;z-index:100}
     .sidebar-logo{padding:18px 14px 14px;border-bottom:1px solid rgba(255,255,255,.18)}
     .sidebar-logo h2{color:#fff;font-size:.88rem;font-weight:800;letter-spacing:-.01em}
     .sidebar-logo p{color:rgba(255,255,255,.55);font-size:.7rem;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -388,12 +391,12 @@
     .login-divider{text-align:center;font-size:.75rem;color:var(--muted);margin:10px 0}
     .approve-btn{background:#d1fae5;color:#065f46;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .reject-btn{background:#fee2e2;color:#b91c1c;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
-    .change-pw-btn{background:#EDE9FE;color:var(--primary);border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .change-pw-btn{background:#fff7ed;color:var(--primary);border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .pending-section{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:14px}
     .pending-section-title{font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .pending-badge{background:#ef4444;color:#fff;border-radius:10px;font-size:.62rem;font-weight:700;padding:2px 7px}
     .user-item.pending{background:#fef9ec;border-color:#fcd34d}
-    .pw-inline-form{background:#f0f9ff;border:1.5px solid #DDD6FE;border-radius:9px;padding:12px;margin-top:8px;display:none}
+    .pw-inline-form{background:#f0f9ff;border:1.5px solid #fdba74;border-radius:9px;padding:12px;margin-top:8px;display:none}
     .pw-inline-form .form-group{margin-bottom:8px}
     /* Change-pw modal */
     #changePwModal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:600;align-items:center;justify-content:center;padding:16px}
@@ -408,17 +411,16 @@
 
     /* PDKA LOGO */
     .pdka-logo-block{text-align:center;margin-bottom:22px}
-    .pdka-logo-mark{display:inline-flex;align-items:center;justify-content:center;gap:0;margin-bottom:8px}
-    .pdka-box{width:44px;height:44px;background:linear-gradient(135deg,#6D28D9,#5B21B6);border-radius:10px 4px 10px 4px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(109,40,217,.40)}
+    .pdka-logo-mark{display:inline-flex;align-items:center;justify-content:center;gap:0;margin-bottom:8px;background:#fff;border-radius:12px;padding:10px 14px}
+    .pdka-box{width:44px;height:44px;background:linear-gradient(135deg,#f8a006,#c2410c);border-radius:10px 4px 10px 4px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(109,40,217,.40)}
     .pdka-box span{color:#fff;font-size:1.3rem;font-weight:900;letter-spacing:-.04em}
     .pdka-brand-name{font-size:1.25rem;font-weight:900;color:var(--primary);letter-spacing:.02em;margin:0}
     .pdka-sub{font-size:.72rem;color:var(--muted);margin-top:2px;font-weight:500;letter-spacing:.04em}
     .pdka-login-tagline{font-size:.78rem;color:var(--muted);margin-top:2px}
-    .sidebar-pdka{display:flex;align-items:center;gap:9px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.18)}
-    .sidebar-pdka-box{width:32px;height:32px;background:rgba(255,255,255,.22);border-radius:7px 3px 7px 3px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-    .sidebar-pdka-box span{color:#fff;font-size:.85rem;font-weight:900}
-    .sidebar-pdka-text h2{color:#fff;font-size:.85rem;font-weight:800;letter-spacing:.01em;line-height:1.1}
-    .sidebar-pdka-text p{color:rgba(255,255,255,.55);font-size:.68rem;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .sidebar-pdka{display:flex;align-items:center;justify-content:center;padding:14px 12px 14px;background:#fff;border-bottom:1px solid rgba(0,0,0,.08)}
+    .sidebar-pdka-box{width:100%;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:10px;padding:6px 8px;box-shadow:none}
+    .sidebar-logo-img{width:100%;max-width:168px;height:auto;object-fit:contain;display:block}
+    .brand-logo{width:100%;max-width:220px;height:auto;object-fit:contain;display:block}
 
     /* DASHBOARD PIE CHART */
     .dash-pie-wrap{padding:0 16px 16px;display:flex;justify-content:center}
@@ -452,9 +454,8 @@
     }
     body{background:var(--bg)}
     .topbar{background:#fff;border-bottom:1px solid rgba(109,40,217,.12);box-shadow:0 1px 8px rgba(109,40,217,.08)}
-    .topbar-title{font-size:.95rem;font-weight:800;background:linear-gradient(135deg,#6D28D9,#9333EA);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .topbar-title{font-size:.95rem;font-weight:800;background:linear-gradient(135deg,#f8a006,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .sidebar{box-shadow:4px 0 24px rgba(0,0,0,.18)}
-    .sidebar-pdka-box{background:rgba(255,255,255,.25);border-radius:8px 3px 8px 3px}
     .nav-item:hover{background:rgba(255,255,255,.16);transform:translateX(2px)}
     .nav-item.active{background:rgba(255,255,255,.25);border-left:3px solid rgba(255,255,255,.8);padding-left:9px;box-shadow:0 2px 10px rgba(0,0,0,.2)}
     .sync-chip{border-radius:10px;transition:opacity .2s}
@@ -472,18 +473,18 @@
     .status-badge{font-size:.62rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
     .admin-panel{border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid rgba(109,40,217,.07)}
     .admin-panel-title{font-size:.72rem;font-weight:800;letter-spacing:.07em;border-bottom:1px solid rgba(109,40,217,.08)}
-    .btn-primary{background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(109,40,217,.28);letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
+    .btn-primary{background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(109,40,217,.28);letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
     .btn-primary:hover{box-shadow:0 6px 18px rgba(109,40,217,.38);transform:translateY(-1px)}
     .btn-primary:active{transform:scale(.97)}
-    .btn-login{background:linear-gradient(135deg,#6D28D9,#9333EA);border:none;box-shadow:0 4px 14px rgba(109,40,217,.35);letter-spacing:.02em}
-    .btn-login:hover{background:linear-gradient(135deg,#5B21B6,#7C3AED);box-shadow:0 6px 18px rgba(109,40,217,.45)}
-    .template-btn{background:#F5F3FF;color:#6D28D9;border:1.5px solid #DDD6FE;border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:10px;display:inline-block}
-    .template-btn:hover{background:#EDE9FE;border-color:#C4B5FD}
-    .search-bar input{border:1.5px solid #DDD6FE;border-radius:12px;padding:11px 16px;font-size:.88rem;transition:border-color .2s,box-shadow .2s;font-family:inherit}
-    .search-bar input:focus{border-color:#6D28D9;box-shadow:0 0 0 3px rgba(109,40,217,.12);outline:none}
+    .btn-login{background:linear-gradient(135deg,#f8a006,#f59e0b);border:none;box-shadow:0 4px 14px rgba(109,40,217,.35);letter-spacing:.02em}
+    .btn-login:hover{background:linear-gradient(135deg,#c2410c,#f59e0b);box-shadow:0 6px 18px rgba(109,40,217,.45)}
+    .template-btn{background:#fff7ed;color:#f8a006;border:1.5px solid #fdba74;border-radius:10px;padding:10px 16px;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;margin-bottom:10px;display:inline-block}
+    .template-btn:hover{background:#fff7ed;border-color:#fdba74}
+    .search-bar input{border:1.5px solid #fdba74;border-radius:12px;padding:11px 16px;font-size:.88rem;transition:border-color .2s,box-shadow .2s;font-family:inherit}
+    .search-bar input:focus{border-color:#f8a006;box-shadow:0 0 0 3px rgba(109,40,217,.12);outline:none}
     .filter-btn{background:#fff;border:1.5px solid #E9E4F5;color:var(--muted);border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-    .filter-btn:hover{background:#F5F3FF;border-color:#C4B5FD;color:#6D28D9}
-    .filter-btn.active{background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(109,40,217,.25)}
+    .filter-btn:hover{background:#fff7ed;border-color:#fdba74;color:#f8a006}
+    .filter-btn.active{background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(109,40,217,.25)}
     .modal-box{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.28)}
     .modal-header{border-radius:22px 22px 0 0}
     .login-card{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.32)}
@@ -501,12 +502,98 @@
     .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0;transition:background .3s}
     .sync-dot.connected{background:#34d399}
     .sync-dot.error{background:#f87171}
-    .fab{background:linear-gradient(135deg,#6D28D9,#9333EA);box-shadow:0 6px 20px rgba(109,40,217,.45);border-radius:18px;width:52px;height:52px}
+    .fab{background:linear-gradient(135deg,#f8a006,#f59e0b);box-shadow:0 6px 20px rgba(109,40,217,.45);border-radius:18px;width:52px;height:52px}
     .fab:hover{box-shadow:0 8px 26px rgba(109,40,217,.55);transform:translateY(-2px) scale(1.05)}
     ::-webkit-scrollbar{width:5px;height:5px}
     ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:#DDD6FE;border-radius:6px}
-    ::-webkit-scrollbar-thumb:hover{background:#C4B5FD}
+    ::-webkit-scrollbar-thumb{background:#fdba74;border-radius:6px}
+    ::-webkit-scrollbar-thumb:hover{background:#fdba74}
+
+    /* ── FINANCE DASHBOARD (SuperDesign) ─────────────────── */
+    .fd-dashboard{--fd-bg:#f8f7f4;--fd-primary:#ff6b00;--fd-primary-light:#ffebd6;--fd-muted:#71717a;--fd-border:#e4e4e7;padding:20px 16px 100px;max-width:1400px;margin:0 auto}
+    .fd-top-row{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:20px}
+    .fd-card{background:#fff;border-radius:2rem;padding:22px 24px;box-shadow:0 1px 4px rgba(0,0,0,.06);flex:1;min-width:260px}
+    .fd-expiring-card{display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:transform .2s,box-shadow .2s}
+    .fd-expiring-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,107,0,.12)}
+    .fd-expiring-left{display:flex;align-items:center;gap:12px}
+    .fd-icon-wrap{width:40px;height:40px;border-radius:50%;background:#fff7ed;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+    .fd-card-label{font-weight:600;font-size:1rem;color:var(--text)}
+    .fd-mini-chart{width:120px;height:44px}
+    .fd-total-card{display:flex;align-items:center;justify-content:space-between}
+    .fd-total-left{display:flex;align-items:center;gap:14px}
+    .fd-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f8a006,#c2410c);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.1rem;flex-shrink:0}
+    .fd-muted{font-size:.8rem;color:var(--fd-muted)}
+    .fd-big{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+    .fd-btn-primary{background:var(--fd-primary);color:#fff;border:none;border-radius:1rem;padding:10px 22px;font-weight:700;font-size:.85rem;cursor:pointer;box-shadow:0 4px 14px rgba(255,107,0,.25);transition:transform .15s}
+    .fd-btn-primary:hover{transform:scale(1.02)}
+    .fd-btn-primary:active{transform:scale(.97)}
+    .fd-progress-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .fd-progress-bar{height:10px;background:#f4f4f5;border-radius:999px;overflow:hidden;margin-bottom:10px}
+    .fd-progress-fill{height:100%;background:var(--fd-primary);border-radius:999px;transition:width 1s ease}
+    .fd-progress-foot{display:flex;justify-content:space-between;font-size:.82rem}
+    .fd-grid{display:grid;grid-template-columns:1fr;gap:20px}
+    @media(min-width:1024px){.fd-grid{grid-template-columns:2fr 1fr}}
+    .fd-main-col{display:flex;flex-direction:column;gap:20px}
+    .fd-chart-card{padding:28px 28px 20px;border-radius:2.5rem;position:relative}
+    .fd-chart-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+    .fd-chart-title{font-size:1.15rem;font-weight:800}
+    .fd-chart-wrap{height:260px;position:relative}
+    .fd-bottom-row{display:grid;grid-template-columns:1fr;gap:20px}
+    @media(min-width:768px){.fd-bottom-row{grid-template-columns:1fr 1fr}}
+    .fd-promo{background:linear-gradient(180deg,#fb923c,#ea580c);border-radius:2.5rem;padding:28px;min-height:320px;position:relative;overflow:hidden;color:#fff}
+    .fd-promo-brand{font-size:1.4rem;font-weight:900;letter-spacing:-.04em;margin-bottom:16px}
+    .fd-promo-title{font-size:clamp(2.5rem,8vw,4.5rem);font-weight:900;line-height:.85;letter-spacing:-.04em}
+    .fd-promo-card{position:absolute;right:16px;bottom:24px;width:min(180px,42%);aspect-ratio:1.58;background:rgba(255,255,255,.2);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.35);border-radius:1rem;padding:14px;transform:rotate(-5deg)}
+    .fd-invoices-card{border-radius:2.5rem;padding:28px}
+    .fd-invoices-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .fd-invoices-title{font-size:1.15rem;font-weight:800}
+    .fd-table{width:100%;border-collapse:collapse;font-size:.82rem}
+    .fd-table th{text-align:left;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fd-muted);padding:0 0 10px;border-bottom:1px solid var(--fd-border);font-weight:600}
+    .fd-table th:last-child{text-align:right}
+    .fd-table td{padding:14px 0;border-bottom:1px solid rgba(228,228,231,.5);vertical-align:middle}
+    .fd-table tr:last-child td{border-bottom:none}
+    .fd-table-user{display:flex;align-items:center;gap:10px}
+    .fd-table-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;flex-shrink:0}
+    .fd-table-name{font-weight:700;font-size:.82rem}
+    .fd-table-email{font-size:.65rem;color:var(--fd-muted)}
+    .fd-side-col{display:flex;flex-direction:column;gap:20px}
+    .fd-wallet-card{border-radius:2.5rem;padding:28px}
+    .fd-wallet-title{font-size:1.15rem;font-weight:800;margin-bottom:18px}
+    .fd-wallet-visual{background:linear-gradient(135deg,#fb923c,#ea580c);border-radius:1.5rem;aspect-ratio:1.6;padding:22px;color:#fff;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;margin-bottom:18px}
+    .fd-wallet-visual::before,.fd-wallet-visual::after{content:'';position:absolute;border-radius:50%;background:rgba(255,255,255,.12);filter:blur(20px)}
+    .fd-wallet-visual::before{width:120px;height:120px;top:-30px;right:-20px}
+    .fd-wallet-visual::after{width:90px;height:90px;bottom:-20px;left:-10px}
+    .fd-wallet-visual>*{position:relative;z-index:1}
+    .fd-wallet-btns{display:flex;gap:10px}
+    .fd-wallet-btns button{flex:1;padding:14px;border-radius:1rem;font-weight:700;font-size:.82rem;cursor:pointer;border:none}
+    .fd-wallet-btns .fd-wb-primary{background:var(--fd-primary);color:#fff;box-shadow:0 4px 12px rgba(255,107,0,.3)}
+    .fd-wallet-btns .fd-wb-muted{background:#f4f4f5;color:var(--text)}
+    .fd-activities-card{border-radius:2.5rem;padding:28px}
+    .fd-activities-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .fd-activity-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light)}
+    .fd-activity-item:last-child{border-bottom:none}
+    .fd-activity-left{display:flex;align-items:center;gap:10px;min-width:0}
+    .fd-activity-meta{min-width:0}
+    .fd-activity-name{font-weight:700;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .fd-activity-sub{font-size:.65rem;color:var(--fd-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+    .fd-activity-amt{font-size:.75rem;font-weight:800;text-align:right}
+    .fd-activity-amt.warn{color:var(--warning)}
+    .fd-activity-amt.danger{color:var(--danger)}
+    .fd-activity-date{font-size:.65rem;color:var(--fd-muted);text-align:right}
+    .fd-actions-card{border-radius:2.5rem;padding:28px}
+    .fd-stat-pills{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}
+    .fd-stat-pill{background:#f8f7f4;border-radius:12px;padding:12px;text-align:center;cursor:pointer;transition:background .2s,transform .15s;border:2px solid transparent}
+    .fd-stat-pill:hover{background:#fff7ed}
+    .fd-stat-pill.selected{border-color:var(--fd-primary);background:#fff7ed}
+    .fd-stat-pill .n{font-size:1.4rem;font-weight:900;line-height:1}
+    .fd-stat-pill .l{font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fd-muted);font-weight:700;margin-top:4px}
+    .fd-stat-pill.p-active .n{color:var(--success)}
+    .fd-stat-pill.p-expiring .n{color:var(--warning)}
+    .fd-stat-pill.p-expired .n{color:var(--danger)}
+    .fd-stat-pill.p-renewed .n{color:var(--renewed)}
+    .fd-link-btn{background:none;border:none;color:var(--fd-primary);font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:2px}
+    .fd-empty{padding:20px;text-align:center;color:var(--fd-muted);font-size:.82rem}
+    .sec-dashboard .dash-quick-panel{padding:0 16px 12px}
   </style>
 </head>
 <body>
@@ -528,10 +615,8 @@
     <div id="loginView">
       <div class="pdka-logo-block">
         <div class="pdka-logo-mark">
-          <div class="pdka-box"><span>PD</span></div>
+          <img src="./logo.png" alt="Kumar &amp; Associates" class="brand-logo" />
         </div>
-        <p class="pdka-brand-name">PDKA</p>
-        <p class="pdka-sub">Agreement Tracker</p>
         <p class="pdka-login-tagline">Sign in to continue</p>
       </div>
       <div class="login-error" id="loginError"></div>
@@ -551,10 +636,8 @@
     <div id="signupView" style="display:none">
       <div class="pdka-logo-block">
         <div class="pdka-logo-mark">
-          <div class="pdka-box"><span>PD</span></div>
+          <img src="./logo.png" alt="Kumar &amp; Associates" class="brand-logo" />
         </div>
-        <p class="pdka-brand-name">PDKA</p>
-        <p class="pdka-sub">Request Account Access</p>
         <p class="pdka-login-tagline">Admin will approve your account</p>
       </div>
       <div class="login-error" id="signupError"></div>
@@ -572,7 +655,7 @@
     <!-- ── FORGOT PASSWORD VIEW ── -->
     <div id="forgotView" style="display:none">
       <div class="login-logo"><span class="logo-icon">🔑</span><h2>Forgot Password?</h2><p>Contact your administrator</p></div>
-      <div style="background:#EDE9FE;border:1.5px solid #DDD6FE;border-radius:10px;padding:16px;font-size:.83rem;color:#4C1D95;line-height:1.7;margin-bottom:16px">
+      <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:16px;font-size:.83rem;color:#c2410c;line-height:1.7;margin-bottom:16px">
         <strong>To reset your password:</strong><br/>
         Ask your system administrator to reset your password from <b>Admin Settings → User Management</b>.<br/><br/>
         Your admin can set a new temporary password for you.
@@ -589,10 +672,8 @@
   <!-- SIDEBAR -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-pdka">
-      <div class="sidebar-pdka-box"><span>PD</span></div>
-      <div class="sidebar-pdka-text">
-        <h2>PDKA Tracker</h2>
-        <p id="sidebarUserName">Loading...</p>
+      <div class="sidebar-pdka-box">
+        <img src="./logo.png" alt="Kumar &amp; Associates" class="sidebar-logo-img"/>
       </div>
     </div>
     <nav class="sidebar-nav">
@@ -644,46 +725,129 @@
     <!-- SYNC STATUS BAR -->
     <div class="sync-bar" id="syncBar"><span id="syncBarText"></span></div>
 
-    <!-- ════ SECTION: DASHBOARD ════════════════════════════════ -->
+    <!-- ════ SECTION: DASHBOARD (FinanceDashboard) ═════════════ -->
     <div class="section active" id="sec-dashboard">
-      <div class="summary" style="padding:16px 16px 12px">
-        <div class="summary-card sc-active clickable-card" onclick="showSection('agreements');setFilter('active')" title="View all active agreements">
-          <div class="count active" id="countActive">0</div><div class="label">Active</div>
-        </div>
-        <div class="summary-card sc-expiring clickable-card" id="cardExpiring" onclick="toggleDashSection('expiring')" title="Click to expand expiring agreements">
-          <div class="count expiring" id="countExpiring">0</div><div class="label">Expiring</div>
-        </div>
-        <div class="summary-card sc-expired clickable-card" id="cardExpired" onclick="toggleDashSection('expired')" title="Click to expand expired agreements">
-          <div class="count expired" id="countExpired">0</div><div class="label">Expired</div>
-        </div>
-        <div class="summary-card sc-renewed clickable-card" onclick="showSection('agreements');setFilter('renewed')" title="View all renewed agreements">
-          <div class="count renewed" id="countRenewed">0</div><div class="label">Renewed</div>
-        </div>
-      </div>
-
-      <div class="dash-quick-panel" id="dashQuickPanel" style="display:none">
-        <div class="dash-quick-panel-inner">
-          <div class="dash-qp-header">
-            <span class="dash-qp-title" id="dashQpTitle"></span>
-            <button class="dash-qp-close" onclick="closeDashPanel()">✕</button>
+      <div class="fd-dashboard">
+        <div class="fd-top-row">
+          <div class="fd-card fd-expiring-card" id="cardExpiring" onclick="toggleDashSection('expiring')" title="View expiring agreements">
+            <div class="fd-expiring-left">
+              <div class="fd-icon-wrap">⚠️</div>
+              <div>
+                <div class="fd-card-label">Expiring Soon</div>
+                <div class="fd-big" style="color:var(--warning)" id="fdExpiringCount">0</div>
+              </div>
+            </div>
+            <div class="fd-mini-chart"><canvas id="fdExpiringLine"></canvas></div>
           </div>
-          <div class="dash-qp-list" id="dashQpList"></div>
-        </div>
-      </div>
-
-      <div class="dash-pie-wrap">
-        <div class="dash-pie-card">
-          <div class="dash-pie-title">Agreement Status Overview</div>
-          <div class="dash-pie-canvas-wrap">
-            <canvas id="agreementPieChart"></canvas>
+          <div class="fd-card fd-total-card">
+            <div class="fd-total-left">
+              <div class="fd-avatar" id="fdUserInitials">?</div>
+              <div>
+                <div class="fd-muted">Total Agreements</div>
+                <div class="fd-big" id="fdTotalCount">0</div>
+              </div>
+            </div>
+            <button class="fd-btn-primary" onclick="showSection('agreements');setTimeout(openAddModal,100)">Add</button>
           </div>
-          <div class="dash-pie-legend" id="dashPieLegend"></div>
+          <div class="fd-card">
+            <div class="fd-progress-head"><span class="fd-card-label">Active Rate</span></div>
+            <div class="fd-progress-bar"><div class="fd-progress-fill" id="fdActiveProgress" style="width:0%"></div></div>
+            <div class="fd-progress-foot">
+              <span class="fd-big" style="font-size:1rem" id="countActive">0</span>
+              <span class="fd-muted" id="fdActiveLabel">of 0 active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="dash-quick-panel" id="dashQuickPanel" style="display:none">
+          <div class="dash-quick-panel-inner">
+            <div class="dash-qp-header">
+              <span class="dash-qp-title" id="dashQpTitle"></span>
+              <button class="dash-qp-close" onclick="closeDashPanel()">✕</button>
+            </div>
+            <div class="dash-qp-list" id="dashQpList"></div>
+          </div>
+        </div>
+
+        <div class="fd-grid">
+          <div class="fd-main-col">
+            <div class="fd-card fd-chart-card">
+              <div class="fd-chart-head">
+                <h3 class="fd-chart-title">Agreements by month</h3>
+                <div style="text-align:right">
+                  <div class="fd-muted">Total tracked</div>
+                  <div class="fd-big" id="fdChartTotal">0</div>
+                </div>
+              </div>
+              <div class="fd-chart-wrap"><canvas id="fdBarChart"></canvas></div>
+              <div class="dash-pie-legend" id="dashPieLegend" style="margin-top:14px"></div>
+            </div>
+            <div class="fd-bottom-row">
+              <div class="fd-promo">
+                <div class="fd-promo-brand">PDKA</div>
+                <div class="fd-promo-title">TRACK<br/>EVERY<br/>DEAL</div>
+                <div class="fd-promo-card">
+                  <div style="font-size:.65rem;opacity:.85;letter-spacing:.08em">AGREEMENTS</div>
+                  <div style="font-size:.9rem;font-weight:800;margin-top:8px" id="fdPromoCount">0</div>
+                  <div style="font-size:.6rem;opacity:.7;margin-top:4px" id="fdPromoUser">—</div>
+                </div>
+              </div>
+              <div class="fd-card fd-invoices-card">
+                <div class="fd-invoices-head">
+                  <h3 class="fd-invoices-title">Expiring soon</h3>
+                  <button class="fd-link-btn" onclick="showSection('agreements');setFilter('expiring')">View all →</button>
+                </div>
+                <table class="fd-table">
+                  <thead><tr><th>Agreement</th><th>Ends</th><th style="text-align:right">Status</th></tr></thead>
+                  <tbody id="fdInvoicesBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="fd-side-col">
+            <div class="fd-card fd-wallet-card">
+              <h3 class="fd-wallet-title">Quick Overview</h3>
+              <div class="fd-wallet-visual">
+                <div style="font-size:1rem;font-weight:600" id="fdWalletUser">Agreement Tracker</div>
+                <div>
+                  <div style="font-size:.95rem;letter-spacing:.12em;opacity:.95" id="fdWalletStat">0 active · 0 expiring</div>
+                  <div style="font-size:.7rem;opacity:.75;margin-top:4px;text-transform:uppercase">Status snapshot</div>
+                </div>
+              </div>
+              <div class="fd-wallet-btns">
+                <button class="fd-wb-primary" onclick="showSection('agreements');setTimeout(openAddModal,100)">Add</button>
+                <button class="fd-wb-muted" onclick="showSection('agreements');setFilter('expiring')">Expiring</button>
+              </div>
+            </div>
+            <div class="fd-card fd-activities-card">
+              <div class="fd-activities-head">
+                <h3 class="fd-chart-title">Recent</h3>
+                <button class="fd-link-btn" onclick="showSection('agreements')">View all →</button>
+              </div>
+              <div id="fdActivitiesList"></div>
+            </div>
+            <div class="fd-card fd-actions-card">
+              <h3 class="fd-chart-title" style="margin-bottom:4px">Status</h3>
+              <div class="fd-stat-pills">
+                <div class="fd-stat-pill p-active" onclick="showSection('agreements');setFilter('active')">
+                  <div class="n" id="countActiveDup">0</div><div class="l">Active</div>
+                </div>
+                <div class="fd-stat-pill p-expiring" id="cardExpiringPill" onclick="toggleDashSection('expiring')">
+                  <div class="n" id="countExpiring">0</div><div class="l">Expiring</div>
+                </div>
+                <div class="fd-stat-pill p-expired" id="cardExpired" onclick="toggleDashSection('expired')">
+                  <div class="n" id="countExpired">0</div><div class="l">Expired</div>
+                </div>
+                <div class="fd-stat-pill p-renewed" onclick="showSection('agreements');setFilter('renewed')">
+                  <div class="n" id="countRenewed">0</div><div class="l">Renewed</div>
+                </div>
+              </div>
+              <button class="fd-btn-primary" style="width:100%;padding:14px;margin-top:8px" onclick="downloadReport()">Export Excel</button>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div style="padding:0 16px 16px">
-        <button class="btn-primary" onclick="showSection('agreements');setTimeout(openAddModal,100)" style="max-width:260px">+ Add New Agreement</button>
-      </div>
+      <canvas id="agreementPieChart" style="display:none" aria-hidden="true"></canvas>
     </div>
 
     <!-- ════ SECTION: AGREEMENTS ══════════════════════════════ -->
@@ -718,7 +882,7 @@
           <div class="admin-panel-title">📤 Bulk Import from Excel</div>
           <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Upload multiple agreements at once. Download the template first to see the required column format.</p>
           <button class="template-btn" onclick="downloadTemplate()">⬇️ Download Excel Template</button>
-          <button class="btn-primary" onclick="openBulkModal()" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);max-width:280px">📤 Bulk Upload Agreements</button>
+          <button class="btn-primary" onclick="openBulkModal()" style="background:linear-gradient(135deg,#f59e0b,#f8a006);max-width:280px">📤 Bulk Upload Agreements</button>
         </div>
       </div>
     </div>
@@ -807,7 +971,7 @@
 
         <div class="admin-panel">
           <div class="admin-panel-title">📧 Microsoft 365 Email</div>
-          <div style="background:#EDE9FE;border:1.5px solid #DDD6FE;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.8rem;color:#4C1D95;line-height:1.6">
+          <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.8rem;color:#c2410c;line-height:1.6">
             <strong>✅ Sends via your Microsoft 365 account</strong><br/>
             No passwords needed — emails are sent using your signed-in Microsoft account. Connect OneDrive in Admin Settings first.
           </div>
@@ -830,7 +994,7 @@
             </label>
           </div>
           <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:12px">When enabled, emails are automatically sent on your configured alert days to the TO / CC addresses set on each agreement.</p>
-          <button onclick="sendAutoRemindersManual()" style="width:100%;max-width:320px;padding:12px 20px;background:linear-gradient(135deg,#6D28D9,#9333EA);color:#fff;border:none;border-radius:12px;font-size:.83rem;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 3px 10px rgba(109,40,217,.3);letter-spacing:.01em;transition:box-shadow .2s">Send All Pending Reminders</button>
+          <button onclick="sendAutoRemindersManual()" style="width:100%;max-width:320px;padding:12px 20px;background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;border:none;border-radius:12px;font-size:.83rem;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 3px 10px rgba(109,40,217,.3);letter-spacing:.01em;transition:box-shadow .2s">Send All Pending Reminders</button>
           <div style="padding:10px;background:#f0f9ff;border-radius:8px;font-size:.75rem;color:#0369a1">
             📱 <strong>Install on Android:</strong> Open in Chrome → tap ⋮ menu → "Add to Home Screen" → Add
           </div>
@@ -917,22 +1081,19 @@
     </div>
     <div class="form-section-title">📄 Agreement Details</div>
     <div class="form-group"><label>Agreement Name *</label><input type="text" id="agrName" placeholder="e.g. Software License Agreement"/></div>
-    <div class="form-group"><label>Agreement Number</label><input type="text" id="agrNumber" placeholder="e.g. AGR-2026-001"/></div>
     <div class="form-group"><label>Type / Category</label>
       <select id="agrType">
         <option value="">Select type...</option>
-        <option>Vendor Agreement</option><option>Client Agreement</option>
-        <option>Service Agreement</option><option>Lease Agreement</option>
-        <option>Partnership Agreement</option><option>NDA</option>
-        <option>Purchase Agreement</option><option>Employment Agreement</option>
-        <option>Other</option>
+        <option>Accounting Retainer Services</option>
+        <option>CS Retainer Services</option>
+        <option>Advisory Services</option>
+        <option>Auditing &amp; Assurance Services</option>
       </select>
     </div>
     <div class="form-row">
       <div class="form-group"><label>Start Date *</label><input type="date" id="agrStart"/></div>
       <div class="form-group"><label>End Date *</label><input type="date" id="agrEnd"/></div>
     </div>
-    <div class="form-group"><label>Agreement Value (₹)</label><input type="number" id="agrValue" placeholder="e.g. 500000" min="0"/></div>
     <div class="form-section-title">👤 Party / Client / Vendor Details</div>
     <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
     <div class="form-row">
@@ -980,13 +1141,13 @@
            ondragover="bulkDragOver(event)" ondragleave="bulkDragLeave(event)" ondrop="bulkDrop(event)">
         <div class="bd-icon">📊</div>
         <div style="font-weight:700;font-size:.95rem">Tap to select your Excel file</div>
-        <div style="font-size:.75rem;margin-top:5px;color:#7c3aed">Supports .xlsx and .xls files</div>
+        <div style="font-size:.75rem;margin-top:5px;color:#f59e0b">Supports .xlsx and .xls files</div>
       </div>
       <input type="file" id="bulkFileInput" accept=".xlsx,.xls" style="display:none" onchange="parseBulkFile(event)"/>
       <div style="margin-top:14px;padding:12px;background:#fefce8;border-radius:10px;font-size:.78rem;color:#854d0e;line-height:1.6">
         <strong>📋 Required columns in your Excel:</strong><br/>
         Agreement Name · Client Name · Start Date · End Date<br/>
-        <span style="color:#92400e">Optional: Agreement No · Type · Value · PAN · GST Registered (Yes/No) · GST Number · Contact · Notes</span>
+        <span style="color:#92400e">Optional: Type · PAN · GST Registered (Yes/No) · GST Number · Contact · Notes</span>
       </div>
     </div>
     <div id="bulkStep2" style="display:none">
@@ -1121,38 +1282,133 @@ function showSection(name){
 
 function updateDashboard(){
   updateSummary();
-  updatePieChart();
+  renderFinanceDashboard();
   const urgentCount=agreements.filter(a=>['expiring','expired'].includes(getStatus(a))).length;
   const badge=document.getElementById('navBadgeCount');
   if(badge){badge.textContent=urgentCount;badge.style.display=urgentCount>0?'inline-block':'none';}
 }
 
-let _pieChart=null;
-function updatePieChart(){
+let _fdBarChart=null;
+let _fdLineChart=null;
+
+function monthBuckets(){
+  const months=[];
+  const now=new Date();
+  for(let i=11;i>=0;i--){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    months.push({key:d.getFullYear()+'-'+(d.getMonth()+1),label:d.toLocaleString('en',{month:'short'}),count:0});
+  }
+  return months;
+}
+
+function renderFinanceDashboard(){
   const active=agreements.filter(a=>getStatus(a)==='active').length;
   const expiring=agreements.filter(a=>getStatus(a)==='expiring').length;
   const expired=agreements.filter(a=>getStatus(a)==='expired').length;
   const renewed=agreements.filter(a=>getStatus(a)==='renewed').length;
-  const canvas=document.getElementById('agreementPieChart');
-  if(!canvas)return;
-  const data=[active,expiring,expired,renewed];
+  const total=agreements.length;
   const labels=['Active','Expiring','Expired','Renewed'];
-  const colors=['#059669','#d97706','#dc2626','#7c3aed'];
+  const data=[active,expiring,expired,renewed];
+  const colors=['#059669','#d97706','#dc2626','#f59e0b'];
+
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('fdTotalCount',total);
+  set('fdExpiringCount',expiring);
+  set('fdChartTotal',total);
+  set('fdPromoCount',total);
+  const pct=total?Math.round((active/total)*100):0;
+  const prog=document.getElementById('fdActiveProgress');
+  if(prog)prog.style.width=pct+'%';
+  const activeLbl=document.getElementById('fdActiveLabel');
+  if(activeLbl)activeLbl.textContent='of '+total+' agreements';
+  set('countActiveDup',active);
+
+  const cur=typeof currentUser!=='undefined'&&currentUser?currentUser:null;
+  const displayName=cur?(cur.name||cur.username||'User'):'User';
+  const initials=(displayName.match(/\b\w/g)||['?']).slice(0,2).join('').toUpperCase();
+  set('fdUserInitials',initials);
+  set('fdPromoUser',displayName);
+  const wu=document.getElementById('fdWalletUser');if(wu)wu.textContent=displayName;
+  const ws=document.getElementById('fdWalletStat');
+  if(ws)ws.textContent=active+' active · '+expiring+' expiring';
+
   const legend=document.getElementById('dashPieLegend');
-  if(legend){
-    legend.innerHTML=labels.map((l,i)=>'<div class="dash-pie-legend-item"><span class="dash-pie-dot" style="background:'+colors[i]+'"></span>'+l+' ('+data[i]+')</div>').join('');
-  }
-  if(_pieChart){_pieChart.data.datasets[0].data=data;_pieChart.update();return;}
-  _pieChart=new Chart(canvas,{
-    type:'doughnut',
-    data:{labels:labels,datasets:[{data:data,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return ' '+c.label+': '+c.raw+(c.raw===1?' agreement':' agreements');}}}},
-      animation:{duration:600,easing:'easeInOutQuart'}
-    }
+  if(legend)legend.innerHTML=labels.map((l,i)=>'<div class="dash-pie-legend-item"><span class="dash-pie-dot" style="background:'+colors[i]+'"></span>'+l+' ('+data[i]+')</div>').join('');
+
+  const buckets=monthBuckets();
+  agreements.forEach(a=>{
+    if(!a.endDate)return;
+    const d=new Date(a.endDate);
+    const key=d.getFullYear()+'-'+(d.getMonth()+1);
+    const b=buckets.find(x=>x.key===key);
+    if(b)b.count++;
   });
+  const barCanvas=document.getElementById('fdBarChart');
+  if(barCanvas){
+    const barLabels=buckets.map(b=>b.label);
+    const barValues=buckets.map(b=>b.count);
+    const barColors=barValues.map((v,i)=>i===barValues.indexOf(Math.max(...barValues,0))&&Math.max(...barValues)>0?'#ff6b00':'#ffebd6');
+    if(_fdBarChart){
+      _fdBarChart.data.labels=barLabels;
+      _fdBarChart.data.datasets[0].data=barValues;
+      _fdBarChart.data.datasets[0].backgroundColor=barColors;
+      _fdBarChart.update();
+    }else{
+      _fdBarChart=new Chart(barCanvas,{
+        type:'bar',
+        data:{labels:barLabels,datasets:[{data:barValues,backgroundColor:barColors,borderRadius:10,borderSkipped:false}]},
+        options:{
+          responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>' '+c.raw+' ending this month'}}},
+          scales:{x:{grid:{display:false},ticks:{color:'#a1a1aa',font:{size:11}}},y:{display:false,beginAtZero:true}},
+          animation:{duration:700,easing:'easeInOutQuart'}
+        }
+      });
+    }
+  }
+
+  const lineCanvas=document.getElementById('fdExpiringLine');
+  if(lineCanvas){
+    const trend=buckets.map(b=>{
+      const [y,m]=b.key.split('-').map(Number);
+      return agreements.filter(a=>{if(!a.endDate)return false;const d=new Date(a.endDate);return getStatus(a)==='expiring'&&d.getFullYear()===y&&d.getMonth()+1===m;}).length||0;
+    });
+    if(_fdLineChart){
+      _fdLineChart.data.datasets[0].data=trend;
+      _fdLineChart.update();
+    }else{
+      _fdLineChart=new Chart(lineCanvas,{
+        type:'line',
+        data:{labels:buckets.map(()=>''),datasets:[{data:trend,borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.08)',borderWidth:2.5,fill:true,tension:.4,pointRadius:0}]},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{enabled:false}},scales:{x:{display:false},y:{display:false}}}
+      });
+    }
+  }
+
+  const expiringList=agreements.filter(a=>getStatus(a)==='expiring').sort((a,b)=>new Date(a.endDate)-new Date(b.endDate)).slice(0,4);
+  const invBody=document.getElementById('fdInvoicesBody');
+  if(invBody){
+    invBody.innerHTML=expiringList.length?expiringList.map(a=>{
+      const ini=(a.client||a.name||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      const st=getStatus(a);
+      const stLabel={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st];
+      return'<tr><td><div class="fd-table-user"><div class="fd-table-avatar">'+ini+'</div><div><div class="fd-table-name">'+esc(a.name)+'</div><div class="fd-table-email">'+esc(a.client)+'</div></div></div></td><td><div style="font-weight:600">'+fDate(a.endDate)+'</div><div class="fd-table-email">'+getDaysLeft(a.endDate)+'d left</div></td><td style="text-align:right;font-weight:700">'+stLabel+'</td></tr>';
+    }).join(''):'<tr><td colspan="3"><div class="fd-empty">No expiring agreements</div></td></tr>';
+  }
+
+  const recent=[...agreements].sort((a,b)=>new Date(b.createdAt||b.startDate||0)-new Date(a.createdAt||a.startDate||0)).slice(0,4);
+  const actList=document.getElementById('fdActivitiesList');
+  if(actList){
+    actList.innerHTML=recent.length?recent.map(a=>{
+      const st=getStatus(a);
+      const cls=st==='expired'?'danger':(st==='expiring'?'warn':'');
+      const ini=(a.client||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+      return'<div class="fd-activity-item"><div class="fd-activity-left"><div class="fd-table-avatar">'+ini+'</div><div class="fd-activity-meta"><div class="fd-activity-name">'+esc(a.name)+'</div><div class="fd-activity-sub">'+esc(a.client)+'</div></div></div><div><div class="fd-activity-amt '+cls+'">'+({active:'✅ Active',expiring:'⚠️ Expiring',expired:'❌ Expired',renewed:'🔄 Renewed'}[st])+'</div><div class="fd-activity-date">'+fDate(a.endDate)+'</div></div></div>';
+    }).join(''):'<div class="fd-empty">No agreements yet</div>';
+  }
 }
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 let _dashPanelType=null;
 function toggleDashSection(type){
@@ -1165,6 +1421,9 @@ function toggleDashSection(type){
   _dashPanelType=type;
   if(cardExp)cardExp.classList.toggle('card-selected',type==='expiring');
   if(cardExpd)cardExpd.classList.toggle('card-selected',type==='expired');
+  const pillExp=document.getElementById('cardExpiringPill');
+  if(pillExp)pillExp.classList.toggle('selected',type==='expiring');
+  if(cardExpd)cardExpd.classList.toggle('selected',type==='expired');
   let items,title,cls,bgCol,textCol,daysFn;
   if(type==='expiring'){
     items=agreements.filter(a=>getStatus(a)==='expiring').sort((a,b)=>new Date(a.endDate)-new Date(b.endDate));
@@ -1195,11 +1454,13 @@ function toggleDashSection(type){
 function closeDashPanel(){
   const panel=document.getElementById('dashQuickPanel');
   if(panel)panel.style.display='none';
-  _dashPanelType=null;
+  const pillExp=document.getElementById('cardExpiringPill');
   const cardExp=document.getElementById('cardExpiring');
   const cardExpd=document.getElementById('cardExpired');
+  if(pillExp)pillExp.classList.remove('selected');
   if(cardExp)cardExp.classList.remove('card-selected');
-  if(cardExpd)cardExpd.classList.remove('card-selected');
+  if(cardExpd){cardExpd.classList.remove('selected');cardExpd.classList.remove('card-selected');}
+  _dashPanelType=null;
 }
 
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebarOverlay').classList.toggle('open');}
@@ -1418,7 +1679,6 @@ function getStatus(agr){
   if(d<=mx)return'expiring';
   return'active';
 }
-function fCur(v){return v?'₹'+Number(v).toLocaleString('en-IN'):'—'}
 function fDate(d){if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`}
 function fSize(b){if(b<1024)return b+' B';if(b<1048576)return(b/1024).toFixed(1)+' KB';return(b/1048576).toFixed(1)+' MB'}
 function fileIcon(t,n){
@@ -1444,7 +1704,7 @@ async function renderAgreements(){
     const mf=currentFilter==='all'||status===currentFilter;
     const ms=!search||a.name.toLowerCase().includes(search)||a.client.toLowerCase().includes(search)||
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
-      (a.number&&a.number.toLowerCase().includes(search));
+      (a.type&&a.type.toLowerCase().includes(search));
     return mf&&ms;
   });
   filtered.sort((a,b)=>{
@@ -1500,11 +1760,11 @@ async function buildCard(a){
   const delBtn=`<button class="btn-delete" onclick="deleteAgreement('${a.id}')">🗑️ Delete</button>`;
   return`<div class="agreement-card status-${status}" id="card-${a.id}">
     <div class="card-top"><div class="card-title">${a.name}</div><div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div></div>
-    <div class="card-client">👤 ${a.client}${a.number?' · #'+a.number:''}${a.type?' · '+a.type:''}</div>
+    <div class="card-client">👤 ${a.client}${a.type?' · '+a.type:''}</div>
     <div class="card-details">
       <div class="detail-item"><div class="detail-label">Start Date</div><div class="detail-value">${fDate(a.startDate)}</div></div>
       <div class="detail-item"><div class="detail-label">End Date</div><div class="detail-value">${fDate(a.endDate)}</div></div>
-      <div class="detail-item"><div class="detail-label">Value</div><div class="detail-value">${fCur(a.value)}</div></div>
+      <div class="detail-item"><div class="detail-label">Type</div><div class="detail-value">${a.type||'—'}</div></div>
       <div class="detail-item"><div class="detail-label">Contact</div><div class="detail-value">${a.contact||'—'}</div></div>
     </div>
     <div class="compliance-row">${panTag}${gstTag}</div>
@@ -1573,8 +1833,7 @@ async function showHistory(agrId){
       <div class="hc-meta">
         <div><div class="hc-label">Start Date</div><div class="hc-value">${fDate(a.startDate)}</div></div>
         <div><div class="hc-label">End Date</div><div class="hc-value">${fDate(a.endDate)}</div></div>
-        <div><div class="hc-label">Value</div><div class="hc-value">${fCur(a.value)}</div></div>
-        <div><div class="hc-label">Agr. No.</div><div class="hc-value">${a.number||'—'}</div></div>
+        <div><div class="hc-label">Type</div><div class="hc-value">${a.type||'—'}</div></div>
         <div><div class="hc-label">PAN</div><div class="hc-value">${a.pan?a.pan.toUpperCase():'—'}</div></div>
         <div><div class="hc-label">GST</div><div class="hc-value">${a.gstRegistered?(a.gst?a.gst.toUpperCase():'Registered'):'Not Registered'}</div></div>
       </div>
@@ -1631,8 +1890,6 @@ async function saveAgreement(){
   const existing=editId?agreements.find(a=>a.id===editId):null;
   const agr={
     id:editId||Date.now().toString(),name,client,startDate,endDate,
-    number:document.getElementById('agrNumber').value.trim(),
-    value:document.getElementById('agrValue').value,
     type:document.getElementById('agrType').value,
     contact:document.getElementById('agrContact').value.trim(),
     contactInfo:document.getElementById('agrContactInfo').value.trim(),
@@ -1683,7 +1940,7 @@ async function deleteFile(agrId,fileId){
 // MODALS
 // ══════════════════════════════════════════════════
 function resetForm(){
-  ['agrName','agrNumber','agrClient','agrStart','agrEnd','agrValue','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails'].forEach(id=>document.getElementById(id).value='');
+  ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('agrType').value='';
   document.getElementById('gstToggle').checked=false;
   document.getElementById('gstField').classList.remove('visible');
@@ -1697,9 +1954,9 @@ function openEditModal(id){
   const a=agreements.find(x=>x.id===id);if(!a)return;
   resetForm();document.getElementById('modalTitle').textContent='✏️ Edit Agreement';document.getElementById('saveBtn').textContent='💾 Save Changes';
   document.getElementById('editId').value=a.id;
-  document.getElementById('agrName').value=a.name||'';document.getElementById('agrNumber').value=a.number||'';
+  document.getElementById('agrName').value=a.name||'';
   document.getElementById('agrClient').value=a.client||'';document.getElementById('agrStart').value=a.startDate||'';
-  document.getElementById('agrEnd').value=a.endDate||'';document.getElementById('agrValue').value=a.value||'';
+  document.getElementById('agrEnd').value=a.endDate||'';
   document.getElementById('agrType').value=a.type||'';document.getElementById('agrContact').value=a.contact||'';
   document.getElementById('agrContactInfo').value=a.contactInfo||'';document.getElementById('agrPan').value=a.pan||'';
   document.getElementById('agrNotes').value=a.notes||'';
@@ -1713,7 +1970,7 @@ function openRenewModal(id){
   resetForm();document.getElementById('modalTitle').textContent='🔄 Renew Agreement';document.getElementById('saveBtn').textContent='🔄 Create Renewed Agreement';
   document.getElementById('renewFromId').value=a.id;document.getElementById('renewalNotice').style.display='block';
   document.getElementById('agrName').value=a.name||'';document.getElementById('agrClient').value=a.client||'';
-  document.getElementById('agrValue').value=a.value||'';document.getElementById('agrType').value=a.type||'';
+  document.getElementById('agrType').value=a.type||'';
   document.getElementById('agrContact').value=a.contact||'';document.getElementById('agrContactInfo').value=a.contactInfo||'';
   document.getElementById('agrPan').value=a.pan||'';document.getElementById('agrNotes').value='';
   document.getElementById('agrToEmail1').value=a.toEmail1||a.notifEmail||'';
@@ -1769,11 +2026,11 @@ async function previewFile(fileId){
 // ══════════════════════════════════════════════════
 function downloadTemplate(){
   if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
-  const headers=[['Agreement Name*','Agreement Number','Client/Vendor Name*','Type','Start Date* (DD/MM/YYYY)','End Date* (DD/MM/YYYY)','Value (₹)','PAN Number','GST Registered (Yes/No)','GST Number','Contact Person','Contact Email/Phone','Notes']];
-  const sample=[['Software License Agreement','AGR-2026-001','TechCorp Pvt. Ltd.','Service Agreement','01/04/2026','31/03/2027','500000','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
-                ['Office Lease Agreement','AGR-2026-002','Property Holdings Ltd.','Lease Agreement','01/01/2026','31/12/2026','1200000','FGHIJ5678K','No','','Sunita Sharma','+91 9876543210','3-year lock-in waived']];
+  const headers=[['Agreement Name*','Client/Vendor Name*','Type','Start Date* (DD/MM/YYYY)','End Date* (DD/MM/YYYY)','PAN Number','GST Registered (Yes/No)','GST Number','Contact Person','Contact Email/Phone','Notes']];
+  const sample=[['Annual Audit Engagement','TechCorp Pvt. Ltd.','Auditing & Assurance Services','01/04/2026','31/03/2027','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
+                ['Monthly Bookkeeping','Property Holdings Ltd.','Accounting Retainer Services','01/01/2026','31/12/2026','FGHIJ5678K','No','','Sunita Sharma','+91 9876543210','Monthly retainer']];
   const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
-  ws['!cols']=[{wch:28},{wch:18},{wch:26},{wch:20},{wch:22},{wch:22},{wch:14},{wch:14},{wch:22},{wch:20},{wch:18},{wch:24},{wch:30}];
+  ws['!cols']=[{wch:28},{wch:26},{wch:28},{wch:22},{wch:22},{wch:14},{wch:22},{wch:20},{wch:18},{wch:24},{wch:30}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Agreements Template');
   XLSX.writeFile(wb,'Agreement_Upload_Template.xlsx');showToast('✅ Template downloaded!');
 }
@@ -1799,7 +2056,7 @@ function processBulkFile(file){
       if(raw.length<2){showToast('⚠️ File is empty or has no data rows');return}
       const headerRow=raw[0].map(h=>(h||'').toString().toLowerCase().trim());
       const col=name=>{const idx=headerRow.findIndex(h=>h.includes(name));return idx>=0?idx:null;};
-      const colMap={name:col('agreement name'),number:col('agreement number')||col('agr. no')||col('agreement no'),client:col('client')||col('vendor')||col('party'),type:col('type'),startDate:col('start date')||col('start'),endDate:col('end date')||col('end'),value:col('value'),pan:col('pan'),gstReg:col('gst registered')||col('gst reg'),gst:col('gst number')||col('gstin'),contact:col('contact person')||col('contact'),contactInfo:col('email')||col('phone')||col('contact email'),notes:col('notes')||col('remarks')};
+      const colMap={name:col('agreement name'),client:col('client')||col('vendor')||col('party'),type:col('type'),startDate:col('start date')||col('start'),endDate:col('end date')||col('end'),pan:col('pan'),gstReg:col('gst registered')||col('gst reg'),gst:col('gst number')||col('gstin'),contact:col('contact person')||col('contact'),contactInfo:col('email')||col('phone')||col('contact email'),notes:col('notes')||col('remarks')};
       parsedRows=[];
       for(let i=1;i<raw.length;i++){
         const r=raw[i];if(!r||r.every(c=>!c))continue;
@@ -1810,7 +2067,7 @@ function processBulkFile(file){
         const pan=get('pan').toUpperCase();if(pan&&!validatePAN(pan))errors.push('Invalid PAN');
         const gstRegRaw=get('gstReg').toLowerCase();const gstRegistered=gstRegRaw==='yes'||gstRegRaw==='y'||gstRegRaw==='true'||gstRegRaw==='1';
         const gstNum=get('gst').toUpperCase();if(gstRegistered&&gstNum&&!validateGST(gstNum))errors.push('Invalid GST');
-        parsedRows.push({rowNum:i+1,name,client,startDate,endDate,number:get('number'),type:get('type'),value:get('value').replace(/[^0-9.]/g,''),pan,gstRegistered,gst:gstRegistered?gstNum:'',contact:get('contact'),contactInfo:get('contactInfo'),notes:get('notes'),errors});
+        parsedRows.push({rowNum:i+1,name,client,startDate,endDate,type:get('type'),pan,gstRegistered,gst:gstRegistered?gstNum:'',contact:get('contact'),contactInfo:get('contactInfo'),notes:get('notes'),errors});
       }
       showImportPreview();
     }catch(err){showToast('⚠️ Could not read file: '+err.message)}
@@ -1820,8 +2077,8 @@ function processBulkFile(file){
 function showImportPreview(){
   const valid=parsedRows.filter(r=>r.errors.length===0);const invalid=parsedRows.filter(r=>r.errors.length>0);
   document.getElementById('importSummary').innerHTML=`<b>📊 ${parsedRows.length} rows found</b> &nbsp;·&nbsp; ✅ <b>${valid.length} valid</b> &nbsp;·&nbsp; ❌ <b>${invalid.length} with errors</b>`;
-  const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Start Date</th><th>End Date</th><th>Value (₹)</th><th>PAN</th><th>GST</th><th>Type</th><th>Notes</th></tr></thead>`;
-  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.value?'₹'+Number(r.value).toLocaleString('en-IN'):'—'}</td><td>${r.pan||'—'}</td><td>${r.gstRegistered?(r.gst||'Registered'):'Not Reg.'}</td><td>${r.type||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
+  const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Start Date</th><th>End Date</th><th>PAN</th><th>GST</th><th>Type</th><th>Notes</th></tr></thead>`;
+  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.gstRegistered?(r.gst||'Registered'):'Not Reg.'}</td><td>${r.type||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
   document.getElementById('importTable').innerHTML=thead+`<tbody>${tbody}</tbody>`;
   if(invalid.length>0)document.getElementById('importErrorNote').textContent=`⚠️ ${invalid.length} row(s) with errors will be skipped.`;
   else document.getElementById('importErrorNote').textContent='';
@@ -1830,7 +2087,7 @@ function showImportPreview(){
 
 async function confirmBulkImport(){
   const valid=parsedRows.filter(r=>r.errors.length===0);if(valid.length===0){showToast('⚠️ No valid rows to import');return}
-  for(const r of valid){await dbPut('agreements',{id:Date.now().toString()+Math.random().toString(36).slice(2),name:r.name,client:r.client,startDate:r.startDate,endDate:r.endDate,number:r.number,type:r.type,value:r.value,pan:r.pan,gstRegistered:r.gstRegistered,gst:r.gst,contact:r.contact,contactInfo:r.contactInfo,notes:r.notes,createdAt:new Date().toISOString(),fileIds:[],renewedFrom:null,renewedTo:null});}
+  for(const r of valid){await dbPut('agreements',{id:Date.now().toString()+Math.random().toString(36).slice(2),name:r.name,client:r.client,startDate:r.startDate,endDate:r.endDate,type:r.type,pan:r.pan,gstRegistered:r.gstRegistered,gst:r.gst,contact:r.contact,contactInfo:r.contactInfo,notes:r.notes,createdAt:new Date().toISOString(),fileIds:[],renewedFrom:null,renewedTo:null});}
   agreements=await dbGetAll('agreements');closeModal('bulkModal');resetBulkUpload();renderAgreements();showToast(`✅ ${valid.length} agreement(s) imported successfully!`);odSyncToOneDrive();
 }
 
@@ -1845,17 +2102,17 @@ function downloadReport(){
   const sorted=[...agreements].sort((a,b)=>{const o={expiring:0,active:1,expired:2,renewed:3};return o[getStatus(a)]-o[getStatus(b)]||new Date(a.endDate)-new Date(b.endDate);});
   const now=new Date().toLocaleDateString('en-IN');
   const counts={active:0,expiring:0,expired:0,renewed:0};sorted.forEach(a=>counts[getStatus(a)]++);
-  const headers=['#','Agreement Name','Agreement No.','Client / Vendor','Type','Start Date','End Date','Days Left','Status','Value (₹)','PAN','GST Registered','GST Number','Contact Person','Contact Info','Notes','Renewal Of','Renewed To'];
+  const headers=['#','Agreement Name','Client / Vendor','Type','Start Date','End Date','Days Left','Status','PAN','GST Registered','GST Number','Contact Person','Contact Info','Notes','Renewal Of','Renewed To'];
   const rows=sorted.map((a,i)=>{
     const status=getStatus(a);const days=getDaysLeft(a.endDate);
     const statusLabel={active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[status];
     const daysLabel=status==='renewed'?'Renewed':status==='expired'?`-${Math.abs(days)} (Expired)`:`${days} days`;
     const prevAgr=a.renewedFrom?agreements.find(x=>x.id===a.renewedFrom):null;
     const nextAgr=a.renewedTo?agreements.find(x=>x.id===a.renewedTo):null;
-    return[i+1,a.name,a.number||'',a.client,a.type||'',fDate(a.startDate),fDate(a.endDate),daysLabel,statusLabel,a.value?Number(a.value):'',a.pan||'',a.gstRegistered?'Yes':'No',a.gst||'',a.contact||'',a.contactInfo||'',a.notes||'',prevAgr?prevAgr.name:'',nextAgr?nextAgr.name:''];
+    return[i+1,a.name,a.client,a.type||'',fDate(a.startDate),fDate(a.endDate),daysLabel,statusLabel,a.pan||'',a.gstRegistered?'Yes':'No',a.gst||'',a.contact||'',a.contactInfo||'',a.notes||'',prevAgr?prevAgr.name:'',nextAgr?nextAgr.name:''];
   });
   const wsData=[headers,...rows];const ws=XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols']=[{wch:4},{wch:30},{wch:16},{wch:28},{wch:20},{wch:13},{wch:13},{wch:14},{wch:15},{wch:14},{wch:14},{wch:14},{wch:18},{wch:18},{wch:24},{wch:28},{wch:26},{wch:26}];
+  ws['!cols']=[{wch:4},{wch:30},{wch:28},{wch:28},{wch:13},{wch:13},{wch:14},{wch:15},{wch:14},{wch:14},{wch:18},{wch:18},{wch:24},{wch:28},{wch:26},{wch:26}];
   const sumData=[['Agreement Tracker — Report Summary'],['Generated on:',now],['',''],['Total Agreements',agreements.length],['Active',counts.active],['Expiring Soon',counts.expiring],['Expired',counts.expired],['Renewed (Historical)',counts.renewed]];
   const wsSummary=XLSX.utils.aoa_to_sheet(sumData);wsSummary['!cols']=[{wch:28},{wch:20}];
   const expiringRows=sorted.filter(a=>getStatus(a)==='expiring');
@@ -1863,8 +2120,8 @@ function downloadReport(){
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,wsSummary,'Summary');
   XLSX.utils.book_append_sheet(wb,ws,'All Agreements');
-  if(expiringRows.length>0){const expData=[['Agreement Name','Client','End Date','Days Left','Value (₹)','PAN','GST','Contact'],...expiringRows.map(a=>[a.name,a.client,fDate(a.endDate),getDaysLeft(a.endDate),a.value?Number(a.value):'',a.pan||'',a.gstRegistered?(a.gst||'Yes - Number Missing'):'Not Registered',a.contact||''])];const wsExpiring=XLSX.utils.aoa_to_sheet(expData);XLSX.utils.book_append_sheet(wb,wsExpiring,'Expiring Soon');}
-  if(expiredRows.length>0){const expiredData=[['Agreement Name','Client','End Date','Expired (days ago)','Value (₹)','PAN','GST','Renewal Status'],...expiredRows.map(a=>[a.name,a.client,fDate(a.endDate),Math.abs(getDaysLeft(a.endDate)),a.value?Number(a.value):'',a.pan||'',a.gstRegistered?(a.gst||'Yes'):'Not Registered',a.renewedTo?'Renewed':'Pending Renewal'])];const wsExpired=XLSX.utils.aoa_to_sheet(expiredData);XLSX.utils.book_append_sheet(wb,wsExpired,'Expired');}
+  if(expiringRows.length>0){const expData=[['Agreement Name','Client','End Date','Days Left','PAN','GST','Contact'],...expiringRows.map(a=>[a.name,a.client,fDate(a.endDate),getDaysLeft(a.endDate),a.pan||'',a.gstRegistered?(a.gst||'Yes - Number Missing'):'Not Registered',a.contact||''])];const wsExpiring=XLSX.utils.aoa_to_sheet(expData);XLSX.utils.book_append_sheet(wb,wsExpiring,'Expiring Soon');}
+  if(expiredRows.length>0){const expiredData=[['Agreement Name','Client','End Date','Expired (days ago)','PAN','GST','Renewal Status'],...expiredRows.map(a=>[a.name,a.client,fDate(a.endDate),Math.abs(getDaysLeft(a.endDate)),a.pan||'',a.gstRegistered?(a.gst||'Yes'):'Not Registered',a.renewedTo?'Renewed':'Pending Renewal'])];const wsExpired=XLSX.utils.aoa_to_sheet(expiredData);XLSX.utils.book_append_sheet(wb,wsExpired,'Expired');}
   const fileName=`Agreement_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
   XLSX.writeFile(wb,fileName);showToast(`✅ Report downloaded: ${fileName}`);
 }
@@ -2018,10 +2275,9 @@ function buildEmailBody(a,days){
   const nt=a.notes?(a.notes).replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';
   const status=days<0?'EXPIRED':days<=30?'EXPIRING SOON':'UPCOMING EXPIRY';
   const daysMsg=days<0?'Expired '+Math.abs(days)+' day(s) ago':days===0?'Expires TODAY':'Expires in '+days+' day(s)';
-  const bgColor=days<0?'#fee2e2':days<=7?'#fef3c7':'#EDE9FE';
-  const txColor=days<0?'#b91c1c':days<=7?'#92400e':'#4C1D95';
-  let valueRow='';try{if(a.value&&!isNaN(Number(a.value))){valueRow='<tr><td style="padding:8px 0;color:#6b7280;width:140px">Value</td><td style="padding:8px 0">Rs. '+Number(a.value).toLocaleString('en-IN')+'</td></tr>';}}catch(e){}
-  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#6D28D9;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Agreement No.</td><td style="padding:8px 0">'+(a.number||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr>'+valueRow+'</table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">This is an automated reminder from Agreement Tracker. Please do not reply to this email.</div></div>';
+  const bgColor=days<0?'#fee2e2':days<=7?'#fef3c7':'#fff7ed';
+  const txColor=days<0?'#b91c1c':days<=7?'#92400e':'#c2410c';
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#f8a006;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Type</td><td style="padding:8px 0">'+(a.type||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr></table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">This is an automated reminder from Agreement Tracker. Please do not reply to this email.</div></div>';
 }
 
 let _composeAgrId=null;
@@ -2036,7 +2292,7 @@ function openEmailModal(agrId){
   document.getElementById('composeCcEmails').value=a.ccEmails||'';
   document.getElementById('composeSubject').value=`[Agreement Tracker] ${days<0?'EXPIRED':'Expiry Reminder'}: ${a.name} (${a.client})`;
   const statusLabel=days<0?`EXPIRED ${Math.abs(days)} day(s) ago`:`expires in ${days} day(s)`;
-  const bodyText=['Dear Recipient,','','This is a reminder regarding the following agreement:','',`  Agreement : ${a.name}`,`  Client    : ${a.client}`,`  Start Date: ${a.startDate||'—'}`,`  End Date  : ${a.endDate||'—'}`,`  Status    : ${statusLabel}`,a.value?`  Value     : ₹${Number(a.value).toLocaleString('en-IN')}`:null,'','Please take the necessary action at the earliest.','','— Agreement Tracker'].filter(l=>l!==null).join('\n');
+  const bodyText=['Dear Recipient,','','This is a reminder regarding the following agreement:','',`  Agreement : ${a.name}`,`  Client    : ${a.client}`,`  Start Date: ${a.startDate||'—'}`,`  End Date  : ${a.endDate||'—'}`,`  Status    : ${statusLabel}`,'','Please take the necessary action at the earliest.','','— Agreement Tracker'].join('\n');
   document.getElementById('composeBody').value=bodyText;
   const btn=document.getElementById('composeSendBtn');btn.disabled=false;btn.textContent='📤 Send Email';
   const acc=getMSAccount();const fromLine=document.getElementById('composeFromLine');if(fromLine)fromLine.textContent=acc?'From: '+acc.username:'';
@@ -2057,7 +2313,7 @@ async function submitEmailCompose(){
   const toList=[];
   for(const e of rawTo){if(!isValidEmail(e)){showComposeError('Invalid email address: "'+e+'" — please check and try again.');return;}toList.push(e);}
   const ccList=ccRaw?ccRaw.split(',').map(e=>e.trim()).filter(e=>{if(!e)return false;if(!isValidEmail(e)){showComposeError('Invalid CC email: "'+e+'"');return false;}return true;}):[];
-  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#6D28D9;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">Agreement Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker - Microsoft 365</p></div></div>';
+  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#f8a006;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">Agreement Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker - Microsoft 365</p></div></div>';
   const btn=document.getElementById('composeSendBtn');btn.disabled=true;btn.textContent='Sending...';
   showToast('Sending via Microsoft 365...');
   try{
@@ -2112,7 +2368,7 @@ async function sendTestEmail(){
   if(to.length===0){if(statusEl)statusEl.textContent='Cannot determine your email address.';return;}
   if(statusEl)statusEl.textContent='📨 Sending test email to '+to[0]+'…';
   try{
-    await sendEmailViaGraph(to,[],'[Agreement Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#6D28D9">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
+    await sendEmailViaGraph(to,[],'[Agreement Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#f8a006">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
     if(statusEl)statusEl.textContent='✅ Test email sent to '+to[0];showToast('✅ Test email sent!');
   }catch(e){if(statusEl)statusEl.textContent='❌ '+e.message;showToast('❌ '+e.message);}
 }
@@ -2204,3 +2460,4 @@ openDB().then(async()=>{
 </script>
 </body>
 </html>
+
