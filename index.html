@@ -678,7 +678,7 @@
       </div>
       <div class="login-error" id="loginError"></div>
       <div class="login-success" id="loginSuccess" style="display:none"></div>
-      <div class="login-field"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/></div>
+      <div class="login-field"><label>Username / Email</label><input type="text" id="loginUser" placeholder="Enter username or email" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()"/></div>
       <div class="login-field"><label>Password</label><div class="pw-wrap"><input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/><button class="pw-eye" onclick="togglePw('loginPass',this)" type="button">👁</button></div></div>
       <button class="btn-login" onclick="doLogin()">🔐 Sign In</button>
       <div class="login-divider">──────────────────</div>
@@ -1799,12 +1799,13 @@ function getSession(){const s=localStorage.getItem('agrSession');return s?JSON.p
 function setSession(u){localStorage.setItem('agrSession',JSON.stringify({userId:u.id,username:u.username,name:u.name,role:u.role,ts:Date.now()}))}
 function clearSession(){localStorage.removeItem('agrSession')}
 function doLogin(){
-  const uname=document.getElementById('loginUser').value.trim();
+  const input=document.getElementById('loginUser').value.trim().toLowerCase();
   const pw=document.getElementById('loginPass').value;
   const err=document.getElementById('loginError');
-  if(!uname||!pw){err.style.display='block';err.textContent='Please enter username and password.';return}
-  const u=getUsers().find(x=>x.username===uname&&x.pwHash===hashPw(pw));
-  if(!u){err.style.display='block';err.textContent='Incorrect username or password.';return}
+  if(!input||!pw){err.style.display='block';err.textContent='Please enter your username or email and password.';return}
+  const hash=hashPw(pw);
+  const u=getUsers().find(x=>(x.username===input||(x.email&&x.email.toLowerCase()===input))&&x.pwHash===hash);
+  if(!u){err.style.display='block';err.textContent='Incorrect username/email or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection('dashboard');showToast('Welcome, '+u.name+'!');
 }
