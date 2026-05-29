@@ -1585,7 +1585,9 @@ function updateUserChip(u){
   document.getElementById('userAvatar').textContent=ini;
   document.getElementById('userChipName').textContent=u.name.split(' ')[0];
   const sn=document.getElementById('sidebarUserName');if(sn)sn.textContent=u.name+' ('+u.role+')';
-  const an=document.getElementById('nav-admin');if(an)an.style.display=(u.role==='admin')?'flex':'none';
+  const isAdmin=(u.role==='admin');
+  const an=document.getElementById('nav-admin');if(an)an.style.display=isAdmin?'flex':'none';
+  const sc=document.getElementById('syncChip');if(sc)sc.style.display=isAdmin?'flex':'none';
 }
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈'}else{i.type='password';btn.textContent='👁'}}
 
