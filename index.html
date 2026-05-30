@@ -1208,7 +1208,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Special Service Name <span style="font-size:.7rem;color:var(--muted)">(optional — if service has a specific name)</span></label>
+        <label>Description</label>
         <input type="text" id="agrSpecialService" placeholder="e.g. DPIIT Startup Compliance, ROC Filing..."/>
       </div>
       <div class="form-row">
@@ -1274,7 +1274,6 @@
     <div class="modal-title" id="billModalTitle">Add One Time Bill</div>
     <input type="hidden" id="billEditId"/>
     <div class="form-section-title">🧾 Bill Details</div>
-    <div class="form-group"><label>Bill Name / Description *</label><input type="text" id="billName" placeholder="e.g. ROC Filing Fee, Special Audit Report"/></div>
     <div class="form-group"><label>Service Type</label>
       <select id="billType" onchange="onBillTypeChange()">
         <option value="">Select service...</option>
@@ -1292,10 +1291,10 @@
         </select>
       </div>
     </div>
-    <div class="form-group"><label>Special Service Name <span style="font-size:.7rem;color:var(--muted)">(optional)</span></label>
-      <input type="text" id="billSpecialService" placeholder="e.g. DPIIT Startup Compliance, ROC Filing..."/>
+    <div class="form-group"><label>Description</label>
+      <input type="text" id="billSpecialService" placeholder="e.g. Describe the service or billing details..."/>
     </div>
-    <div class="form-group"><label>Bill Date *</label><input type="date" id="billDate"/></div>
+    <div class="form-group"><label>Period *</label><input type="month" id="billDate"/></div>
     <div class="form-row">
       <div class="form-group"><label>Amount (₹) *</label><input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/></div>
       <div class="form-group"><label>Invoice / Ref No.</label><input type="text" id="billInvoice" placeholder="e.g. INV-2024-001"/></div>
@@ -1646,7 +1645,7 @@ function onBillGstToggle(){
 }
 
 function resetBillForm(){
-  ['billName','billDate','billAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
+  ['billDate','billAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
     .forEach(id=>document.getElementById(id).value='');
   document.getElementById('billType').value='';
   document.getElementById('billSubType').value='';
@@ -1670,7 +1669,6 @@ function openEditBillModal(id){
   document.getElementById('billModalTitle').textContent='✏️ Edit Bill';
   document.getElementById('billSaveBtn').textContent='💾 Save Changes';
   document.getElementById('billEditId').value=b.id;
-  document.getElementById('billName').value=b.name||'';
   document.getElementById('billDate').value=b.date||'';
   document.getElementById('billAmount').value=b.amount||'';
   document.getElementById('billInvoice').value=b.invoice||'';
@@ -1693,11 +1691,11 @@ function openEditBillModal(id){
 }
 
 function saveBill(){
-  const name=document.getElementById('billName').value.trim();
+  const desc=document.getElementById('billSpecialService').value.trim();
   const client=document.getElementById('billClient').value.trim();
   const date=document.getElementById('billDate').value;
   const amount=document.getElementById('billAmount').value;
-  if(!name||!client||!date||!amount){showToast('⚠️ Please fill all required fields');return;}
+  if(!client||!date||!amount){showToast('⚠️ Please fill all required fields');return;}
   const pan=document.getElementById('billPan').value.trim().toUpperCase();
   if(pan&&!validatePAN(pan)){showToast('⚠️ Invalid PAN format');return;}
   const gstRegistered=document.getElementById('billGstToggle').checked;
@@ -1706,7 +1704,7 @@ function saveBill(){
   const editId=document.getElementById('billEditId').value;
   const bill={
     id: editId||Date.now().toString(),
-    name, client, date, amount,
+    name: desc, client, date, amount,
     type: document.getElementById('billType').value,
     subType: document.getElementById('billSubType').value,
     specialService: document.getElementById('billSpecialService').value.trim(),
@@ -1744,7 +1742,7 @@ function renderBills(){
   }
   el.innerHTML=list.map(b=>{
     const amt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—';
-    const dt=b.date?new Date(b.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const dt=b.date?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'}):'—';
     const ini=b.client.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const sub=[b.type,b.subType,b.specialService].filter(Boolean).join(' › ');
     return`<div class="agr-card" style="margin-bottom:12px">
