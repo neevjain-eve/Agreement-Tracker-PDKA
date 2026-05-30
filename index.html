@@ -1187,101 +1187,106 @@
       <strong>🔄 Renewing Agreement</strong>
       The original agreement will be preserved as history. Update the dates and any changed details below.
     </div>
-    <div class="form-section-title">📄 Agreement Details</div>
-    <div class="form-group"><label>Agreement Name *</label>
-      <select id="agrNameSelect" onchange="onAgrNameSelect()">
-        <option value="">Select agreement type...</option>
-        <option value="Accounting Retainer Services Agreement">Accounting Retainer Services Agreement</option>
-        <option value="CS Retainer Services Agreement">CS Retainer Services Agreement</option>
-        <option value="Advisory Services Agreement">Advisory Services Agreement</option>
-        <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
-        <option value="Tax Services Agreement">Tax Services Agreement</option>
-      </select>
-      <input type="hidden" id="agrName"/>
-    </div>
-    <div class="form-group"><label>Type / Category</label>
-      <select id="agrType" onchange="onTypeChange()">
-        <option value="">Select type...</option>
-        <option>Accounting Retainer Services</option>
-        <option>CS Retainer Services</option>
-        <option>Advisory Services</option>
-        <option>Auditing &amp; Assurance Services</option>
-        <option>Tax Services</option>
-      </select>
-    </div>
-    <div id="agrServiceFields" style="display:none">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Sub-Service</label>
-          <select id="agrSubType" onchange="onAgrSubChange()">
-            <option value="">Select sub-service...</option>
-            <option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+
+      <!-- LEFT: Agreement Details -->
+      <div>
+        <div class="form-section-title">📄 Agreement Details</div>
+        <div class="form-group"><label>Agreement Name *</label>
+          <select id="agrNameSelect" onchange="onAgrNameSelect()">
+            <option value="">Select agreement type...</option>
+            <option value="Accounting Retainer Services Agreement">Accounting Retainer Services Agreement</option>
+            <option value="CS Retainer Services Agreement">CS Retainer Services Agreement</option>
+            <option value="Advisory Services Agreement">Advisory Services Agreement</option>
+            <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
+            <option value="Tax Services Agreement">Tax Services Agreement</option>
           </select>
-          <div id="agrAddSubRow" style="display:none;margin-top:6px;gap:6px;align-items:center">
-            <input type="text" id="agrNewSubInput" placeholder="New sub-service name" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')saveAgrSubCategory()"/>
-            <button type="button" onclick="saveAgrSubCategory()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;cursor:pointer">Request</button>
-            <button type="button" onclick="hideAgrAddSub()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted)">✕</button>
+          <input type="hidden" id="agrName"/>
+        </div>
+        <div class="form-group"><label>Type / Category</label>
+          <select id="agrType" onchange="onTypeChange()">
+            <option value="">Select type...</option>
+            <option>Accounting Retainer Services</option>
+            <option>CS Retainer Services</option>
+            <option>Advisory Services</option>
+            <option>Auditing &amp; Assurance Services</option>
+            <option>Tax Services</option>
+          </select>
+        </div>
+        <div id="agrServiceFields" style="display:none">
+          <div class="form-group">
+            <label>Sub-Service</label>
+            <select id="agrSubType" onchange="onAgrSubChange()">
+              <option value="">Select sub-service...</option>
+              <option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>
+            </select>
+            <div id="agrAddSubRow" style="display:none;margin-top:6px;gap:6px;align-items:center">
+              <input type="text" id="agrNewSubInput" placeholder="New sub-service name" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')saveAgrSubCategory()"/>
+              <button type="button" onclick="saveAgrSubCategory()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;cursor:pointer">Request</button>
+              <button type="button" onclick="hideAgrAddSub()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted)">✕</button>
+            </div>
+          </div>
+          <div class="form-group"><label>Amount (₹)</label>
+            <input type="number" id="agrAmount" placeholder="e.g. 50000" min="0" step="0.01"/>
+          </div>
+          <div class="form-group"><label>Description</label>
+            <input type="text" id="agrSpecialService" placeholder="e.g. DPIIT Startup Compliance, ROC Filing..."/>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Start Date *</label><input type="date" id="agrStart"/></div>
+            <div class="form-group"><label>End Date *</label><input type="date" id="agrEnd"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Billing Month <span style="font-size:.7rem;color:var(--muted)">(optional)</span></label>
+              <input type="month" id="agrMonth"/>
+            </div>
+            <div class="form-group">
+              <label>Billing Frequency</label>
+              <select id="agrBillingFreq">
+                <option value="">Select frequency...</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Quarterly">Quarterly</option>
+                <option value="Half Yearly">Half Yearly</option>
+                <option value="Yearly">Yearly</option>
+              </select>
+            </div>
           </div>
         </div>
+        <div class="form-section-title">📎 Attach Documents</div>
         <div class="form-group">
-          <label>Amount (₹)</label>
-          <input type="number" id="agrAmount" placeholder="e.g. 50000" min="0" step="0.01"/>
+          <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
+               ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+            <div class="dz-icon">📂</div>
+            <div><strong>Tap to attach files</strong></div>
+            <div style="font-size:.73rem;margin-top:3px">PDF, Word, Excel, Images &amp; more</div>
+          </div>
+          <input type="file" id="fileInput" multiple style="display:none" onchange="onFileSelect(event)" accept="*/*"/>
+          <div id="pendingFiles"></div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Description</label>
-        <input type="text" id="agrSpecialService" placeholder="e.g. DPIIT Startup Compliance, ROC Filing..."/>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label>Start Date *</label><input type="date" id="agrStart"/></div>
-        <div class="form-group"><label>End Date *</label><input type="date" id="agrEnd"/></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>Billing Month <span style="font-size:.7rem;color:var(--muted)">(optional)</span></label>
-          <input type="month" id="agrMonth"/>
+
+      <!-- RIGHT: Client + Email Details -->
+      <div>
+        <div class="form-section-title">👤 Party / Client / Vendor Details</div>
+        <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
+        <div class="form-group"><label>PAN Number</label><input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
+        <div class="form-group"><label>Contact Person</label><input type="text" id="agrContact" placeholder="Name"/></div>
+        <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
+        <div class="form-group"><label>GST Registration</label>
+          <label class="toggle-row" for="gstToggle">
+            <span class="toggle-label" id="gstToggleLabel">Not Registered under GST</span>
+            <span class="toggle-switch"><input type="checkbox" id="gstToggle" onchange="onGstToggle()"/><span class="toggle-slider"></span></span>
+          </label>
         </div>
-        <div class="form-group">
-          <label>Billing Frequency</label>
-          <select id="agrBillingFreq">
-            <option value="">Select frequency...</option>
-            <option value="Monthly">Monthly</option>
-            <option value="Quarterly">Quarterly</option>
-            <option value="Half Yearly">Half Yearly</option>
-            <option value="Yearly">Yearly</option>
-          </select>
-        </div>
+        <div class="form-group gst-field" id="gstField"><label>GST Number</label><input type="text" id="agrGst" placeholder="e.g. 29ABCDE1234F1Z5" maxlength="15" style="text-transform:uppercase"/></div>
+        <div class="form-group"><label>Notes / Remarks</label><textarea id="agrNotes" rows="2" placeholder="Any additional notes..."></textarea></div>
+        <div class="form-section-title">📧 Email Notifications</div>
+        <div class="form-group"><label>TO — Email 1 (Primary Recipient)</label><input type="email" id="agrToEmail1" placeholder="e.g. manager@company.com"/></div>
+        <div class="form-group"><label>TO — Email 2 (Second Recipient)</label><input type="email" id="agrToEmail2" placeholder="e.g. accounts@company.com"/></div>
+        <div class="form-group"><label>CC Emails</label><input type="text" id="agrCcEmails" placeholder="cc1@company.com, cc2@company.com"/></div>
       </div>
-    </div>
-    <div class="form-section-title">👤 Party / Client / Vendor Details</div>
-    <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
-    <div class="form-row">
-      <div class="form-group"><label>PAN Number</label><input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
-      <div class="form-group"><label>Contact Person</label><input type="text" id="agrContact" placeholder="Name"/></div>
-    </div>
-    <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
-    <div class="form-group"><label>GST Registration</label>
-      <label class="toggle-row" for="gstToggle">
-        <span class="toggle-label" id="gstToggleLabel">Not Registered under GST</span>
-        <span class="toggle-switch"><input type="checkbox" id="gstToggle" onchange="onGstToggle()"/><span class="toggle-slider"></span></span>
-      </label>
-    </div>
-    <div class="form-group gst-field" id="gstField"><label>GST Number</label><input type="text" id="agrGst" placeholder="e.g. 29ABCDE1234F1Z5" maxlength="15" style="text-transform:uppercase"/></div>
-    <div class="form-group"><label>Notes / Remarks</label><textarea id="agrNotes" rows="2" placeholder="Any additional notes..."></textarea></div>
-    <div class="form-section-title">📧 Email Notifications</div>
-    <div class="form-group"><label>TO — Email 1 (Primary Recipient)</label><input type="email" id="agrToEmail1" placeholder="e.g. manager@company.com"/></div>
-    <div class="form-group"><label>TO — Email 2 (Second Recipient)</label><input type="email" id="agrToEmail2" placeholder="e.g. accounts@company.com"/></div>
-    <div class="form-group"><label>CC Emails</label><input type="text" id="agrCcEmails" placeholder="cc1@company.com, cc2@company.com"/></div>
-    <div class="form-section-title">📎 Attach Documents</div>
-    <div class="form-group">
-      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
-           ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
-        <div class="dz-icon">📂</div>
-        <div><strong>Tap to attach files</strong></div>
-        <div style="font-size:.73rem;margin-top:3px">PDF, Word, Excel, Images &amp; more</div>
-      </div>
-      <input type="file" id="fileInput" multiple style="display:none" onchange="onFileSelect(event)" accept="*/*"/>
-      <div id="pendingFiles"></div>
+
     </div>
     <button class="btn-primary" id="saveBtn" onclick="saveAgreement()">💾 Save Agreement</button>
     <button class="btn-secondary" onclick="closeModal('addModal')">Cancel</button>
