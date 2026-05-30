@@ -1329,10 +1329,13 @@
             </select>
           </div>
         </div>
-        <!-- Right half: Custom date -->
+        <!-- Right half: Custom date range -->
         <div>
           <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Custom</div>
-          <input type="date" id="billDateCustom" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.83rem;font-family:inherit;outline:none;box-sizing:border-box" onchange="syncBillPeriodFromCustom()"/>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <input type="date" id="billDateCustomStart" placeholder="Start Date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;font-family:inherit;outline:none;box-sizing:border-box" onchange="syncBillPeriodFromCustom()"/>
+            <input type="date" id="billDateCustomEnd" placeholder="End Date" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.8rem;font-family:inherit;outline:none;box-sizing:border-box" onchange="syncBillPeriodFromCustom()"/>
+          </div>
         </div>
       </div>
       <input type="hidden" id="billDate"/>
@@ -1691,15 +1694,17 @@ function syncBillPeriod(){
   const y=document.getElementById('billPeriodYear').value;
   if(m&&y){
     document.getElementById('billDate').value=y+'-'+m;
-    document.getElementById('billDateCustom').value='';
+    document.getElementById('billDateCustomStart').value='';
+    document.getElementById('billDateCustomEnd').value='';
   } else {
     document.getElementById('billDate').value='';
   }
 }
 function syncBillPeriodFromCustom(){
-  const d=document.getElementById('billDateCustom').value;
-  if(d){
-    document.getElementById('billDate').value=d;
+  const s=document.getElementById('billDateCustomStart').value;
+  const e=document.getElementById('billDateCustomEnd').value;
+  if(s||e){
+    document.getElementById('billDate').value=(s||'')+'|'+(e||'');
     document.getElementById('billPeriodMonth').value='';
     document.getElementById('billPeriodYear').value='';
   }
@@ -1710,7 +1715,8 @@ function resetBillForm(){
   document.getElementById('billDate').value='';
   document.getElementById('billPeriodMonth').value='';
   document.getElementById('billPeriodYear').value='';
-  document.getElementById('billDateCustom').value='';
+  document.getElementById('billDateCustomStart').value='';
+  document.getElementById('billDateCustomEnd').value='';
   document.getElementById('billType').value='';
   document.getElementById('billSubType').value='';
   document.getElementById('billSubTypeGroup').style.display='none';
@@ -1738,9 +1744,12 @@ function openEditBillModal(id){
   if(_bd&&_bd.length===7){
     document.getElementById('billPeriodYear').value=_bd.slice(0,4);
     document.getElementById('billPeriodMonth').value=_bd.slice(5,7);
-    document.getElementById('billDateCustom').value='';
-  } else if(_bd&&_bd.length===10){
-    document.getElementById('billDateCustom').value=_bd;
+    document.getElementById('billDateCustomStart').value='';
+    document.getElementById('billDateCustomEnd').value='';
+  } else if(_bd&&_bd.includes('|')){
+    const [_s,_e]=_bd.split('|');
+    document.getElementById('billDateCustomStart').value=_s||'';
+    document.getElementById('billDateCustomEnd').value=_e||'';
     document.getElementById('billPeriodMonth').value='';
     document.getElementById('billPeriodYear').value='';
   }
@@ -1816,7 +1825,16 @@ function renderBills(){
   }
   el.innerHTML=list.map(b=>{
     const amt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—';
-    const dt=b.date?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'}):'—';
+    let dt='—';
+    if(b.date){
+      if(b.date.includes('|')){
+        const [_s,_e]=b.date.split('|');
+        const fmt=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';
+        dt=[fmt(_s),fmt(_e)].filter(Boolean).join(' – ');
+      } else {
+        dt=new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+      }
+    }
     const ini=b.client.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const sub=[b.type,b.subType,b.specialService].filter(Boolean).join(' › ');
     return`<div class="agr-card" style="margin-bottom:12px">
