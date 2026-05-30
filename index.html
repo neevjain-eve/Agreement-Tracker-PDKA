@@ -1183,7 +1183,18 @@
       The original agreement will be preserved as history. Update the dates and any changed details below.
     </div>
     <div class="form-section-title">📄 Agreement Details</div>
-    <div class="form-group"><label>Agreement Name *</label><input type="text" id="agrName" placeholder="e.g. Software License Agreement"/></div>
+    <div class="form-group"><label>Agreement Name *</label>
+      <select id="agrNameSelect" onchange="onAgrNameSelect()" style="margin-bottom:6px">
+        <option value="">Select category or type custom...</option>
+        <option value="Accounting Retainer Services Agreement">Accounting Retainer Services Agreement</option>
+        <option value="CS Retainer Services Agreement">CS Retainer Services Agreement</option>
+        <option value="Advisory Services Agreement">Advisory Services Agreement</option>
+        <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
+        <option value="Tax Services Agreement">Tax Services Agreement</option>
+        <option value="__custom__">Custom name...</option>
+      </select>
+      <input type="text" id="agrName" placeholder="e.g. Software License Agreement" oninput="onAgrNameInput()"/>
+    </div>
     <div class="form-group"><label>Type / Category</label>
       <select id="agrType" onchange="onTypeChange()">
         <option value="">Select type...</option>
@@ -1662,6 +1673,37 @@ const SUB_SERVICES = {
   'Tax Services': ['Income Tax Return and Compliance','Income Tax Assessments and Advising','Retainership and GST Filing','GST Audits and Assessments']
 };
 
+function onAgrNameSelect(){
+  const sel=document.getElementById('agrNameSelect');
+  const val=sel.value;
+  if(!val||val==='__custom__'){
+    document.getElementById('agrName').value='';
+    document.getElementById('agrName').focus();
+    return;
+  }
+  // Set the name field
+  document.getElementById('agrName').value=val;
+  // Sync Type/Category
+  const typeMap={
+    'Accounting Retainer Services Agreement':'Accounting Retainer Services',
+    'CS Retainer Services Agreement':'CS Retainer Services',
+    'Advisory Services Agreement':'Advisory Services',
+    'Auditing & Assurance Services Agreement':'Auditing & Assurance Services',
+    'Tax Services Agreement':'Tax Services'
+  };
+  const type=typeMap[val]||'';
+  if(type){
+    document.getElementById('agrType').value=type;
+    onTypeChange();
+  }
+}
+function onAgrNameInput(){
+  // If user types freely, deselect the dropdown
+  const inp=document.getElementById('agrName').value;
+  const sel=document.getElementById('agrNameSelect');
+  const matched=[...sel.options].find(o=>o.value===inp);
+  if(!matched) sel.value='__custom__';
+}
 function onTypeChange(){
   const type = document.getElementById('agrType').value;
   const fields = document.getElementById('agrServiceFields');
@@ -2554,6 +2596,7 @@ async function deleteFile(agrId,fileId){
 // ══════════════════════════════════════════════════
 function resetForm(){
   ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('agrNameSelect').value='';
   document.getElementById('agrType').value='';
   document.getElementById('agrSubType').value='';
   document.getElementById('agrAmount').value='';
@@ -2574,6 +2617,8 @@ function openEditModal(id){
   resetForm();document.getElementById('modalTitle').textContent='✏️ Edit Agreement';document.getElementById('saveBtn').textContent='💾 Save Changes';
   document.getElementById('editId').value=a.id;
   document.getElementById('agrName').value=a.name||'';
+  const _ns=document.getElementById('agrNameSelect');
+  if(_ns){const _m=[..._ns.options].find(o=>o.value===a.name);_ns.value=_m?a.name:'__custom__';}
   document.getElementById('agrClient').value=a.client||'';document.getElementById('agrStart').value=a.startDate||'';
   document.getElementById('agrEnd').value=a.endDate||'';
   document.getElementById('agrType').value=a.type||'';
