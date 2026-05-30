@@ -1842,7 +1842,8 @@ function onTypeChange(){
   const subSel = document.getElementById('agrSubType');
   const subs = SUB_SERVICES[type] || [];
   subSel.innerHTML = '<option value="">Select sub-service...</option>' +
-    subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
+    subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
+    '<option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>';
   fields.style.display = type ? 'block' : 'none';
 }
 
@@ -1859,8 +1860,9 @@ function onBillTypeChange(){
   const sel = document.getElementById('billSubType');
   const subs = SUB_SERVICES[type] || [];
   sel.innerHTML = '<option value="">Select sub-service...</option>' +
-    subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('');
-  grp.style.display = subs.length ? 'block' : 'none';
+    subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
+    '<option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>';
+  grp.style.display = type ? 'block' : 'none';
 }
 
 function onBillGstToggle(){
