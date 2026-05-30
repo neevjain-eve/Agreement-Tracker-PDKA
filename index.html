@@ -743,6 +743,9 @@
       <button class="nav-item" onclick="showSection('billing')" id="nav-billing">
         <span class="nav-icon">🧾</span><span class="nav-label">One Time Billing</span>
       </button>
+      <button class="nav-item" onclick="showSection('monthly')" id="nav-monthly">
+        <span class="nav-icon">📅</span><span class="nav-label">Monthly Statement</span>
+      </button>
       <button class="nav-item" onclick="showSection('notifications')" id="nav-notifications">
         <span class="nav-icon">🔔</span><span class="nav-label">Notifications</span>
       </button>
@@ -975,6 +978,48 @@
       </div>
       <div class="agreements-list" id="billList" style="padding:0 16px 90px"></div>
       <button class="fab" onclick="openAddBillModal()">＋</button>
+    </div>
+
+    <!-- ════ SECTION: MONTHLY STATEMENT ═══════════════════════ -->
+    <div class="section" id="sec-monthly">
+      <div style="padding:16px 16px 0">
+
+        <!-- Month/Year picker + actions -->
+        <div class="admin-panel" style="margin:0 0 14px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <div style="font-size:.72rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Select Period</div>
+            <select id="monthlyMonth" onchange="renderMonthly()" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:.83rem;font-family:inherit;outline:none">
+              <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+              <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+              <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+              <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+            </select>
+            <select id="monthlyYear" onchange="renderMonthly()" style="padding:8px 10px;border:1.5px solid var(--border);border-radius:10px;font-size:.83rem;font-family:inherit;outline:none">
+              <option value="2023">2023</option><option value="2024">2024</option>
+              <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+            </select>
+            <div style="flex:1"></div>
+            <button onclick="downloadMonthlyExcel()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">📥 Export Excel</button>
+            <button onclick="zohoMonthlyPush()" style="background:linear-gradient(135deg,#f8a006,#c2410c);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">☁️ Push to Zoho</button>
+          </div>
+        </div>
+
+        <!-- Summary cards -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px" id="monthlySummaryCards"></div>
+
+        <!-- Agreements table -->
+        <div class="admin-panel" style="margin:0 0 14px;overflow:hidden">
+          <div class="admin-panel-title">📋 Agreements Active This Month</div>
+          <div style="overflow-x:auto"><table id="monthlyAgrTable" style="width:100%;border-collapse:collapse;font-size:.78rem"></table></div>
+        </div>
+
+        <!-- Bills table -->
+        <div class="admin-panel" style="margin:0 0 90px;overflow:hidden">
+          <div class="admin-panel-title">🧾 One Time Bills This Month</div>
+          <div style="overflow-x:auto"><table id="monthlyBillTable" style="width:100%;border-collapse:collapse;font-size:.78rem"></table></div>
+        </div>
+
+      </div>
     </div>
 
     <!-- ════ SECTION: EXPORT / IMPORT ═════════════════════════ -->
@@ -1587,13 +1632,13 @@ function showToast(msg){
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 function showSection(name){
-  ['dashboard','agreements','billing','notifications','export','admin'].forEach(s=>{
+  ['dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
     const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===name);
   });
-  const titles={dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
+  const titles={dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
   if(name==='admin'){renderSubReqAdmin();updateZohoStatus();}
@@ -1610,6 +1655,7 @@ function showSection(name){
   if(name==='dashboard'){updateDashboard();}
   if(name==='agreements'){renderAgreements();}
   if(name==='billing'){renderBills();}
+  if(name==='monthly'){initMonthly();}
   closeSidebar();
 }
 
@@ -3109,6 +3155,215 @@ function resetBulkUpload(){parsedRows=[];document.getElementById('bulkStep1').st
 // ══════════════════════════════════════════════════
 // DOWNLOAD REPORT
 // ══════════════════════════════════════════════════
+// ══════════════════════════════════════════════════
+// MONTHLY STATEMENT
+// ══════════════════════════════════════════════════
+function initMonthly(){
+  const now=new Date();
+  const mm=document.getElementById('monthlyMonth');
+  const yy=document.getElementById('monthlyYear');
+  if(mm&&!mm._init){mm.value=now.getMonth()+1;mm._init=true;}
+  if(yy&&!yy._init){yy.value=now.getFullYear();yy._init=true;}
+  renderMonthly();
+}
+
+function getMonthlyData(){
+  const m=parseInt(document.getElementById('monthlyMonth').value);
+  const y=parseInt(document.getElementById('monthlyYear').value);
+  // Agreements active during this month (start <= last day of month AND end >= first day)
+  const first=new Date(y,m-1,1);
+  const last=new Date(y,m,0);
+  const agrData=agreements.filter(a=>{
+    if(!a.startDate||!a.endDate)return false;
+    const s=new Date(a.startDate),e=new Date(a.endDate);
+    return s<=last&&e>=first;
+  });
+  // Bills in this month — match period (month field or custom date range)
+  const billData=bills.filter(b=>{
+    if(!b.date)return false;
+    if(b.date.includes('|')){
+      const [bs,be]=b.date.split('|');
+      const s=bs?new Date(bs):null,e=be?new Date(be):null;
+      if(s&&e)return s<=last&&e>=first;
+      if(s)return s.getFullYear()===y&&s.getMonth()+1===m;
+      return false;
+    }
+    // YYYY-MM month format
+    if(b.date.length===7){
+      const [by,bm]=b.date.split('-').map(Number);
+      return by===y&&bm===m;
+    }
+    // Full date
+    const d=new Date(b.date);
+    return d.getFullYear()===y&&d.getMonth()+1===m;
+  });
+  return{m,y,agrData,billData};
+}
+
+function renderMonthly(){
+  const{m,y,agrData,billData}=getMonthlyData();
+  const totalAgrAmt=agrData.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  const grandTotal=totalAgrAmt+totalBillAmt;
+  const fmt=n=>'₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const mn=new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+
+  // Summary cards
+  const cards=document.getElementById('monthlySummaryCards');
+  if(cards) cards.innerHTML=[
+    {label:'Agreements',val:agrData.length,sub:fmt(totalAgrAmt),color:'#3b82f6',bg:'#eff6ff'},
+    {label:'One Time Bills',val:billData.length,sub:fmt(totalBillAmt),color:'#f59e0b',bg:'#fffbeb'},
+    {label:'Grand Total',val:agrData.length+billData.length,sub:fmt(grandTotal),color:'#16a34a',bg:'#f0fdf4'}
+  ].map(c=>`<div style="background:${c.bg};border-radius:14px;padding:16px 18px;border:1.5px solid ${c.color}22">
+    <div style="font-size:.68rem;font-weight:700;color:${c.color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${c.label}</div>
+    <div style="font-size:1.6rem;font-weight:900;color:${c.color};line-height:1">${c.val}</div>
+    <div style="font-size:.78rem;font-weight:700;color:${c.color};margin-top:4px;opacity:.8">${c.sub}</div>
+  </div>`).join('');
+
+  // Agreements table
+  const th=(t,w)=>`<th style="padding:8px 10px;text-align:left;font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap;${w?'width:'+w:''}">` + t + '</th>';
+  const td=(t,s='')=>`<td style="padding:8px 10px;border-bottom:1px solid var(--border-light);${s}">${t??'—'}</td>`;
+  const badge=(s,c,b)=>`<span style="background:${b};color:${c};font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px">${s}</span>`;
+  const statusColor={active:['#16a34a','#dcfce7'],expiring:['#d97706','#fef9c3'],expired:['#dc2626','#fee2e2'],renewed:['#7c3aed','#ede9fe']};
+
+  const agrTable=document.getElementById('monthlyAgrTable');
+  if(agrTable){
+    if(!agrData.length){
+      agrTable.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted);font-size:.82rem">No agreements active this month</td></tr>';
+    }else{
+      const hdr='<thead><tr>'+th('#','40px')+th('Agreement Name')+th('Client')+th('Type')+th('Sub-Service')+th('Start')+th('End')+th('Amount','100px')+th('Status','90px')+'</tr></thead>';
+      const rows=agrData.map((a,i)=>{
+        const st=getStatus(a);const[c,b]=statusColor[st]||['#6b7280','#f3f4f6'];
+        const lbl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st];
+        return'<tr>'+
+          td(i+1,'')+td(`<strong>${esc(a.name||'')}</strong>`)+td(esc(a.client||''))+
+          td(esc(a.type||''))+td(esc(a.subType||a.specialService||''))+
+          td(fDate(a.startDate))+td(fDate(a.endDate))+
+          td(a.amount?'₹'+Number(a.amount).toLocaleString('en-IN'):'—','font-weight:700')+
+          td(badge(lbl,c,b))+'</tr>';
+      }).join('');
+      agrTable.innerHTML=hdr+'<tbody>'+rows+'</tbody>'+
+        '<tfoot><tr><td colspan="7" style="padding:10px;font-weight:800;font-size:.82rem">Total</td>'+
+        '<td style="padding:10px;font-weight:800;color:#16a34a">'+fmt(totalAgrAmt)+'</td><td></td></tr></tfoot>';
+    }
+  }
+
+  // Bills table
+  const billTable=document.getElementById('monthlyBillTable');
+  if(billTable){
+    if(!billData.length){
+      billTable.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);font-size:.82rem">No bills this month</td></tr>';
+    }else{
+      const hdr='<thead><tr>'+th('#','40px')+th('Client')+th('Service Type')+th('Sub-Service')+th('Description')+th('Period')+th('Invoice No.')+th('Amount','100px')+'</tr></thead>';
+      const rows=billData.map((b,i)=>{
+        const dt=b.date?(b.date.includes('|')?(()=>{const[s,e]=b.date.split('|');const f=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';return[f(s),f(e)].filter(Boolean).join(' – ');})():b.date.length===7?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'short',year:'numeric'}):new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})):'—';
+        return'<tr>'+td(i+1)+td(esc(b.client||''))+td(esc(b.type||''))+
+          td(esc(b.subType||''))+td(esc(b.specialService||''))+td(dt)+
+          td(esc(b.invoice||''))+
+          td(b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—','font-weight:700')+'</tr>';
+      }).join('');
+      billTable.innerHTML=hdr+'<tbody>'+rows+'</tbody>'+
+        '<tfoot><tr><td colspan="7" style="padding:10px;font-weight:800;font-size:.82rem">Total</td>'+
+        '<td style="padding:10px;font-weight:800;color:#f59e0b">'+fmt(totalBillAmt)+'</td></tr></tfoot>';
+    }
+  }
+}
+
+function downloadMonthlyExcel(){
+  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded');return;}
+  const{m,y,agrData,billData}=getMonthlyData();
+  const mn=new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
+  const fmt=n=>n?'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2}):'—';
+  const totalAgrAmt=agrData.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  const wb=XLSX.utils.book_new();
+
+  // Summary sheet
+  const sumRows=[
+    ['Monthly Statement — '+mn],['Generated:',new Date().toLocaleDateString('en-IN')],[''],
+    ['Category','Count','Amount'],
+    ['Agreements',agrData.length,totalAgrAmt],
+    ['One Time Bills',billData.length,totalBillAmt],
+    ['Grand Total',agrData.length+billData.length,totalAgrAmt+totalBillAmt]
+  ];
+  const wsSummary=XLSX.utils.aoa_to_sheet(sumRows);
+  wsSummary['!cols']=[{wch:28},{wch:10},{wch:18}];
+  XLSX.utils.book_append_sheet(wb,wsSummary,'Summary');
+
+  // Agreements sheet
+  const agrHeaders=['#','Agreement Name','Client / Vendor','Type','Sub-Service','Description','Start Date','End Date','Billing Freq','Amount (₹)','Status','PAN','GST No.','Contact','Notes'];
+  const agrRows=agrData.map((a,i)=>[
+    i+1,a.name||'',a.client||'',a.type||'',a.subType||'',a.specialService||'',
+    fDate(a.startDate),fDate(a.endDate),a.billingFreq||'',
+    parseFloat(a.amount)||0,
+    {active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[getStatus(a)]||'',
+    a.pan||'',a.gst||'',a.contact||'',a.notes||''
+  ]);
+  agrRows.push(['','','','','','','','','Total',totalAgrAmt,'','','','','']);
+  const wsAgr=XLSX.utils.aoa_to_sheet([agrHeaders,...agrRows]);
+  wsAgr['!cols']=[{wch:4},{wch:30},{wch:26},{wch:26},{wch:22},{wch:22},{wch:12},{wch:12},{wch:13},{wch:13},{wch:14},{wch:13},{wch:18},{wch:18},{wch:24}];
+  XLSX.utils.book_append_sheet(wb,wsAgr,'Agreements');
+
+  // Bills sheet
+  const billHeaders=['#','Client / Vendor','Service Type','Sub-Service','Description','Period','Invoice No.','Amount (₹)','PAN','GST No.','Contact','Notes'];
+  const billRows=billData.map((b,i)=>{
+    const dt=b.date?(b.date.includes('|')?(()=>{const[s,e]=b.date.split('|');const f=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';return[f(s),f(e)].filter(Boolean).join(' to ');})():b.date.length===7?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'}):new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})):'';
+    return[i+1,b.client||'',b.type||'',b.subType||'',b.specialService||'',dt,b.invoice||'',parseFloat(b.amount)||0,b.pan||'',b.gst||'',b.contactInfo||'',b.notes||''];
+  });
+  billRows.push(['','','','','','','Total',totalBillAmt,'','','','']);
+  const wsBill=XLSX.utils.aoa_to_sheet([billHeaders,...billRows]);
+  wsBill['!cols']=[{wch:4},{wch:26},{wch:26},{wch:22},{wch:22},{wch:22},{wch:16},{wch:13},{wch:13},{wch:18},{wch:22},{wch:24}];
+  XLSX.utils.book_append_sheet(wb,wsBill,'One Time Bills');
+
+  const mn2=new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'}).replace(' ','-');
+  XLSX.writeFile(wb,`Monthly_Statement_${mn2}.xlsx`);
+  showToast('✅ Monthly statement downloaded!');
+}
+
+async function zohoMonthlyPush(){
+  if(!isZohoConnected()){showToast('⚠️ Connect Zoho Books in Admin Settings first');return;}
+  const{agrData,billData}=getMonthlyData();
+  if(!agrData.length&&!billData.length){showToast('No data this month to push');return;}
+  showToast('🔄 Pushing to Zoho Books...');
+  let token;
+  try{token=await zohoGetToken();}
+  catch(e){showToast('❌ Zoho auth failed: '+e.message);return;}
+  const cfg=getZohoConfig();
+  const orgId=cfg.orgId;
+  let pushed=0,errors=0;
+  const today=new Date().toISOString().slice(0,10);
+
+  for(const a of agrData){
+    if(!a.client)continue;
+    try{
+      await zohoApi('POST','/contacts',{
+        contact_name:a.client,company_name:a.client,contact_type:'customer',
+        notes:'Agreement: '+(a.name||'')+(a.type?' | '+a.type:'')+(a.startDate?' | Start: '+a.startDate:'')+(a.endDate?' | End: '+a.endDate:''),
+        gst_no:a.gst||undefined,gst_treatment:a.gstRegistered?'business_gst':'business_none'
+      },token,orgId);
+      pushed++;
+    }catch(e){errors++;}
+  }
+
+  for(const b of billData){
+    if(!b.client||!b.amount)continue;
+    try{
+      const cr=await zohoApi('POST','/contacts',{contact_name:b.client,company_name:b.client,contact_type:'customer'},token,orgId);
+      const cid=cr?.contact?.contact_id;
+      if(cid){
+        await zohoApi('POST','/invoices',{
+          customer_id:cid,date:today,
+          reference_number:b.invoice||undefined,
+          notes:(b.specialService||b.type||'One Time Bill')+(b.subType?' – '+b.subType:''),
+          line_items:[{name:(b.specialService||b.type||'Service'),rate:parseFloat(b.amount)||0,quantity:1,product_type:'service'}]
+        },token,orgId);
+        pushed++;
+      }
+    }catch(e){errors++;}
+  }
+  showToast(errors?`⚠️ Done — ${pushed} pushed, ${errors} errors`:`✅ ${pushed} records pushed to Zoho Books!`);
+}
+
 function downloadReport(){
   if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
   if(agreements.length===0){showToast('⚠️ No agreements to export');return}
