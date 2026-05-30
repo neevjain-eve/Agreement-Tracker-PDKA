@@ -1211,7 +1211,12 @@
           <select id="agrSubType">
             <option value="">Select sub-service...</option>
           </select>
-          <button type="button" onclick="addAgrSubCategory()" style="margin-top:5px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:3px">＋ Add sub-category</button>
+          <div id="agrAddSubRow" style="display:none;margin-top:6px;display:none;gap:6px;align-items:center">
+            <input type="text" id="agrNewSubInput" placeholder="New sub-category name" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-family:inherit;outline:none"/>
+            <button type="button" onclick="saveAgrSubCategory()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;cursor:pointer">Save</button>
+            <button type="button" onclick="hideAgrAddSub()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted)">✕</button>
+          </div>
+          <button type="button" id="agrAddSubBtn" onclick="showAgrAddSub()" style="margin-top:5px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:3px">＋ Add new</button>
         </div>
         <div class="form-group">
           <label>Amount (₹)</label>
@@ -1300,7 +1305,12 @@
         <select id="billSubType">
           <option value="">Select sub-service...</option>
         </select>
-        <button type="button" onclick="addBillSubCategory()" style="margin-top:5px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:3px">＋ Add sub-category</button>
+        <div id="billAddSubRow" style="display:none;margin-top:6px;gap:6px;align-items:center">
+          <input type="text" id="billNewSubInput" placeholder="New sub-category name" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-family:inherit;outline:none"/>
+          <button type="button" onclick="saveBillSubCategory()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;cursor:pointer">Save</button>
+          <button type="button" onclick="hideBillAddSub()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted)">✕</button>
+        </div>
+        <button type="button" id="billAddSubBtn" onclick="showBillAddSub()" style="margin-top:5px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:3px">＋ Add new</button>
       </div>
     </div>
     <div class="form-group"><label>Description</label>
@@ -1692,34 +1702,59 @@ function onAgrNameSelect(){
 }
 function onAgrNameInput(){}
 
-function addAgrSubCategory(){
+// ── Agreements sub-category inline add ──
+function showAgrAddSub(){
   const type=document.getElementById('agrType').value;
   if(!type){showToast('Please select a service type first');return;}
-  const name=prompt('Enter new sub-category name:','');
-  if(!name||!name.trim())return;
-  const n=name.trim();
+  const row=document.getElementById('agrAddSubRow');
+  row.style.display='flex';
+  document.getElementById('agrAddSubBtn').style.display='none';
+  setTimeout(()=>document.getElementById('agrNewSubInput').focus(),50);
+}
+function hideAgrAddSub(){
+  document.getElementById('agrAddSubRow').style.display='none';
+  document.getElementById('agrNewSubInput').value='';
+  document.getElementById('agrAddSubBtn').style.display='flex';
+}
+function saveAgrSubCategory(){
+  const type=document.getElementById('agrType').value;
+  const n=document.getElementById('agrNewSubInput').value.trim();
+  if(!n){showToast('Enter a name');return;}
   if(!SUB_SERVICES[type])SUB_SERVICES[type]=[];
   if(SUB_SERVICES[type].includes(n)){showToast('Already exists');return;}
   SUB_SERVICES[type].push(n);
-  // Persist to localStorage
   localStorage.setItem('agrSubServices',JSON.stringify(SUB_SERVICES));
   onTypeChange();
   document.getElementById('agrSubType').value=n;
+  hideAgrAddSub();
   showToast('✅ Sub-category added');
 }
 
-function addBillSubCategory(){
+// ── Billing sub-category inline add ──
+function showBillAddSub(){
   const type=document.getElementById('billType').value;
   if(!type){showToast('Please select a service type first');return;}
-  const name=prompt('Enter new sub-category name:','');
-  if(!name||!name.trim())return;
-  const n=name.trim();
+  const row=document.getElementById('billAddSubRow');
+  row.style.display='flex';
+  document.getElementById('billAddSubBtn').style.display='none';
+  setTimeout(()=>document.getElementById('billNewSubInput').focus(),50);
+}
+function hideBillAddSub(){
+  document.getElementById('billAddSubRow').style.display='none';
+  document.getElementById('billNewSubInput').value='';
+  document.getElementById('billAddSubBtn').style.display='flex';
+}
+function saveBillSubCategory(){
+  const type=document.getElementById('billType').value;
+  const n=document.getElementById('billNewSubInput').value.trim();
+  if(!n){showToast('Enter a name');return;}
   if(!SUB_SERVICES[type])SUB_SERVICES[type]=[];
   if(SUB_SERVICES[type].includes(n)){showToast('Already exists');return;}
   SUB_SERVICES[type].push(n);
   localStorage.setItem('agrSubServices',JSON.stringify(SUB_SERVICES));
   onBillTypeChange();
   document.getElementById('billSubType').value=n;
+  hideBillAddSub();
   showToast('✅ Sub-category added');
 }
 function onTypeChange(){
@@ -1785,6 +1820,7 @@ function resetBillForm(){
   document.getElementById('billDateCustomEnd').value='';
   document.getElementById('billType').value='';
   document.getElementById('billSubType').value='';
+  hideBillAddSub&&hideBillAddSub();
   document.getElementById('billSubTypeGroup').style.display='none';
   document.getElementById('billGstToggle').checked=false;
   document.getElementById('billGstField').classList.remove('visible');
@@ -2618,6 +2654,7 @@ function resetForm(){
   document.getElementById('agrName').value='';
   document.getElementById('agrType').value='';
   document.getElementById('agrSubType').value='';
+  hideAgrAddSub&&hideAgrAddSub();
   document.getElementById('agrAmount').value='';
   document.getElementById('agrSpecialService').value='';
   document.getElementById('agrServiceFields').style.display='none';
