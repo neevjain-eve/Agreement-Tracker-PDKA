@@ -1184,16 +1184,15 @@
     </div>
     <div class="form-section-title">📄 Agreement Details</div>
     <div class="form-group"><label>Agreement Name *</label>
-      <select id="agrNameSelect" onchange="onAgrNameSelect()" style="margin-bottom:6px">
-        <option value="">Select category or type custom...</option>
+      <select id="agrNameSelect" onchange="onAgrNameSelect()">
+        <option value="">Select agreement type...</option>
         <option value="Accounting Retainer Services Agreement">Accounting Retainer Services Agreement</option>
         <option value="CS Retainer Services Agreement">CS Retainer Services Agreement</option>
         <option value="Advisory Services Agreement">Advisory Services Agreement</option>
         <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
         <option value="Tax Services Agreement">Tax Services Agreement</option>
-        <option value="__custom__">Custom name...</option>
       </select>
-      <input type="text" id="agrName" placeholder="e.g. Software License Agreement" oninput="onAgrNameInput()"/>
+      <input type="hidden" id="agrName"/>
     </div>
     <div class="form-group"><label>Type / Category</label>
       <select id="agrType" onchange="onTypeChange()">
@@ -1212,6 +1211,7 @@
           <select id="agrSubType">
             <option value="">Select sub-service...</option>
           </select>
+          <button type="button" onclick="addAgrSubCategory()" style="margin-top:5px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:3px">＋ Add sub-category</button>
         </div>
         <div class="form-group">
           <label>Amount (₹)</label>
@@ -1300,6 +1300,7 @@
         <select id="billSubType">
           <option value="">Select sub-service...</option>
         </select>
+        <button type="button" onclick="addBillSubCategory()" style="margin-top:5px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer;padding:2px 0;display:flex;align-items:center;gap:3px">＋ Add sub-category</button>
       </div>
     </div>
     <div class="form-group"><label>Description</label>
@@ -1672,18 +1673,13 @@ const SUB_SERVICES = {
   'Auditing & Assurance Services': [],
   'Tax Services': ['Income Tax Return and Compliance','Income Tax Assessments and Advising','Retainership and GST Filing','GST Audits and Assessments']
 };
+// Merge any user-added sub-categories from localStorage
+(function(){try{const saved=JSON.parse(localStorage.getItem('agrSubServices')||'{}');Object.keys(saved).forEach(k=>{if(SUB_SERVICES[k])saved[k].forEach(v=>{if(!SUB_SERVICES[k].includes(v))SUB_SERVICES[k].push(v);});});}catch(e){}})();
 
 function onAgrNameSelect(){
   const sel=document.getElementById('agrNameSelect');
   const val=sel.value;
-  if(!val||val==='__custom__'){
-    document.getElementById('agrName').value='';
-    document.getElementById('agrName').focus();
-    return;
-  }
-  // Set the name field
-  document.getElementById('agrName').value=val;
-  // Sync Type/Category
+  document.getElementById('agrName').value=val||'';
   const typeMap={
     'Accounting Retainer Services Agreement':'Accounting Retainer Services',
     'CS Retainer Services Agreement':'CS Retainer Services',
@@ -1692,17 +1688,39 @@ function onAgrNameSelect(){
     'Tax Services Agreement':'Tax Services'
   };
   const type=typeMap[val]||'';
-  if(type){
-    document.getElementById('agrType').value=type;
-    onTypeChange();
-  }
+  if(type){document.getElementById('agrType').value=type;onTypeChange();}
 }
-function onAgrNameInput(){
-  // If user types freely, deselect the dropdown
-  const inp=document.getElementById('agrName').value;
-  const sel=document.getElementById('agrNameSelect');
-  const matched=[...sel.options].find(o=>o.value===inp);
-  if(!matched) sel.value='__custom__';
+function onAgrNameInput(){}
+
+function addAgrSubCategory(){
+  const type=document.getElementById('agrType').value;
+  if(!type){showToast('Please select a service type first');return;}
+  const name=prompt('Enter new sub-category name:','');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(!SUB_SERVICES[type])SUB_SERVICES[type]=[];
+  if(SUB_SERVICES[type].includes(n)){showToast('Already exists');return;}
+  SUB_SERVICES[type].push(n);
+  // Persist to localStorage
+  localStorage.setItem('agrSubServices',JSON.stringify(SUB_SERVICES));
+  onTypeChange();
+  document.getElementById('agrSubType').value=n;
+  showToast('✅ Sub-category added');
+}
+
+function addBillSubCategory(){
+  const type=document.getElementById('billType').value;
+  if(!type){showToast('Please select a service type first');return;}
+  const name=prompt('Enter new sub-category name:','');
+  if(!name||!name.trim())return;
+  const n=name.trim();
+  if(!SUB_SERVICES[type])SUB_SERVICES[type]=[];
+  if(SUB_SERVICES[type].includes(n)){showToast('Already exists');return;}
+  SUB_SERVICES[type].push(n);
+  localStorage.setItem('agrSubServices',JSON.stringify(SUB_SERVICES));
+  onBillTypeChange();
+  document.getElementById('billSubType').value=n;
+  showToast('✅ Sub-category added');
 }
 function onTypeChange(){
   const type = document.getElementById('agrType').value;
@@ -2597,6 +2615,7 @@ async function deleteFile(agrId,fileId){
 function resetForm(){
   ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('agrNameSelect').value='';
+  document.getElementById('agrName').value='';
   document.getElementById('agrType').value='';
   document.getElementById('agrSubType').value='';
   document.getElementById('agrAmount').value='';
@@ -2618,7 +2637,7 @@ function openEditModal(id){
   document.getElementById('editId').value=a.id;
   document.getElementById('agrName').value=a.name||'';
   const _ns=document.getElementById('agrNameSelect');
-  if(_ns){const _m=[..._ns.options].find(o=>o.value===a.name);_ns.value=_m?a.name:'__custom__';}
+  if(_ns){const _m=[..._ns.options].find(o=>o.value===a.name);_ns.value=_m?a.name:'';}
   document.getElementById('agrClient').value=a.client||'';document.getElementById('agrStart').value=a.startDate||'';
   document.getElementById('agrEnd').value=a.endDate||'';
   document.getElementById('agrType').value=a.type||'';
