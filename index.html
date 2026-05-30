@@ -761,9 +761,13 @@
           <span class="sidebar-profile-role" id="sidebarProfileRole">user</span>
         </div>
       </div>
-      <div class="sync-chip" id="syncChip" onclick="showSection('admin');setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start">
+      <div class="sync-chip" id="syncChip" onclick="showSection('admin');setTimeout(()=>{const el=document.getElementById('odAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="OneDrive Sync" style="width:100%;margin-bottom:6px;justify-content:flex-start">
         <span class="sync-dot" id="syncDot"></span>
         <span id="syncLabel">OneDrive</span>
+      </div>
+      <div class="sync-chip" id="zohoChip" onclick="showSection('admin');setTimeout(()=>{const el=document.getElementById('zohoAdminPanel');if(el)el.scrollIntoView({behavior:'smooth'})},250)" title="Zoho Books Sync" style="width:100%;margin-bottom:8px;justify-content:flex-start;display:none">
+        <span class="sync-dot" id="zohoDot"></span>
+        <span id="zohoLabel">Zoho Books</span>
       </div>
       <button class="nav-item" onclick="openChangePw(null)" style="color:rgba(255,255,255,.6)">
         <span class="nav-icon">🔑</span><span class="nav-label">Change Password</span>
@@ -1051,6 +1055,44 @@
             </div>
             <button class="btn-primary" onclick="odConnect()" style="margin-top:0;max-width:240px">🔗 Connect to OneDrive</button>
           </div>
+        </div>
+
+      </div>
+
+        <!-- Zoho Books Panel -->
+        <div class="admin-panel" id="zohoAdminPanel">
+          <div class="admin-panel-title">📒 Zoho Books Sync</div>
+          <div class="od-section">
+            <div class="od-section-title">Connection Status</div>
+            <div class="od-status-row">
+              <div class="od-status-label">Status</div>
+              <div class="od-status-val" id="zohoStatusText">Not connected</div>
+            </div>
+            <div class="od-status-row" id="zohoOrgRow" style="display:none">
+              <div class="od-status-label">Organisation</div>
+              <div class="od-status-val" id="zohoOrgText">—</div>
+            </div>
+            <div class="od-status-row">
+              <div class="od-status-label">What syncs</div>
+              <div class="od-status-val" style="font-size:.72rem">Agreements → Zoho contacts · One Time Bills → Zoho invoices</div>
+            </div>
+            <div id="zohoConnectedActions" style="display:none">
+              <button class="btn-od-connect" onclick="zohoSyncNow()" style="background:var(--success)">🔄 Sync Now</button>
+              <button class="btn-od-disconnect" onclick="zohoDisconnect()">Disconnect Zoho Books</button>
+            </div>
+            <div id="zohoSetupActions">
+              <button class="btn-od-connect" onclick="showZohoSetup()">🔧 Setup Zoho Books Sync</button>
+            </div>
+          </div>
+          <div id="zohoSetupSection" style="display:none;margin-top:12px">
+            <div class="form-group">
+              <label>Organisation ID</label>
+              <input type="text" id="zohoOrgId" placeholder="e.g. 60020012345" style="font-family:monospace;font-size:.85rem"/>
+              <div style="font-size:.71rem;color:var(--muted);margin-top:4px">Find it in Zoho Books → Settings → Organisation Profile</div>
+            </div>
+            <button class="btn-primary" onclick="zohoConnect()" style="margin-top:0;max-width:240px">🔗 Connect to Zoho Books</button>
+          </div>
+          <div id="zohoSyncLog" style="display:none;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px;font-size:.76rem;color:#166534;line-height:1.7"></div>
         </div>
 
       </div>
@@ -1541,7 +1583,7 @@ function showSection(name){
   const titles={dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
-  if(name==='admin'){renderSubReqAdmin();}
+  if(name==='admin'){renderSubReqAdmin();updateZohoStatus();}
   if(name==='notifications'){
     loadEmailSettingsUI();
     const s=settings;
@@ -1853,6 +1895,152 @@ function onTypeChange(){
     subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
     '<option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>';
   fields.style.display = type ? 'block' : 'none';
+}
+
+// ══════════════════════════════════════════════════
+// ZOHO BOOKS SYNC
+// ══════════════════════════════════════════════════
+function getZohoConfig(){return JSON.parse(localStorage.getItem('zohoConfig')||'{}');}
+function saveZohoConfig(c){localStorage.setItem('zohoConfig',JSON.stringify(c));}
+function isZohoConnected(){return !!getZohoConfig().orgId;}
+
+function showZohoSetup(){
+  document.getElementById('zohoSetupSection').style.display='block';
+  document.getElementById('zohoSetupActions').style.display='none';
+  document.getElementById('zohoOrgId').focus();
+}
+
+function zohoConnect(){
+  const orgId=document.getElementById('zohoOrgId').value.trim();
+  if(!orgId){showToast('⚠️ Enter your Zoho Books Organisation ID');return;}
+  saveZohoConfig({orgId});
+  updateZohoStatus();
+  document.getElementById('zohoSetupSection').style.display='none';
+  showToast('✅ Zoho Books connected! Click Sync Now to push data.');
+}
+
+function zohoDisconnect(){
+  if(!confirm('Disconnect Zoho Books? Synced data in Zoho will remain.'))return;
+  localStorage.removeItem('zohoConfig');
+  updateZohoStatus();
+  showToast('Zoho Books disconnected');
+}
+
+function updateZohoStatus(){
+  const connected=isZohoConnected();
+  const cfg=getZohoConfig();
+  const st=document.getElementById('zohoStatusText');
+  const orgRow=document.getElementById('zohoOrgRow');
+  const orgTxt=document.getElementById('zohoOrgText');
+  const connAct=document.getElementById('zohoConnectedActions');
+  const setupAct=document.getElementById('zohoSetupActions');
+  const chip=document.getElementById('zohoChip');
+  const dot=document.getElementById('zohoDot');
+  const lbl=document.getElementById('zohoLabel');
+  if(connected){
+    if(st)st.innerHTML='<span style="color:var(--success);font-weight:700">✅ Connected</span>';
+    if(orgRow)orgRow.style.display='flex';
+    if(orgTxt)orgTxt.textContent='Org ID: '+cfg.orgId;
+    if(connAct)connAct.style.display='block';
+    if(setupAct)setupAct.style.display='none';
+    if(dot){dot.style.background='#22c55e';dot.style.boxShadow='0 0 6px #22c55e';}
+    if(lbl)lbl.textContent='Zoho Books ✓';
+  }else{
+    if(st)st.textContent='Not connected';
+    if(orgRow)orgRow.style.display='none';
+    if(connAct)connAct.style.display='none';
+    if(setupAct)setupAct.style.display='block';
+    if(dot){dot.style.background='#d1d5db';dot.style.boxShadow='none';}
+    if(lbl)lbl.textContent='Zoho Books';
+  }
+}
+
+async function zohoSyncNow(){
+  if(!isZohoConnected()){showToast('Connect Zoho Books first');return;}
+  const cfg=getZohoConfig();
+  const orgId=cfg.orgId;
+  const log=document.getElementById('zohoSyncLog');
+  if(log){log.style.display='block';log.textContent='🔄 Syncing...';}
+  let pushed=0, errors=0, msgs=[];
+
+  // Sync agreements as contacts in Zoho Books
+  for(const a of agreements){
+    if(!a.client)continue;
+    try{
+      const res=await fetch('https://claude-zohobooks.zohomcp.in/mcp/message',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          method:'tools/call',
+          params:{
+            name:'create_contact',
+            arguments:{
+              body:{
+                contact_name:a.client,
+                company_name:a.client,
+                contact_type:'customer',
+                notes:'Agreement: '+(a.name||'')+(a.type?' | Type: '+a.type:'')+(a.startDate?' | Start: '+a.startDate:'')+(a.endDate?' | End: '+a.endDate:''),
+                gst_no:a.gst||undefined,
+                gst_treatment:a.gstRegistered?'business_gst':'business_none'
+              },
+              query_params:{organization_id:orgId}
+            }
+          }
+        })
+      });
+      pushed++;msgs.push('✅ Contact: '+a.client);
+    }catch(e){errors++;msgs.push('❌ '+a.client+': '+e.message);}
+  }
+
+  // Sync one-time bills as invoices
+  for(const b of bills){
+    if(!b.client||!b.amount)continue;
+    try{
+      // First create/ensure contact exists for the bill client
+      const today=new Date().toISOString().slice(0,10);
+      const res=await fetch('https://claude-zohobooks.zohomcp.in/mcp/message',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          method:'tools/call',
+          params:{
+            name:'create_contact',
+            arguments:{
+              body:{contact_name:b.client,company_name:b.client,contact_type:'customer'},
+              query_params:{organization_id:orgId}
+            }
+          }
+        })
+      });
+      const rj=await res.json();
+      const customerId=rj?.result?.content?.[0]?.text ? JSON.parse(rj.result.content[0].text)?.contact?.contact_id : null;
+      if(customerId){
+        // Create invoice
+        await fetch('https://claude-zohobooks.zohomcp.in/mcp/message',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            method:'tools/call',
+            params:{
+              name:'create_invoice',
+              arguments:{
+                body:{
+                  customer_id:customerId,
+                  date:today,
+                  reference_number:b.invoice||undefined,
+                  notes:(b.specialService||b.type||'One Time Bill')+(b.subType?' - '+b.subType:''),
+                  line_items:[{item_id:'0',name:(b.specialService||b.type||'Service'),rate:parseFloat(b.amount)||0,quantity:1}]
+                },
+                query_params:{organization_id:orgId}
+              }
+            }
+          })
+        });
+        pushed++;msgs.push('✅ Invoice: '+b.client+' ₹'+b.amount);
+      }
+    }catch(e){errors++;msgs.push('❌ Bill '+b.client+': '+e.message);}
+  }
+
+  const summary=`Sync complete — ${pushed} pushed, ${errors} errors\n`+msgs.slice(0,10).join('\n');
+  if(log)log.textContent=summary;
+  showToast(errors?`⚠️ Sync done with ${errors} errors`:'✅ Zoho Books sync complete!');
 }
 
 // ══════════════════════════════════════════════════
@@ -2374,6 +2562,7 @@ function updateUserChip(u){
   const isAdmin=(u.role==='admin');
   const an=document.getElementById('nav-admin');if(an)an.style.display=isAdmin?'flex':'none';
   const sc=document.getElementById('syncChip');if(sc)sc.style.display=isAdmin?'flex':'none';
+  const zc=document.getElementById('zohoChip');if(zc)zc.style.display=isAdmin?'flex':'none';
   // Sidebar profile card
   const spa=document.getElementById('sidebarProfileAvatar');if(spa)spa.textContent=ini;
   const spn=document.getElementById('sidebarProfileName');if(spn)spn.textContent=u.name;
@@ -3261,7 +3450,7 @@ function showComposeError(msg){const el=document.getElementById('composeError');
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
-(function(){const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);}else{document.getElementById("loginScreen").style.display="flex";}})();
+(function(){const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);}else{document.getElementById("loginScreen").style.display="flex";}updateZohoStatus();})();
 
 openDB().then(async()=>{
   agreements=await dbGetAll('agreements');
