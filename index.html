@@ -1083,10 +1083,26 @@
             </div>
           </div>
           <div id="zohoSetupSection" style="display:none;margin-top:12px">
+            <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.76rem;color:#92400e;line-height:1.6">
+              <strong>How to connect:</strong> Go to <b>api-console.zoho.in</b> → Create a Self Client → Scope: <code>ZohoBooks.fullaccess.all</code> → Generate token. Then enter details below.
+            </div>
             <div class="form-group">
               <label>Organisation ID</label>
               <input type="text" id="zohoOrgId" placeholder="e.g. 60020012345" style="font-family:monospace;font-size:.85rem"/>
-              <div style="font-size:.71rem;color:var(--muted);margin-top:4px">Find it in Zoho Books → Settings → Organisation Profile</div>
+              <div style="font-size:.71rem;color:var(--muted);margin-top:2px">Zoho Books → Settings → Organisation Profile</div>
+            </div>
+            <div class="form-group">
+              <label>Client ID</label>
+              <input type="text" id="zohoClientId" placeholder="1000.XXXX..." style="font-family:monospace;font-size:.85rem"/>
+            </div>
+            <div class="form-group">
+              <label>Client Secret</label>
+              <input type="password" id="zohoClientSecret" placeholder="Your client secret"/>
+            </div>
+            <div class="form-group">
+              <label>Refresh Token</label>
+              <input type="text" id="zohoRefreshToken" placeholder="1000.XXXX..." style="font-family:monospace;font-size:.85rem"/>
+              <div style="font-size:.71rem;color:var(--muted);margin-top:2px">Generate from Zoho API Console → Self Client → Generate Code</div>
             </div>
             <button class="btn-primary" onclick="zohoConnect()" style="margin-top:0;max-width:240px">🔗 Connect to Zoho Books</button>
           </div>
@@ -1593,6 +1609,7 @@ function showSection(name){
   if(name==='admin'){renderUserList();refreshOdStatusUI();loadAdminCredsUI();odLoadUsers().catch(()=>{});updateUserSyncNote(!!(msalApp&&msalApp.getAllAccounts().length>0));}
   if(name==='dashboard'){updateDashboard();}
   if(name==='agreements'){renderAgreements();}
+  if(name==='billing'){renderBills();}
   closeSidebar();
 }
 
@@ -1909,8 +1926,11 @@ function showZohoSetup(){
 
 function zohoConnect(){
   const orgId=document.getElementById('zohoOrgId').value.trim();
-  if(!orgId){showToast('⚠️ Enter your Zoho Books Organisation ID');return;}
-  saveZohoConfig({orgId});
+  const clientId=document.getElementById('zohoClientId').value.trim();
+  const clientSecret=document.getElementById('zohoClientSecret').value.trim();
+  const refreshToken=document.getElementById('zohoRefreshToken').value.trim();
+  if(!orgId||!clientId||!clientSecret||!refreshToken){showToast('⚠️ Please fill all fields');return;}
+  saveZohoConfig({orgId,clientId,clientSecret,refreshToken});
   updateZohoStatus();
   document.getElementById('zohoSetupSection').style.display='none';
   showToast('✅ Zoho Books connected! Click Sync Now to push data.');
@@ -1937,7 +1957,7 @@ function updateZohoStatus(){
   if(connected){
     if(st)st.innerHTML='<span style="color:var(--success);font-weight:700">✅ Connected</span>';
     if(orgRow)orgRow.style.display='flex';
-    if(orgTxt)orgTxt.textContent='Org ID: '+cfg.orgId;
+    if(orgTxt)orgTxt.textContent=cfg.orgId+(cfg.clientId?' · Client: '+cfg.clientId.slice(0,12)+'…':'');
     if(connAct)connAct.style.display='block';
     if(setupAct)setupAct.style.display='none';
     if(dot){dot.style.background='#22c55e';dot.style.boxShadow='0 0 6px #22c55e';}
@@ -1952,92 +1972,77 @@ function updateZohoStatus(){
   }
 }
 
+async function zohoGetToken(){
+  const cfg=getZohoConfig();
+  if(!cfg.clientId||!cfg.clientSecret||!cfg.refreshToken)throw new Error('Missing Zoho credentials. Please re-setup.');
+  const params=new URLSearchParams({grant_type:'refresh_token',client_id:cfg.clientId,client_secret:cfg.clientSecret,refresh_token:cfg.refreshToken});
+  const r=await fetch('https://accounts.zoho.in/oauth/v2/token',{method:'POST',body:params});
+  const d=await r.json();
+  if(!d.access_token)throw new Error('Token error: '+(d.error||JSON.stringify(d)));
+  return d.access_token;
+}
+
+async function zohoApi(method,path,body,token,orgId){
+  const r=await fetch('https://www.zohoapis.in/books/v3'+path+'?organization_id='+orgId,{
+    method,
+    headers:{'Authorization':'Zoho-oauthtoken '+token,'Content-Type':'application/json'},
+    body:body?JSON.stringify(body):undefined
+  });
+  return r.json();
+}
+
 async function zohoSyncNow(){
   if(!isZohoConnected()){showToast('Connect Zoho Books first');return;}
   const cfg=getZohoConfig();
   const orgId=cfg.orgId;
   const log=document.getElementById('zohoSyncLog');
-  if(log){log.style.display='block';log.textContent='🔄 Syncing...';}
-  let pushed=0, errors=0, msgs=[];
+  if(log){log.style.display='block';log.innerHTML='🔄 Syncing...';}
+  let pushed=0,errors=0,msgs=[];
+  let token;
+  try{token=await zohoGetToken();}
+  catch(e){
+    if(log)log.innerHTML='❌ Auth failed: '+e.message;
+    showToast('❌ Zoho auth failed — check credentials');
+    return;
+  }
 
-  // Sync agreements as contacts in Zoho Books
+  // Sync agreements as contacts
   for(const a of agreements){
     if(!a.client)continue;
     try{
-      const res=await fetch('https://claude-zohobooks.zohomcp.in/mcp/message',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          method:'tools/call',
-          params:{
-            name:'create_contact',
-            arguments:{
-              body:{
-                contact_name:a.client,
-                company_name:a.client,
-                contact_type:'customer',
-                notes:'Agreement: '+(a.name||'')+(a.type?' | Type: '+a.type:'')+(a.startDate?' | Start: '+a.startDate:'')+(a.endDate?' | End: '+a.endDate:''),
-                gst_no:a.gst||undefined,
-                gst_treatment:a.gstRegistered?'business_gst':'business_none'
-              },
-              query_params:{organization_id:orgId}
-            }
-          }
-        })
-      });
+      await zohoApi('POST','/contacts',{
+        contact_name:a.client,company_name:a.client,contact_type:'customer',
+        notes:'Agreement: '+(a.name||'')+(a.type?' | Type: '+a.type:'')+(a.startDate?' | Start: '+a.startDate:'')+(a.endDate?' | End: '+a.endDate:''),
+        gst_no:a.gst||undefined,
+        gst_treatment:a.gstRegistered?'business_gst':'business_none'
+      },token,orgId);
       pushed++;msgs.push('✅ Contact: '+a.client);
     }catch(e){errors++;msgs.push('❌ '+a.client+': '+e.message);}
   }
 
   // Sync one-time bills as invoices
+  const today=new Date().toISOString().slice(0,10);
   for(const b of bills){
     if(!b.client||!b.amount)continue;
     try{
-      // First create/ensure contact exists for the bill client
-      const today=new Date().toISOString().slice(0,10);
-      const res=await fetch('https://claude-zohobooks.zohomcp.in/mcp/message',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({
-          method:'tools/call',
-          params:{
-            name:'create_contact',
-            arguments:{
-              body:{contact_name:b.client,company_name:b.client,contact_type:'customer'},
-              query_params:{organization_id:orgId}
-            }
-          }
-        })
-      });
-      const rj=await res.json();
-      const customerId=rj?.result?.content?.[0]?.text ? JSON.parse(rj.result.content[0].text)?.contact?.contact_id : null;
-      if(customerId){
-        // Create invoice
-        await fetch('https://claude-zohobooks.zohomcp.in/mcp/message',{
-          method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            method:'tools/call',
-            params:{
-              name:'create_invoice',
-              arguments:{
-                body:{
-                  customer_id:customerId,
-                  date:today,
-                  reference_number:b.invoice||undefined,
-                  notes:(b.specialService||b.type||'One Time Bill')+(b.subType?' - '+b.subType:''),
-                  line_items:[{item_id:'0',name:(b.specialService||b.type||'Service'),rate:parseFloat(b.amount)||0,quantity:1}]
-                },
-                query_params:{organization_id:orgId}
-              }
-            }
-          })
-        });
-        pushed++;msgs.push('✅ Invoice: '+b.client+' ₹'+b.amount);
-      }
-    }catch(e){errors++;msgs.push('❌ Bill '+b.client+': '+e.message);}
+      // Create contact first
+      const cr=await zohoApi('POST','/contacts',{contact_name:b.client,company_name:b.client,contact_type:'customer'},token,orgId);
+      const customerId=cr?.contact?.contact_id;
+      if(!customerId)throw new Error('Could not create contact');
+      // Create invoice
+      await zohoApi('POST','/invoices',{
+        customer_id:customerId,date:today,
+        reference_number:b.invoice||undefined,
+        notes:(b.specialService||b.type||'One Time Bill')+(b.subType?' – '+b.subType:''),
+        line_items:[{name:(b.specialService||b.type||'Service'),rate:parseFloat(b.amount)||0,quantity:1,product_type:'service'}]
+      },token,orgId);
+      pushed++;msgs.push('✅ Invoice: '+b.client+' ₹'+b.amount);
+    }catch(e){errors++;msgs.push('❌ '+b.client+': '+e.message);}
   }
 
-  const summary=`Sync complete — ${pushed} pushed, ${errors} errors\n`+msgs.slice(0,10).join('\n');
-  if(log)log.textContent=summary;
-  showToast(errors?`⚠️ Sync done with ${errors} errors`:'✅ Zoho Books sync complete!');
+  const summary='Sync complete — '+pushed+' pushed, '+errors+' errors\n'+msgs.slice(0,15).join('\n');
+  if(log)log.innerHTML=summary.replace(/\n/g,'<br>');
+  showToast(errors?'⚠️ Sync done with '+errors+' errors':'✅ Zoho Books sync complete!');
 }
 
 // ══════════════════════════════════════════════════
