@@ -1294,7 +1294,49 @@
     <div class="form-group"><label>Description</label>
       <input type="text" id="billSpecialService" placeholder="e.g. Describe the service or billing details..."/>
     </div>
-    <div class="form-group"><label>Period *</label><input type="month" id="billDate"/></div>
+    <div class="form-group">
+      <label>Period *</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+        <!-- Left half: Month + Year dropdowns -->
+        <div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Month &amp; Year</div>
+          <div style="display:flex;gap:6px">
+            <select id="billPeriodMonth" style="flex:1;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;font-size:.83rem;font-family:inherit;outline:none" onchange="syncBillPeriod()">
+              <option value="">Month</option>
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+            <select id="billPeriodYear" style="flex:1;padding:10px 8px;border:1.5px solid var(--border);border-radius:10px;font-size:.83rem;font-family:inherit;outline:none" onchange="syncBillPeriod()">
+              <option value="">Year</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027">2027</option>
+            </select>
+          </div>
+        </div>
+        <!-- Right half: Custom date -->
+        <div>
+          <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Custom</div>
+          <input type="date" id="billDateCustom" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.83rem;font-family:inherit;outline:none;box-sizing:border-box" onchange="syncBillPeriodFromCustom()"/>
+        </div>
+      </div>
+      <input type="hidden" id="billDate"/>
+    </div>
     <div class="form-row">
       <div class="form-group"><label>Amount (₹) *</label><input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/></div>
       <div class="form-group"><label>Invoice / Ref No.</label><input type="text" id="billInvoice" placeholder="e.g. INV-2024-001"/></div>
@@ -1644,9 +1686,31 @@ function onBillGstToggle(){
   document.getElementById('billGstToggleLabel').textContent = checked ? 'Registered under GST' : 'Not Registered under GST';
 }
 
+function syncBillPeriod(){
+  const m=document.getElementById('billPeriodMonth').value;
+  const y=document.getElementById('billPeriodYear').value;
+  if(m&&y){
+    document.getElementById('billDate').value=y+'-'+m;
+    document.getElementById('billDateCustom').value='';
+  } else {
+    document.getElementById('billDate').value='';
+  }
+}
+function syncBillPeriodFromCustom(){
+  const d=document.getElementById('billDateCustom').value;
+  if(d){
+    document.getElementById('billDate').value=d;
+    document.getElementById('billPeriodMonth').value='';
+    document.getElementById('billPeriodYear').value='';
+  }
+}
 function resetBillForm(){
-  ['billDate','billAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
+  ['billAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
     .forEach(id=>document.getElementById(id).value='');
+  document.getElementById('billDate').value='';
+  document.getElementById('billPeriodMonth').value='';
+  document.getElementById('billPeriodYear').value='';
+  document.getElementById('billDateCustom').value='';
   document.getElementById('billType').value='';
   document.getElementById('billSubType').value='';
   document.getElementById('billSubTypeGroup').style.display='none';
@@ -1669,7 +1733,17 @@ function openEditBillModal(id){
   document.getElementById('billModalTitle').textContent='✏️ Edit Bill';
   document.getElementById('billSaveBtn').textContent='💾 Save Changes';
   document.getElementById('billEditId').value=b.id;
-  document.getElementById('billDate').value=b.date||'';
+  const _bd=b.date||'';
+  document.getElementById('billDate').value=_bd;
+  if(_bd&&_bd.length===7){
+    document.getElementById('billPeriodYear').value=_bd.slice(0,4);
+    document.getElementById('billPeriodMonth').value=_bd.slice(5,7);
+    document.getElementById('billDateCustom').value='';
+  } else if(_bd&&_bd.length===10){
+    document.getElementById('billDateCustom').value=_bd;
+    document.getElementById('billPeriodMonth').value='';
+    document.getElementById('billPeriodYear').value='';
+  }
   document.getElementById('billAmount').value=b.amount||'';
   document.getElementById('billInvoice').value=b.invoice||'';
   document.getElementById('billClient').value=b.client||'';
