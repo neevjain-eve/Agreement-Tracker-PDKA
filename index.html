@@ -803,6 +803,15 @@
     <!-- SYNC STATUS BAR -->
     <div class="sync-bar" id="syncBar"><span id="syncBarText"></span></div>
 
+    <!-- ════ SECTION: USER CATEGORY DASHBOARD ═══════════════ -->
+    <div class="section" id="sec-userdash" style="display:none">
+      <div style="padding:20px 16px 90px">
+        <div style="font-size:1rem;font-weight:800;margin-bottom:4px;color:var(--text)">My Services</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:18px">Tap a category to request access. Once admin approves, you'll see all agreements and bills for that category.</div>
+        <div id="userCatGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"></div>
+      </div>
+    </div>
+
     <!-- ════ SECTION: DASHBOARD (FinanceDashboard) ═════════════ -->
     <div class="section active" id="sec-dashboard">
       <div class="fd-dashboard">
@@ -2008,39 +2017,41 @@ function renderUserCatDash(){
   const allowed=getUserAllowedCats(session.userId);
   const reqs=getCatRequests();
 
-  el.innerHTML=ALL_CATEGORIES.map(cat=>{
+  const tiles=ALL_CATEGORIES.map((cat,idx)=>{
     const isApproved=allowed.includes(cat);
     const req=reqs.find(r=>r.userId===session.userId&&r.cat===cat);
     const isPending=req&&req.status==='pending';
-
-    // Count data for approved categories
     let agrCount=0,billCount=0,totalAmt=0;
     if(isApproved){
       agrCount=agreements.filter(a=>a.type===cat).length;
       billCount=bills.filter(b=>b.type===cat).length;
-      totalAmt=
-        agreements.filter(a=>a.type===cat).reduce((s,a)=>s+(parseFloat(a.amount)||0),0)+
-        bills.filter(b=>b.type===cat).reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+      totalAmt=agreements.filter(a=>a.type===cat).reduce((s,a)=>s+(parseFloat(a.amount)||0),0)
+              +bills.filter(b=>b.type===cat).reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
     }
-
-    const color=isApproved?'#16a34a':isPending?'#d97706':'#6366f1';
     const bg=isApproved?'#f0fdf4':isPending?'#fffbeb':'#f5f3ff';
     const border=isApproved?'#86efac':isPending?'#fcd34d':'#c4b5fd';
-
-    return`<div style="background:${bg};border:2px solid ${border};border-radius:16px;padding:16px;cursor:${isApproved?'pointer':'default'}" onclick="${isApproved?`openCatSection('${cat}')`:''}">
+    const div=document.createElement('div');
+    div.style.cssText=`background:${bg};border:2px solid ${border};border-radius:16px;padding:16px;cursor:${isApproved?'pointer':'default'}`;
+    if(isApproved) div.onclick=()=>openCatSection(cat);
+    div.innerHTML=`
       <div style="font-size:1.6rem;margin-bottom:6px">${CAT_ICONS[cat]||'📁'}</div>
       <div style="font-size:.83rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(cat)}</div>
       <div style="font-size:.68rem;color:var(--muted);margin-bottom:10px">${CAT_DESC[cat]||''}</div>
       ${isApproved
         ?`<div style="font-size:.7rem;font-weight:700;color:#16a34a;margin-bottom:6px">✅ Access Granted</div>
-          <div style="font-size:.72rem;color:var(--muted)">${agrCount} agreement${agrCount!==1?'s':''} · ${billCount} bill${billCount!==1?'s':''}</div>
-          <div style="font-size:.78rem;font-weight:800;color:#16a34a;margin-top:4px">₹${totalAmt.toLocaleString('en-IN')}</div>`
+           <div style="font-size:.72rem;color:var(--muted)">${agrCount} agreement${agrCount!==1?'s':''} · ${billCount} bill${billCount!==1?'s':''}</div>
+           <div style="font-size:.78rem;font-weight:800;color:#16a34a;margin-top:4px">₹${totalAmt.toLocaleString('en-IN')}</div>`
         :isPending
           ?`<div style="font-size:.72rem;font-weight:700;color:#d97706;background:#fef9c3;padding:4px 10px;border-radius:20px;display:inline-block">⏳ Pending Approval</div>`
-          :`<button onclick="event.stopPropagation();requestCatAccess('${cat}')" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px">Request Access</button>`
-      }
-    </div>`;
-  }).join('');
+          :`<button class="_req_btn_${idx}" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px">Request Access</button>`
+      }`;
+    if(!isApproved&&!isPending){
+      const btn=div.querySelector(`._req_btn_${idx}`);
+      if(btn) btn.onclick=(e)=>{e.stopPropagation();requestCatAccess(cat);};
+    }
+    return div;
+  });
+  el.innerHTML='';tiles.forEach(t=>el.appendChild(t));
 
   // Build approved category nav items
   renderUserCatNav(allowed);
@@ -2081,7 +2092,7 @@ function showCatView(cat){
   window._activeCat=cat;
   // Show agreements section
   const sec=document.getElementById('sec-agreements');if(sec){sec.style.display='block';sec.classList.add('active');}
-  ['nav-agreements','nav-billing','nav-monthly'].forEach(id=>{
+  ['nav-agreements','nav-billing'].forEach(id=>{
     const el=document.getElementById(id);if(el)el.style.display='flex';
   });
   renderAgreements();
@@ -2098,7 +2109,7 @@ function addCatBackBtn(){
     btn.id='catBackBtn';
     btn.style.cssText='position:fixed;top:14px;right:16px;z-index:500;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--text);box-shadow:var(--shadow-sm)';
     btn.innerHTML='← My Services';
-    btn.onclick=()=>{window._activeCat=null;btn.remove();showSection('userdash');['nav-agreements','nav-billing','nav-monthly'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});};
+    btn.onclick=()=>{window._activeCat=null;btn.remove();showSection('userdash');['nav-agreements','nav-billing'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});};
     document.body.appendChild(btn);
   }
 }
@@ -2830,7 +2841,11 @@ function updateUserChip(u){
     const el=document.getElementById(id);
     if(!el)return;
     if(isAdmin){el.style.display='flex';}
-    else{el.style.display=id==='nav-notifications'?'flex':'none';}
+    else{
+      // Users see: notifications, monthly, export (after category approval); agreements/billing shown dynamically
+      const userVisible=['nav-notifications','nav-monthly','nav-export'];
+      el.style.display=userVisible.includes(id)?'flex':'none';
+    }
   });
   const ud=document.getElementById('nav-userdash');if(ud)ud.style.display=isAdmin?'none':'flex';
   // Sidebar profile card
@@ -3403,14 +3418,17 @@ function getMonthlyData(){
   const first=new Date(y,m-1,1);
   const last=new Date(y,m,0);
   const _mSess=getSession();const _mAdmin=_mSess&&_mSess.role==='admin';const _mAllowed=(!_mAdmin&&_mSess)?getUserAllowedCats(_mSess.userId):null;
+  const _activeCatMonthly=window._activeCat||null;
   const agrData=agreements.filter(a=>{
     if(!a.startDate||!a.endDate)return false;
     const s=new Date(a.startDate),e=new Date(a.endDate);
     const af=_mAdmin||!_mAllowed||(a.type&&_mAllowed.includes(a.type));
-    return (s<=last&&e>=first)&&af;
+    const catf=!_activeCatMonthly||(a.type===_activeCatMonthly);
+    return (s<=last&&e>=first)&&af&&catf;
   });
   // Bills in this month — match period (month field or custom date range)
   const billData=bills.filter(b=>{
+    if(_activeCatMonthly&&b.type!==_activeCatMonthly)return false;
     if(!b.date)return false;
     if(b.date.includes('|')){
       const [bs,be]=b.date.split('|');
