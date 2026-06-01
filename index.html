@@ -3222,15 +3222,32 @@ function aiExtractFilter(str){
   if(/email/i.test(str))return'email';
   return'all';
 }
+
+// Session context — scopes all AI data to current user
+function aiCtx(){
+  const s=getSession();
+  const isAdmin=s&&s.role==='admin';
+  const allowed=(!isAdmin&&s)?getUserAllowedCats(s.id||s.userId||''):null;
+  return{isAdmin,allowed,session:s};
+}
+function aiScopeAgrs(){
+  const{isAdmin,allowed}=aiCtx();
+  if(isAdmin)return agreements;
+  return agreements.filter(a=>!allowed||(a.type&&allowed.includes(a.type))||a.isEmail);
+}
+function aiScopeBills(){
+  const{isAdmin,allowed}=aiCtx();
+  if(isAdmin)return bills;
+  return bills.filter(b=>!allowed||(b.type&&allowed.includes(b.type)));
+}
+
 function aiGetAgreements(filter){
-  if(filter==='all')return agreements;
-  if(filter==='email')return agreements.filter(a=>a.isEmail||a.emailAttachName);
-  return agreements.filter(a=>getStatus(a)===filter);
+  const base=aiScopeAgrs();
+  if(filter==='all')return base;
+  if(filter==='email')return base.filter(a=>a.isEmail||a.emailAttachName);
+  return base.filter(a=>getStatus(a)===filter);
 }
-function aiGetBills(filter){
-  if(filter==='all')return bills;
-  return bills;
-}
+function aiGetBills(){return aiScopeBills();}
 
 // ── Excel generation from AI ──
 function aiGenerateExcel(filter,label){
@@ -3256,7 +3273,7 @@ function aiGenerateExcel(filter,label){
 
 function aiBillsExcel(label){
   if(typeof XLSX==='undefined'){aiBot('Excel library not loaded.');return;}
-  const list=bills;
+  const list=aiScopeBills();
   if(!list.length){aiBot('No bills found to export.');return;}
   const headers=['Client','Service Type','Sub-Service','Description','Period','Invoice No.','Amount','Contact'];
   const rows=list.map(b=>[b.client||'',b.type||'',b.subType||'',b.specialService||'',b.date||'',b.invoice||'',b.amount?'Rs.'+Number(b.amount).toLocaleString('en-IN'):'',b.contactInfo||'']);
@@ -3282,8 +3299,9 @@ function aiComposeMail(toEmail,filter,label){
 }
 
 function aiComposeBillsMail(toEmail){
-  if(!bills.length){aiBot('No bills found.');return;}
-  const lines=bills.slice(0,10).map((b,i)=>(i+1)+'. '+b.client+' — Rs.'+(b.amount||'0')+(b.date?' ('+b.date+')':''));
+  const _bl=aiScopeBills();
+  if(!_bl.length){aiBot('No bills found.');return;}
+  const lines=_bl.slice(0,10).map((b,i)=>(i+1)+'. '+b.client+' — Rs.'+(b.amount||'0')+(b.date?' ('+b.date+')':''));
   const body='Dear Team,\n\nPlease find below the list of one-time bills:\n\n'+lines.join('\n')+'\n\nRegards,\nEL Tracker';
   const subject='[EL Tracker] One Time Bills — '+new Date().toLocaleDateString('en-IN');
   const mailto='mailto:'+encodeURIComponent(toEmail)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
@@ -3294,7 +3312,7 @@ function aiComposeBillsMail(toEmail){
 // ── AI Independent Search (never touches search boxes) ──
 function aiSearch(query){
   const q=query.toLowerCase().trim();
-  const results=agreements.filter(a=>
+  const results=aiScopeAgrs().filter(a=>
     (a.name&&a.name.toLowerCase().includes(q))||
     (a.client&&a.client.toLowerCase().includes(q))||
     (a.type&&a.type.toLowerCase().includes(q))||
@@ -3309,7 +3327,7 @@ function aiSearch(query){
 
 function aiSearchBills(query){
   const q=query.toLowerCase().trim();
-  const results=bills.filter(b=>
+  const results=aiScopeBills().filter(b=>
     (b.client&&b.client.toLowerCase().includes(q))||
     (b.type&&b.type.toLowerCase().includes(q))||
     (b.subType&&b.subType.toLowerCase().includes(q))||
@@ -3437,7 +3455,13 @@ function toggleAI(){
   const pane=document.getElementById('aiPane');
   pane.classList.toggle('open',_aiOpen);
   if(_aiOpen&&document.getElementById('aiMsgs').children.length===0){
-    aiBot('Hi! I can navigate the app, generate Excel reports, and compose emails. Try "Excel for expiring agreements" or "Mail active to client@email.com"');
+    const{isAdmin,allowed}=aiCtx();
+    const catTxt=allowed&&allowed.length?(' Your category: '+allowed[0]):'';
+    if(isAdmin){
+      aiBot('Hi Admin! I can navigate the full app, generate Excel, and compose emails. Try "Excel for expiring", "Mail active to email@x.com", or just ask anything!');
+    } else {
+      aiBot('Hi! I can help with your '+( allowed&&allowed[0]||'assigned')+' agreements and bills — search, Excel, email, and more.'+catTxt);
+    }
   }
   if(_aiOpen)document.getElementById('aiInput').focus();
 }
@@ -3522,7 +3546,15 @@ function aiSend(text){
   }
 
   // ── Navigation & other ──
-  const match=AI_KNOWLEDGE.find(k=>k.k.some(kw=>lower.includes(kw)));
+  // Block user from admin-only knowledge entries if not admin
+  const{isAdmin:_aiIsAdmin}=aiCtx();
+  const match=AI_KNOWLEDGE.find(k=>{
+    if(!k.k.some(kw=>lower.includes(kw)))return false;
+    // Admin-only keywords — silently block for users
+    const adminOnly=['user management','manage users','add user','pending users','approve user','category access','sub service request','sub category','onedrive','one drive','cloud backup','zoho','zoho books','admin settings','admin panel','export section','import','bulk upload','download template'];
+    if(!_aiIsAdmin&&adminOnly.some(ao=>k.k.includes(ao)))return false;
+    return true;
+  });
   if(match){
     if(match.reply)aiBot(match.reply);
     if(match.action)setTimeout(()=>match.action(lower),match.reply?400:0);
