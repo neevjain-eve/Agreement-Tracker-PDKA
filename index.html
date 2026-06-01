@@ -1116,28 +1116,31 @@
               <div class="od-status-label">Status</div>
               <div class="od-status-val" id="aiApiStatus">Not configured</div>
             </div>
-            <div class="od-status-row">
-              <div class="od-status-label">Provider</div>
-              <div class="od-status-val">
-                <select id="aiProviderSel" style="border:1.5px solid var(--border);border-radius:8px;padding:4px 8px;font-size:.78rem;font-family:inherit;outline:none">
-                  <option value="claude">Anthropic Claude</option>
-                  <option value="gemini">Google Gemini</option>
-                </select>
+            <div id="aiApiSetupForm">
+              <div class="od-status-row" style="margin-top:10px">
+                <div class="od-status-label">Provider</div>
+                <div class="od-status-val">
+                  <select id="aiProviderSel" onchange="updateAiApiStatus()" style="border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:.82rem;font-family:inherit;outline:none;width:100%">
+                    <option value="claude">Anthropic Claude (claude-haiku)</option>
+                    <option value="gemini">Google Gemini (gemini-1.5-flash)</option>
+                  </select>
+                </div>
+              </div>
+              <div style="margin-top:10px">
+                <label style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">API Key</label>
+                <div style="display:flex;gap:6px;margin-top:5px">
+                  <input type="text" id="aiApiKeyInput" placeholder="Paste your API key here..." style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;font-family:monospace;outline:none;min-width:0" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+                  <button type="button" onclick="saveAiApiKey()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0">💾 Save</button>
+                </div>
+                <div style="font-size:.7rem;color:var(--muted);margin-top:6px;line-height:1.6">
+                  <strong>Claude:</strong> <a href="https://console.anthropic.com" target="_blank" style="color:var(--fd-primary)">console.anthropic.com</a> → API Keys<br/>
+                  <strong>Gemini:</strong> <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--fd-primary)">aistudio.google.com</a> → Get API Key
+                </div>
               </div>
             </div>
-            <div class="form-group" style="margin-top:10px">
-              <label>API Key</label>
-              <div style="display:flex;gap:6px">
-                <input type="password" id="aiApiKeyInput" placeholder="sk-ant-... or AIza..." style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-family:monospace;outline:none"/>
-                <button onclick="saveAiApiKey()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-size:.78rem;font-weight:700;cursor:pointer">Save</button>
-              </div>
-              <div style="font-size:.7rem;color:var(--muted);margin-top:4px">
-                Claude: get key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--fd-primary)">console.anthropic.com</a> &nbsp;|&nbsp;
-                Gemini: get key at <a href="https://aistudio.google.com" target="_blank" style="color:var(--fd-primary)">aistudio.google.com</a>
-              </div>
-            </div>
-            <div id="aiApiConnected" style="display:none">
-              <button onclick="clearAiApiKey()" class="btn-od-disconnect" style="margin-top:8px">Disconnect AI</button>
+            <div id="aiApiConnected" style="display:none;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px">
+              <div style="font-size:.8rem;font-weight:700;color:#16a34a;margin-bottom:6px" id="aiApiConnectedLabel">✅ Connected</div>
+              <button type="button" onclick="clearAiApiKey()" style="background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer">🗑 Remove Key</button>
             </div>
           </div>
         </div>
@@ -3272,13 +3275,16 @@ function updateAiApiStatus(){
   const badge=document.getElementById('aiModelBadge');
   if(c.key&&c.provider){
     const label={'claude':'Claude (Anthropic)','gemini':'Gemini (Google)'}[c.provider]||c.provider;
-    if(el)el.innerHTML='<span style="color:var(--success);font-weight:700">✅ Connected — '+label+'</span>';
+    if(el)el.innerHTML='<span style="color:#16a34a;font-weight:700">✅ Connected — '+label+'</span>';
     if(conn)conn.style.display='block';
     if(badge)badge.textContent='Powered by '+label;
+    const lbl=document.getElementById('aiApiConnectedLabel');if(lbl)lbl.textContent='✅ Connected — '+label;
+    const setup=document.getElementById('aiApiSetupForm');if(setup)setup.style.display='none';
   } else {
-    if(el)el.textContent='Not configured';
+    if(el)el.textContent='Not configured — paste API key below';
     if(conn)conn.style.display='none';
     if(badge)badge.textContent='Built-in mode';
+    const setup=document.getElementById('aiApiSetupForm');if(setup)setup.style.display='block';
   }
 }
 
