@@ -1004,21 +1004,7 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
       </div>
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
-        <button class="filter-btn" onclick="setFilter('email');document.getElementById('agrEmailPanel').style.display='none'" id="filter-email-agr-view" style="border-color:#93c5fd;color:#1d4ed8">📧 Email Records</button>
-        <button class="filter-btn" onclick="toggleAgrEmailPanel()" id="filter-email-agr" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8">✉️ Compose</button>
-      </div>
-      <div id="agrEmailPanel" style="display:none;margin:0 16px 10px;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
-        <div style="font-size:.78rem;font-weight:800;color:#1d4ed8;margin-bottom:8px">📧 Send Agreement Invitation</div>
-        <div style="font-size:.72rem;color:#1e40af;margin-bottom:10px">Compose and send an email to a prospect who doesn't have an active agreement yet.</div>
-        <div style="display:flex;flex-direction:column;gap:7px">
-          <input type="text" id="agrEmailTo" placeholder="To: client@example.com" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none"/>
-          <input type="text" id="agrEmailSubject" placeholder="Subject" value="Agreement Invitation" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none"/>
-          <textarea id="agrEmailBody" rows="4" placeholder="Dear Client,&#10;&#10;We would like to discuss an agreement..." style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none;resize:vertical"></textarea>
-          <div style="display:flex;gap:8px">
-            <button onclick="sendAgrSectionEmail()" style="flex:1;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.78rem;font-weight:700;cursor:pointer">📤 Send Email</button>
-            <button onclick="toggleAgrEmailPanel()" style="background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 14px;font-size:.78rem;font-weight:700;cursor:pointer;color:#6b7280">✕</button>
-          </div>
-        </div>
+        <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
       </div>
 
       <div class="agreements-list" id="agreementsList" style="padding:0 16px 90px"></div>
@@ -1441,6 +1427,15 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
         </div>
         <div class="form-group gst-field" id="gstField"><label>GST Number</label><input type="text" id="agrGst" placeholder="e.g. 29ABCDE1234F1Z5" maxlength="15" style="text-transform:uppercase"/></div>
         <div class="form-group"><label>Notes / Remarks</label><textarea id="agrNotes" rows="2" placeholder="Any additional notes..."></textarea></div>
+        <div class="form-group">
+          <label>Attach Email <span style="font-size:.7rem;color:var(--muted)">(optional — .eml, .msg or PDF of email)</span></label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="file" id="agrEmailAttach" accept=".eml,.msg,.pdf,.txt" style="display:none" onchange="onAgrEmailAttach(event)"/>
+            <button type="button" onclick="document.getElementById('agrEmailAttach').click()" style="background:#eff6ff;border:1.5px solid #93c5fd;color:#1d4ed8;border-radius:9px;padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap">📎 Attach Email</button>
+            <span id="agrEmailAttachName" style="font-size:.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+            <button type="button" id="agrEmailAttachClear" onclick="clearAgrEmailAttach()" style="display:none;background:none;border:none;color:var(--danger);cursor:pointer;font-size:.85rem;flex-shrink:0">✕</button>
+          </div>
+        </div>
         <div class="form-section-title">📧 Email Notifications</div>
         <div class="form-group"><label>TO — Email 1 (Primary Recipient)</label><input type="email" id="agrToEmail1" placeholder="e.g. manager@company.com"/></div>
         <div class="form-group"><label>TO — Email 2 (Second Recipient)</label><input type="email" id="agrToEmail2" placeholder="e.g. accounts@company.com"/></div>
@@ -3173,6 +3168,24 @@ function updateSummary(){
   }else banner.classList.remove('show');
 }
 
+function onAgrEmailAttach(e){
+  const file=e.target.files[0];if(!file)return;
+  document.getElementById('agrEmailAttachName').textContent=file.name;
+  document.getElementById('agrEmailAttachClear').style.display='inline-block';
+  // Store as base64 in a data attribute for saving
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    document.getElementById('agrEmailAttach').dataset.b64=ev.target.result;
+    document.getElementById('agrEmailAttach').dataset.fname=file.name;
+  };
+  reader.readAsDataURL(file);
+}
+function clearAgrEmailAttach(){
+  const inp=document.getElementById('agrEmailAttach');
+  inp.value='';delete inp.dataset.b64;delete inp.dataset.fname;
+  document.getElementById('agrEmailAttachName').textContent='';
+  document.getElementById('agrEmailAttachClear').style.display='none';
+}
 function toggleAgrEmailPanel(){
   const p=document.getElementById('agrEmailPanel');
   const btn=document.getElementById('filter-email-agr');
@@ -3295,6 +3308,8 @@ async function saveAgreement(){
     subType:document.getElementById('agrSubType').value,
     amount:document.getElementById('agrAmount').value,
     specialService:document.getElementById('agrSpecialService').value.trim(),
+    emailAttachName:document.getElementById('agrEmailAttach').dataset.fname||'',
+    emailAttachData:document.getElementById('agrEmailAttach').dataset.b64||'',
     billingMonth:document.getElementById('agrMonth').value,
     billingFreq:document.getElementById('agrBillingFreq').value,
     contact:document.getElementById('agrContact').value.trim(),
@@ -3351,6 +3366,7 @@ function resetForm(){
   document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
   const _en=document.getElementById('emailAgrNote');if(_en)_en.remove();
+  clearAgrEmailAttach&&clearAgrEmailAttach();
   document.getElementById('agrType').value='';
   document.getElementById('agrType').disabled=false;
   document.getElementById('agrSubType').value='';
