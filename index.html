@@ -1922,20 +1922,17 @@ function renderSubReqAdmin(){
   const reqs=getSubRequests();
   const pending=reqs.filter(r=>r.status==='pending');
   if(badge){badge.textContent=pending.length;badge.style.display=pending.length?'inline-block':'none';}
-  if(!reqs.length){el.innerHTML='<div style="font-size:.82rem;color:var(--muted)">No pending requests.</div>';return;}
-  el.innerHTML=reqs.map(r=>{
+  const pendingSubReqs=reqs.filter(r=>r.status==='pending');
+  if(!pendingSubReqs.length){el.innerHTML='<div style="font-size:.82rem;color:var(--muted)">No pending requests.</div>';return;}
+  el.innerHTML=pendingSubReqs.map(r=>{
     const dt=new Date(r.requestedAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-    const isPending=r.status==='pending';
     return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light)">
       <div style="flex:1;min-width:0">
         <div style="font-size:.8rem;font-weight:700">${esc(r.name)}</div>
         <div style="font-size:.7rem;color:var(--muted)">${esc(r.type)} · ${dt}</div>
       </div>
-      ${isPending
-        ?`<button onclick="approveSubReq('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
-          <button onclick="rejectSubReq('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>`
-        :`<span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${r.status==='approved'?'#dcfce7':'#fee2e2'};color:${r.status==='approved'?'#16a34a':'#dc2626'}">${r.status==='approved'?'Approved':'Rejected'}</span>`
-      }
+      <button onclick="approveSubReq('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
+      <button onclick="rejectSubReq('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
     </div>`;
   }).join('');
 }
@@ -2139,21 +2136,18 @@ function renderCatAccessAdmin(){
   const reqs=getCatRequests();
   const pending=reqs.filter(r=>r.status==='pending');
   if(badge){badge.textContent=pending.length;badge.style.display=pending.length?'inline-block':'none';}
-  if(!reqs.length){el.innerHTML='<div style="font-size:.82rem;color:var(--muted)">No pending requests.</div>';return;}
-  el.innerHTML=reqs.map(r=>{
+  const pendingReqs=reqs.filter(r=>r.status==='pending');
+  if(!pendingReqs.length){el.innerHTML='<div style="font-size:.82rem;color:var(--muted)">No pending requests.</div>';return;}
+  el.innerHTML=pendingReqs.map(r=>{
     const dt=new Date(r.requestedAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
-    const isPending=r.status==='pending';
     return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light)">
       <div style="font-size:1.3rem">${CAT_ICONS[r.cat]||'📁'}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:.8rem;font-weight:700">${esc(r.userName)}</div>
         <div style="font-size:.7rem;color:var(--muted)">${esc(r.cat)} · ${dt}</div>
       </div>
-      ${isPending
-        ?`<button onclick="approveCatAccess('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
-          <button onclick="rejectCatAccess('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>`
-        :`<span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${r.status==='approved'?'#dcfce7':'#fee2e2'};color:${r.status==='approved'?'#16a34a':'#dc2626'}">${r.status==='approved'?'Approved':'Rejected'}</span>`
-      }
+      <button onclick="approveCatAccess('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
+      <button onclick="rejectCatAccess('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
     </div>`;
   }).join('');
 }
@@ -2904,17 +2898,21 @@ function renderUserList(){
       <button class="reject-btn" onclick="rejectUser('${u.id}')">✕ Reject</button>
     </div>
   </div>`).join('');}
-  document.getElementById('userList').innerHTML=active.map(u=>`<div class="user-item">
-    <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
-    <div class="user-info">
-      <div class="user-name">${u.name}${session&&session.userId===u.id?' <span style="color:var(--success);font-size:.65rem">(you)</span>':''}</div>
-      <div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>${u.email?' &nbsp;·&nbsp; '+u.email:''}</div>
-    </div>
-    <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
-      <button class="change-pw-btn" onclick="openChangePw('${u.id}')">🔑 Pwd</button>
-      ${u.id!=='admin'?`<button class="btn-del-user" onclick="deleteUser('${u.id}')">🗑</button>`:''}
-    </div>
-  </div>`).join('');
+  document.getElementById('userList').innerHTML=active.map(u=>{
+    const uCat=(u.allowedCats&&u.allowedCats[0])||null;
+    const catBadge=uCat?`<span style="font-size:.62rem;font-weight:700;background:#fff7ed;color:#c2410c;padding:1px 7px;border-radius:20px;margin-left:4px">${uCat.replace(' Services','')}</span>`:'';
+    return`<div class="user-item">
+      <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+      <div class="user-info">
+        <div class="user-name">${u.name}${session&&session.userId===u.id?' <span style="color:var(--success);font-size:.65rem">(you)</span>':''}</div>
+        <div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>${catBadge}${u.email?' &nbsp;·&nbsp; '+u.email:''}</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
+        <button class="change-pw-btn" onclick="openChangePw('${u.id}')">🔑 Pwd</button>
+        ${u.id!=='admin'?`<button class="btn-del-user" onclick="deleteUser('${u.id}')">🗑</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
 }
 function showAddUserForm(){document.getElementById('addUserForm').style.display='block';document.getElementById('addUserBtn').style.display='none'}
 function hideAddUserForm(){document.getElementById('addUserForm').style.display='none';document.getElementById('addUserBtn').style.display='block';['newUserName','newUserUsername','newUserEmail','newUserPass'].forEach(id=>document.getElementById(id).value='')}
