@@ -2294,12 +2294,23 @@ function rejectCatAccess(id){
 // ══════════════════════════════════════════════════
 function getZohoConfig(){return JSON.parse(localStorage.getItem('zohoConfig')||'{}');}
 function saveZohoConfig(c){localStorage.setItem('zohoConfig',JSON.stringify(c));}
-function isZohoConnected(){return !!getZohoConfig().orgId;}
+function isZohoConnected(){const c=getZohoConfig();return !!(c.orgId&&c.clientId&&c.clientSecret&&c.refreshToken);}
 
 function showZohoSetup(){
-  document.getElementById('zohoSetupSection').style.display='block';
-  document.getElementById('zohoSetupActions').style.display='none';
-  document.getElementById('zohoOrgId').focus();
+  const cfg=getZohoConfig();
+  const sec=document.getElementById('zohoSetupSection');
+  const act=document.getElementById('zohoSetupActions');
+  if(sec)sec.style.display='block';
+  if(act)act.style.display='none';
+  // Pre-fill existing values so user can verify/update without retyping all
+  const oId=document.getElementById('zohoOrgId');if(oId&&cfg.orgId)oId.value=cfg.orgId;
+  const cId=document.getElementById('zohoClientId');if(cId&&cfg.clientId)cId.value=cfg.clientId;
+  const cSec=document.getElementById('zohoClientSecret');if(cSec&&cfg.clientSecret)cSec.value=cfg.clientSecret;
+  const rTok=document.getElementById('zohoRefreshToken');if(rTok&&cfg.refreshToken)rTok.value=cfg.refreshToken;
+  setTimeout(()=>{
+    const first=document.getElementById('zohoOrgId');
+    if(first)first.focus();
+  },100);
 }
 
 function zohoConnect(){
@@ -2329,22 +2340,34 @@ function updateZohoStatus(){
   const orgTxt=document.getElementById('zohoOrgText');
   const connAct=document.getElementById('zohoConnectedActions');
   const setupAct=document.getElementById('zohoSetupActions');
-  const chip=document.getElementById('zohoChip');
+  const setupSec=document.getElementById('zohoSetupSection');
   const dot=document.getElementById('zohoDot');
   const lbl=document.getElementById('zohoLabel');
+  // Partial config (orgId only from old version) — force re-setup
+  const partial=cfg.orgId&&(!cfg.clientId||!cfg.clientSecret||!cfg.refreshToken);
   if(connected){
     if(st)st.innerHTML='<span style="color:var(--success);font-weight:700">✅ Connected</span>';
     if(orgRow)orgRow.style.display='flex';
-    if(orgTxt)orgTxt.textContent=cfg.orgId+(cfg.clientId?' · Client: '+cfg.clientId.slice(0,12)+'…':'');
+    if(orgTxt)orgTxt.textContent='Org: '+cfg.orgId+' · Client: '+cfg.clientId.slice(0,14)+'…';
     if(connAct)connAct.style.display='block';
     if(setupAct)setupAct.style.display='none';
+    if(setupSec)setupSec.style.display='none';
     if(dot){dot.style.background='#22c55e';dot.style.boxShadow='0 0 6px #22c55e';}
     if(lbl)lbl.textContent='Zoho Books ✓';
   }else{
-    if(st)st.textContent='Not connected';
+    if(partial){
+      if(st)st.innerHTML='<span style="color:#d97706;font-weight:700">⚠️ Incomplete — please re-enter credentials</span>';
+      // Pre-fill what we have
+      const oId=document.getElementById('zohoOrgId');if(oId&&cfg.orgId)oId.value=cfg.orgId;
+      if(setupSec)setupSec.style.display='block';
+      if(setupAct)setupAct.style.display='none';
+    } else {
+      if(st)st.textContent='Not connected';
+      if(setupSec)setupSec.style.display='none';
+      if(setupAct)setupAct.style.display='block';
+    }
     if(orgRow)orgRow.style.display='none';
     if(connAct)connAct.style.display='none';
-    if(setupAct)setupAct.style.display='block';
     if(dot){dot.style.background='#d1d5db';dot.style.boxShadow='none';}
     if(lbl)lbl.textContent='Zoho Books';
   }
@@ -2352,7 +2375,7 @@ function updateZohoStatus(){
 
 async function zohoGetToken(){
   const cfg=getZohoConfig();
-  if(!cfg.clientId||!cfg.clientSecret||!cfg.refreshToken)throw new Error('Missing Zoho credentials. Please re-setup.');
+  if(!cfg.clientId||!cfg.clientSecret||!cfg.refreshToken){const missing=[];if(!cfg.clientId)missing.push('Client ID');if(!cfg.clientSecret)missing.push('Client Secret');if(!cfg.refreshToken)missing.push('Refresh Token');throw new Error('Missing: '+missing.join(', ')+'. Go to Admin Settings → Zoho Books and click Setup.');}
   const params=new URLSearchParams({grant_type:'refresh_token',client_id:cfg.clientId,client_secret:cfg.clientSecret,refresh_token:cfg.refreshToken});
   const r=await fetch('https://accounts.zoho.in/oauth/v2/token',{method:'POST',body:params});
   const d=await r.json();
