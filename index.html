@@ -733,8 +733,13 @@
       </div>
     </div>
     <nav class="sidebar-nav">
+      <button class="nav-item" onclick="showSection('userdash')" id="nav-userdash" style="display:none">
+        <span class="nav-icon">🏠</span><span class="nav-label">My Services</span>
+      </button>
+      <!-- User approved category nav items (injected dynamically) -->
+      <div id="nav-cat-items"></div>
       <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
-        <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
+        <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
       </button>
       <button class="nav-item" onclick="showSection('agreements')" id="nav-agreements">
         <span class="nav-icon">📋</span><span class="nav-label">Agreements</span>
@@ -1062,6 +1067,11 @@
           <div class="od-sync-note" id="userSyncNote">
             ☁️ <span id="userSyncNoteText">Connecting to OneDrive to sync user list…</span>
           </div>
+        </div>
+
+        <div class="admin-panel" id="catAccessAdminPanel">
+          <div class="admin-panel-title">🔐 Category Access Requests <span class="pending-badge" id="catAccessBadge" style="display:none">0</span></div>
+          <div id="catAccessList"><div style="font-size:.82rem;color:var(--muted)">No pending requests.</div></div>
         </div>
 
         <div class="admin-panel" id="subReqAdminPanel">
@@ -1632,16 +1642,16 @@ function showToast(msg){
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 function showSection(name){
-  ['dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
+  ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
     const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===name);
   });
-  const titles={dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
+  const titles={userdash:'My Services',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
-  if(name==='admin'){renderSubReqAdmin();updateZohoStatus();}
+  if(name==='admin'){renderSubReqAdmin();renderCatAccessAdmin();updateZohoStatus();}
   if(name==='notifications'){
     loadEmailSettingsUI();
     const s=settings;
@@ -1651,8 +1661,9 @@ function showSection(name){
     const tog=document.getElementById('autoEmailToggle');
     if(tog)tog.checked=localStorage.getItem('autoEmailEnabled')==='1';
   }
-  if(name==='admin'){renderUserList();refreshOdStatusUI();loadAdminCredsUI();odLoadUsers().catch(()=>{});updateUserSyncNote(!!(msalApp&&msalApp.getAllAccounts().length>0));}
+  if(name==='admin'){renderUserList();renderCatAccessAdmin();refreshOdStatusUI();loadAdminCredsUI();odLoadUsers().catch(()=>{});updateUserSyncNote(!!(msalApp&&msalApp.getAllAccounts().length>0));}
   if(name==='dashboard'){updateDashboard();}
+  if(name==='userdash'){renderUserCatDash();}
   if(name==='agreements'){renderAgreements();}
   if(name==='billing'){renderBills();}
   if(name==='monthly'){initMonthly();}
@@ -1958,6 +1969,203 @@ function onTypeChange(){
 }
 
 // ══════════════════════════════════════════════════
+// USER CATEGORY ACCESS SYSTEM
+// ══════════════════════════════════════════════════
+const ALL_CATEGORIES = [
+  'Accounting Retainer Services',
+  'CS Retainer Services',
+  'Advisory Services',
+  'Auditing & Assurance Services',
+  'Tax Services'
+];
+const CAT_ICONS = {
+  'Accounting Retainer Services':'📒',
+  'CS Retainer Services':'⚖️',
+  'Advisory Services':'💡',
+  'Auditing & Assurance Services':'🔍',
+  'Tax Services':'🧾'
+};
+const CAT_DESC = {
+  'Accounting Retainer Services':'Bookkeeping, accounts & retainer',
+  'CS Retainer Services':'Secretarial, FEMA & compliance',
+  'Advisory Services':'Business & strategic advisory',
+  'Auditing & Assurance Services':'Audits, assurance & review',
+  'Tax Services':'GST, income tax & assessments'
+};
+
+function getCatRequests(){return JSON.parse(localStorage.getItem('agrCatRequests')||'[]');}
+function saveCatRequests(r){localStorage.setItem('agrCatRequests',JSON.stringify(r));}
+
+function getUserAllowedCats(userId){
+  const users=getUsers();
+  const u=users.find(x=>x.id===userId);
+  return u?u.allowedCats||[]:[];
+}
+
+function renderUserCatDash(){
+  const el=document.getElementById('userCatGrid');if(!el)return;
+  const session=getSession();if(!session)return;
+  const allowed=getUserAllowedCats(session.userId);
+  const reqs=getCatRequests();
+
+  el.innerHTML=ALL_CATEGORIES.map(cat=>{
+    const isApproved=allowed.includes(cat);
+    const req=reqs.find(r=>r.userId===session.userId&&r.cat===cat);
+    const isPending=req&&req.status==='pending';
+
+    // Count data for approved categories
+    let agrCount=0,billCount=0,totalAmt=0;
+    if(isApproved){
+      agrCount=agreements.filter(a=>a.type===cat).length;
+      billCount=bills.filter(b=>b.type===cat).length;
+      totalAmt=
+        agreements.filter(a=>a.type===cat).reduce((s,a)=>s+(parseFloat(a.amount)||0),0)+
+        bills.filter(b=>b.type===cat).reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+    }
+
+    const color=isApproved?'#16a34a':isPending?'#d97706':'#6366f1';
+    const bg=isApproved?'#f0fdf4':isPending?'#fffbeb':'#f5f3ff';
+    const border=isApproved?'#86efac':isPending?'#fcd34d':'#c4b5fd';
+
+    return`<div style="background:${bg};border:2px solid ${border};border-radius:16px;padding:16px;cursor:${isApproved?'pointer':'default'}" onclick="${isApproved?`openCatSection('${cat}')`:''}">
+      <div style="font-size:1.6rem;margin-bottom:6px">${CAT_ICONS[cat]||'📁'}</div>
+      <div style="font-size:.83rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(cat)}</div>
+      <div style="font-size:.68rem;color:var(--muted);margin-bottom:10px">${CAT_DESC[cat]||''}</div>
+      ${isApproved
+        ?`<div style="font-size:.7rem;font-weight:700;color:#16a34a;margin-bottom:6px">✅ Access Granted</div>
+          <div style="font-size:.72rem;color:var(--muted)">${agrCount} agreement${agrCount!==1?'s':''} · ${billCount} bill${billCount!==1?'s':''}</div>
+          <div style="font-size:.78rem;font-weight:800;color:#16a34a;margin-top:4px">₹${totalAmt.toLocaleString('en-IN')}</div>`
+        :isPending
+          ?`<div style="font-size:.72rem;font-weight:700;color:#d97706;background:#fef9c3;padding:4px 10px;border-radius:20px;display:inline-block">⏳ Pending Approval</div>`
+          :`<button onclick="event.stopPropagation();requestCatAccess('${cat}')" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px">Request Access</button>`
+      }
+    </div>`;
+  }).join('');
+
+  // Build approved category nav items
+  renderUserCatNav(allowed);
+}
+
+function renderUserCatNav(allowed){
+  const container=document.getElementById('nav-cat-items');if(!container)return;
+  container.innerHTML=allowed.map(cat=>`
+    <button class="nav-item" onclick="openCatSection('${cat}')" id="nav-cat-${cat.replace(/[^a-z]/gi,'_')}">
+      <span class="nav-icon">${CAT_ICONS[cat]||'📁'}</span>
+      <span class="nav-label" style="font-size:.72rem">${cat.split(' ')[0]} ${cat.split(' ')[1]||''}</span>
+    </button>`).join('');
+}
+
+function openCatSection(cat){
+  // Filter agreements and bills to this category and open Agreements section
+  window._activeCat=cat;
+  document.getElementById('topbarTitle').textContent=CAT_ICONS[cat]+' '+cat;
+  // Show agreements section filtered
+  ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el)el.classList.remove('active');
+  });
+  document.getElementById('sec-agreements').classList.add('active');
+  document.getElementById('sec-billing').classList.add('active');
+  // Actually: show a combined category view
+  showCatView(cat);
+}
+
+function showCatView(cat){
+  ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
+    const el=document.getElementById('sec-'+s);if(el)el.style.display='none';el&&el.classList.remove('active');
+  });
+  // Ensure sec-userdash stays hidden, show agreements section with filtered data
+  const session=getSession();
+  if(!session)return;
+  // Re-route to agreements+billing filtered view
+  window._activeCat=cat;
+  // Show agreements section
+  const sec=document.getElementById('sec-agreements');if(sec){sec.style.display='block';sec.classList.add('active');}
+  ['nav-agreements','nav-billing','nav-monthly'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.style.display='flex';
+  });
+  renderAgreements();
+  // Update topbar
+  const tb=document.getElementById('topbarTitle');if(tb)tb.textContent=(CAT_ICONS[cat]||'📁')+' '+cat;
+  // Add back button
+  addCatBackBtn();
+}
+
+function addCatBackBtn(){
+  let btn=document.getElementById('catBackBtn');
+  if(!btn){
+    btn=document.createElement('button');
+    btn.id='catBackBtn';
+    btn.style.cssText='position:fixed;top:14px;right:16px;z-index:500;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--text);box-shadow:var(--shadow-sm)';
+    btn.innerHTML='← My Services';
+    btn.onclick=()=>{window._activeCat=null;btn.remove();showSection('userdash');['nav-agreements','nav-billing','nav-monthly'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});};
+    document.body.appendChild(btn);
+  }
+}
+
+function requestCatAccess(cat){
+  const session=getSession();if(!session)return;
+  const reqs=getCatRequests();
+  if(reqs.find(r=>r.userId===session.userId&&r.cat===cat&&r.status==='pending')){showToast('Already requested');return;}
+  reqs.push({id:'cr'+Date.now(),userId:session.userId,userName:session.name,cat,status:'pending',requestedAt:new Date().toISOString()});
+  saveCatRequests(reqs);
+  renderUserCatDash();
+  renderCatAccessAdmin();
+  showToast('📩 Access request sent to admin');
+}
+
+function renderCatAccessAdmin(){
+  const el=document.getElementById('catAccessList');if(!el)return;
+  const badge=document.getElementById('catAccessBadge');
+  const reqs=getCatRequests();
+  const pending=reqs.filter(r=>r.status==='pending');
+  if(badge){badge.textContent=pending.length;badge.style.display=pending.length?'inline-block':'none';}
+  if(!reqs.length){el.innerHTML='<div style="font-size:.82rem;color:var(--muted)">No pending requests.</div>';return;}
+  el.innerHTML=reqs.map(r=>{
+    const dt=new Date(r.requestedAt).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    const isPending=r.status==='pending';
+    return`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light)">
+      <div style="font-size:1.3rem">${CAT_ICONS[r.cat]||'📁'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.8rem;font-weight:700">${esc(r.userName)}</div>
+        <div style="font-size:.7rem;color:var(--muted)">${esc(r.cat)} · ${dt}</div>
+      </div>
+      ${isPending
+        ?`<button onclick="approveCatAccess('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
+          <button onclick="rejectCatAccess('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>`
+        :`<span style="font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:20px;background:${r.status==='approved'?'#dcfce7':'#fee2e2'};color:${r.status==='approved'?'#16a34a':'#dc2626'}">${r.status==='approved'?'Approved':'Rejected'}</span>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function approveCatAccess(id){
+  const reqs=getCatRequests();
+  const r=reqs.find(x=>x.id===id);if(!r)return;
+  r.status='approved';
+  saveCatRequests(reqs);
+  // Grant category to user
+  const users=getUsers();
+  const u=users.find(x=>x.id===r.userId);
+  if(u){
+    if(!u.allowedCats)u.allowedCats=[];
+    if(!u.allowedCats.includes(r.cat))u.allowedCats.push(r.cat);
+    saveUsers(users);
+  }
+  renderCatAccessAdmin();
+  showToast('✅ Access granted to '+r.userName+' for '+r.cat);
+}
+
+function rejectCatAccess(id){
+  const reqs=getCatRequests();
+  const r=reqs.find(x=>x.id===id);if(!r)return;
+  r.status='rejected';
+  saveCatRequests(reqs);
+  renderCatAccessAdmin();
+  showToast('❌ Request rejected');
+}
+
+// ══════════════════════════════════════════════════
 // ZOHO BOOKS SYNC
 // ══════════════════════════════════════════════════
 function getZohoConfig(){return JSON.parse(localStorage.getItem('zohoConfig')||'{}');}
@@ -2244,8 +2452,14 @@ function deleteBill(id){
 function renderBills(){
   const el=document.getElementById('billList'); if(!el)return;
   const q=(document.getElementById('billSearchInput')?.value||'').toLowerCase();
+  const _bCat=window._activeCat||null;
+  const _bSession=getSession();
+  const _bAdmin=_bSession&&_bSession.role==='admin';
+  const _bAllowed=(!_bAdmin&&_bSession)?getUserAllowedCats(_bSession.userId):null;
   let list=bills;
   if(q) list=list.filter(b=>(b.name+b.client+b.notes+b.type+b.subType+b.invoice).toLowerCase().includes(q));
+  if(_bCat) list=list.filter(b=>b.type===_bCat);
+  if(!_bAdmin&&_bAllowed) list=list.filter(b=>_bAllowed.includes(b.type));
   if(!list.length){
     el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:12px">🧾</div><div style="font-weight:700;font-size:1rem;margin-bottom:6px">No one-time bills yet</div><div style="font-size:.82rem">Tap + to add your first bill</div></div>';
     return;
@@ -2591,7 +2805,7 @@ function doLogin(){
   const u=getUsers().find(x=>(x.username===input||(x.email&&x.email.toLowerCase()===input))&&x.pwHash===hash);
   if(!u){err.style.display='block';err.textContent='Incorrect username/email or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
-  setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection('dashboard');showToast('Welcome, '+u.name+'!');
+  setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection(u.role==='admin'?'dashboard':'userdash');showToast('Welcome, '+u.name+'!');
 }
 function doLogout(){
   if(!confirm('Sign out?'))return;
@@ -2611,6 +2825,14 @@ function updateUserChip(u){
   const an=document.getElementById('nav-admin');if(an)an.style.display=isAdmin?'flex':'none';
   const sc=document.getElementById('syncChip');if(sc)sc.style.display=isAdmin?'flex':'none';
   const zc=document.getElementById('zohoChip');if(zc)zc.style.display=isAdmin?'flex':'none';
+  // For non-admin: hide admin-only nav, show only user-relevant nav
+  ['nav-dashboard','nav-agreements','nav-billing','nav-monthly','nav-notifications','nav-export'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(isAdmin){el.style.display='flex';}
+    else{el.style.display=id==='nav-notifications'?'flex':'none';}
+  });
+  const ud=document.getElementById('nav-userdash');if(ud)ud.style.display=isAdmin?'none':'flex';
   // Sidebar profile card
   const spa=document.getElementById('sidebarProfileAvatar');if(spa)spa.textContent=ini;
   const spn=document.getElementById('sidebarProfileName');if(spn)spn.textContent=u.name;
@@ -2729,13 +2951,20 @@ function validateGST(g){return/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9
 async function renderAgreements(){
   const search=document.getElementById('searchInput').value.toLowerCase();
   const list=document.getElementById('agreementsList');
+  const _catFilter=window._activeCat||null;
+  const session=getSession();
+  const isAdmin=session&&session.role==='admin';
+  // Non-admin: only show their allowed categories
+  const allowedCats=(!isAdmin&&session)?getUserAllowedCats(session.userId):null;
   let filtered=agreements.filter(a=>{
     const status=getStatus(a);
     const mf=currentFilter==='all'||status===currentFilter;
     const ms=!search||a.name.toLowerCase().includes(search)||a.client.toLowerCase().includes(search)||
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
-    return mf&&ms;
+    const cf=!_catFilter||(a.type===_catFilter);
+    const af=isAdmin||!allowedCats||(a.type&&allowedCats.includes(a.type));
+    return mf&&ms&&cf&&af;
   });
   filtered.sort((a,b)=>{
     const o={expiring:0,active:1,expired:2,renewed:3};
@@ -3173,10 +3402,12 @@ function getMonthlyData(){
   // Agreements active during this month (start <= last day of month AND end >= first day)
   const first=new Date(y,m-1,1);
   const last=new Date(y,m,0);
+  const _mSess=getSession();const _mAdmin=_mSess&&_mSess.role==='admin';const _mAllowed=(!_mAdmin&&_mSess)?getUserAllowedCats(_mSess.userId):null;
   const agrData=agreements.filter(a=>{
     if(!a.startDate||!a.endDate)return false;
     const s=new Date(a.startDate),e=new Date(a.endDate);
-    return s<=last&&e>=first;
+    const af=_mAdmin||!_mAllowed||(a.type&&_mAllowed.includes(a.type));
+    return (s<=last&&e>=first)&&af;
   });
   // Bills in this month — match period (month field or custom date range)
   const billData=bills.filter(b=>{
@@ -3707,7 +3938,7 @@ function showComposeError(msg){const el=document.getElementById('composeError');
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
-(function(){const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);}else{document.getElementById("loginScreen").style.display="flex";}updateZohoStatus();})();
+(function(){const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");}else{document.getElementById("loginScreen").style.display="flex";}updateZohoStatus();})();
 
 openDB().then(async()=>{
   agreements=await dbGetAll('agreements');
