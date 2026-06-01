@@ -3056,13 +3056,13 @@ async function renderAgreements(){
   const allowedCats=(!isAdmin&&session)?getUserAllowedCats(session.userId):null;
   let filtered=agreements.filter(a=>{
     const status=getStatus(a);
-    const mf=currentFilter==='all'||status===currentFilter;
+    const mf=currentFilter==='all'||currentFilter==='email'||status===currentFilter;
     const ms=!search||a.name.toLowerCase().includes(search)||a.client.toLowerCase().includes(search)||
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
     const af=isAdmin||!allowedCats||(a.type&&allowedCats.includes(a.type))||a.isEmail;
-    const ef=currentFilter==='email'?a.isEmail:true;
+    const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName):true;
     return mf&&ms&&cf&&af&&ef;
   });
   filtered.sort((a,b)=>{
