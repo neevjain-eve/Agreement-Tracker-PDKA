@@ -733,8 +733,8 @@
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item" onclick="showSection('userdash')" id="nav-userdash" style="display:none">
-        <span class="nav-icon">🏠</span><span class="nav-label">My Services</span>
+      <button class="nav-item" onclick="showSection('userdash')" id="nav-userdash">
+        <span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span>
       </button>
       <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
         <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
@@ -804,8 +804,8 @@
     <!-- ════ SECTION: USER CATEGORY DASHBOARD ═══════════════ -->
     <div class="section" id="sec-userdash">
       <div style="padding:20px 16px 90px">
-        <div style="font-size:1rem;font-weight:800;margin-bottom:4px;color:var(--text)">My Services</div>
-        <div style="font-size:.8rem;color:var(--muted);margin-bottom:18px">Tap a category to request access. Once admin approves, you'll see all agreements and bills for that category.</div>
+        <div style="font-size:1rem;font-weight:800;margin-bottom:4px;color:var(--text)">Dashboard</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:18px">Select your service category below to request access. Once approved by admin, your dashboard will appear here.</div>
         <div id="userCatGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px"></div>
       </div>
     </div>
@@ -1655,7 +1655,7 @@ function showSection(name){
     const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===name);
   });
-  const titles={userdash:'My Services',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
+  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
   if(name==='admin'){renderSubReqAdmin();renderCatAccessAdmin();updateZohoStatus();}
@@ -2013,31 +2013,83 @@ function renderUserCatDash(){
   const session=getSession();if(!session)return;
   const allowed=getUserAllowedCats(session.userId);
   const reqs=getCatRequests();
+  const el=document.getElementById('userCatGrid');if(!el)return;
+  el.innerHTML='';
 
-  // If user has an approved category → go straight to its dashboard
   if(allowed.length>0){
     const cat=allowed[0];
     window._activeCat=cat;
-    // Show nav items for this user
+    // Show relevant nav items
     ['nav-agreements','nav-billing','nav-monthly','nav-export','nav-notifications'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.style.display='flex';
+      const nv=document.getElementById(id);if(nv)nv.style.display='flex';
     });
-    // Update topbar
-    const tb=document.getElementById('topbarTitle');
-    if(tb)tb.textContent=(CAT_ICONS[cat]||'📁')+' '+cat;
-    // Switch to agreements section (filtered to their category)
-    ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
-      const el=document.getElementById('sec-'+s);if(el)el.classList.remove('active');
-      const nv=document.getElementById('nav-'+s);if(nv)nv.classList.remove('active');
-    });
-    document.getElementById('sec-agreements')?.classList.add('active');
-    document.getElementById('nav-agreements')?.classList.add('active');
-    renderAgreements();
+    // ── Render category dashboard inside sec-userdash ──
+    const agrList=agreements.filter(a=>a.type===cat);
+    const billList=bills.filter(b=>b.type===cat);
+    const totalAgr=agrList.length;
+    const totalBill=billList.length;
+    const totalAmt=agrList.reduce((s,a)=>s+(parseFloat(a.amount)||0),0)+billList.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+    const active=agrList.filter(a=>getStatus(a)==='active').length;
+    const expiring=agrList.filter(a=>getStatus(a)==='expiring').length;
+    const expired=agrList.filter(a=>getStatus(a)==='expired').length;
+    const fmt=n=>'₹'+Number(n).toLocaleString('en-IN');
+    const card=(icon,label,val,sub,color,bg)=>`<div style="background:${bg};border-radius:14px;padding:16px 18px;border:1.5px solid ${color}22">
+      <div style="font-size:.68rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${icon} ${label}</div>
+      <div style="font-size:1.8rem;font-weight:900;color:${color};line-height:1">${val}</div>
+      ${sub?`<div style="font-size:.75rem;color:${color};margin-top:4px;opacity:.8;font-weight:700">${sub}</div>`:''}
+    </div>`;
+    const recentAgr=agrList.slice(0,3).map(a=>{
+      const st=getStatus(a);
+      const sc={active:'#16a34a',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
+      const sl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
+      return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)">
+        <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f8a006,#c2410c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0">${(a.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.name||'')}</div>
+          <div style="font-size:.68rem;color:var(--muted)">${esc(a.client||'')}</div>
+        </div>
+        <span style="font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px;background:${sc}22;color:${sc}">${sl}</span>
+      </div>`;
+    }).join('')||'<div style="font-size:.8rem;color:var(--muted);text-align:center;padding:16px">No agreements yet</div>';
+    const recentBill=billList.slice(0,3).map(b=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)">
+        <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0">${(b.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.specialService||b.type||'Bill')}</div>
+          <div style="font-size:.68rem;color:var(--muted)">${esc(b.client||'')}</div>
+        </div>
+        <span style="font-size:.75rem;font-weight:800;color:#0369a1">${b.amount?fmt(b.amount):'—'}</span>
+      </div>`).join('')||'<div style="font-size:.8rem;color:var(--muted);text-align:center;padding:16px">No bills yet</div>';
+
+    el.innerHTML=`
+      <div style="grid-column:1/-1;display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#f8a006,#c2410c);border-radius:16px;padding:18px 20px;color:#fff;margin-bottom:4px">
+        <div style="font-size:2rem">${CAT_ICONS[cat]||'📁'}</div>
+        <div>
+          <div style="font-size:1rem;font-weight:900;letter-spacing:-.02em">${esc(cat)}</div>
+          <div style="font-size:.75rem;opacity:.85;margin-top:2px">${CAT_DESC[cat]||''}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;grid-column:1/-1">
+        ${card('📋','Agreements',totalAgr,null,'#3b82f6','#eff6ff')}
+        ${card('🧾','One Time Bills',totalBill,null,'#f59e0b','#fffbeb')}
+        ${card('✅','Active',active,null,'#16a34a','#f0fdf4')}
+        ${card('⚠️','Expiring',expiring,null,'#d97706','#fffbeb')}
+        ${card('❌','Expired',expired,null,'#dc2626','#fff1f2')}
+        ${card('💰','Total Amount',fmt(totalAmt),null,'#7c3aed','#f5f3ff')}
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);grid-column:1/-1">
+        <div style="font-size:.82rem;font-weight:800;margin-bottom:10px">📋 Recent Agreements</div>
+        ${recentAgr}
+        ${agrList.length>3?`<button onclick="showSection('agreements')" style="margin-top:8px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer">View all ${agrList.length} →</button>`:''}
+      </div>
+      <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);grid-column:1/-1">
+        <div style="font-size:.82rem;font-weight:800;margin-bottom:10px">🧾 Recent Bills</div>
+        ${recentBill}
+        ${billList.length>3?`<button onclick="showSection('billing')" style="margin-top:8px;background:none;border:none;color:var(--fd-primary);font-size:.75rem;font-weight:700;cursor:pointer">View all ${billList.length} →</button>`:''}
+      </div>`;
     return;
   }
 
   // No approved category yet → show request tiles
-  const el=document.getElementById('userCatGrid');if(!el)return;
   const tiles=ALL_CATEGORIES.map((cat,idx)=>{
     const req=reqs.find(r=>r.userId===session.userId&&r.cat===cat);
     const isPending=req&&req.status==='pending';
@@ -2051,7 +2103,7 @@ function renderUserCatDash(){
       <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px">${CAT_DESC[cat]||''}</div>
       ${isPending
         ?`<div style="font-size:.72rem;font-weight:700;color:#d97706;background:#fef9c3;padding:5px 12px;border-radius:20px;display:inline-block">⏳ Awaiting Admin Approval</div>`
-        :`<button class="_req_btn_${idx}" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.75rem;font-weight:700;cursor:pointer;width:100%">Request Access</button>`
+        :`<button class="_req_btn_${idx}" style="background:linear-gradient(135deg,#f8a006,#c2410c);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.75rem;font-weight:700;cursor:pointer;width:100%">Request Access</button>`
       }`;
     if(!isPending){
       const btn=div.querySelector(`._req_btn_${idx}`);
