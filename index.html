@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f8a006"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-title" content="Agreement Tracker"/>
+  <meta name="apple-mobile-web-app-title" content="EL Tracker"/>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Agreement Tracker</title>
+  <title>EL Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -898,7 +898,7 @@
             <div class="fd-bottom-row">
               <div class="fd-card" style="padding:20px 20px 16px;display:flex;flex-direction:column;gap:14px">
                 <div>
-                  <div class="fd-promo-brand" style="margin-bottom:4px">PDKA</div>
+                  <div class="fd-promo-brand" style="margin-bottom:4px">EL</div>
                   <div style="font-size:1.1rem;font-weight:900;letter-spacing:-.02em;color:var(--text);line-height:1.2">TRACK<br/>EVERY DEAL</div>
                   <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Filter agreements by status or find clients with no active agreement.</div>
                 </div>
@@ -951,7 +951,7 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
             <div class="fd-card fd-wallet-card">
               <h3 class="fd-wallet-title">Quick Overview</h3>
               <div class="fd-wallet-visual">
-                <div style="font-size:1rem;font-weight:600" id="fdWalletUser">Agreement Tracker</div>
+                <div style="font-size:1rem;font-weight:600" id="fdWalletUser">EL Tracker</div>
                 <div>
                   <div style="font-size:.95rem;letter-spacing:.12em;opacity:.95" id="fdWalletStat">0 active · 0 expiring</div>
                   <div style="font-size:.7rem;opacity:.75;margin-top:4px;text-transform:uppercase">Status snapshot</div>
@@ -1001,6 +1001,23 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
       </div>
       <div class="search-bar" style="padding:14px 16px 10px">
         <input type="text" id="searchInput" placeholder="Search name, client, PAN, GST..." oninput="renderAgreements()"/>
+      </div>
+      <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
+        <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
+        <button class="filter-btn" onclick="toggleAgrEmailPanel()" id="filter-email-agr" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
+      </div>
+      <div id="agrEmailPanel" style="display:none;margin:0 16px 10px;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
+        <div style="font-size:.78rem;font-weight:800;color:#1d4ed8;margin-bottom:8px">📧 Send Agreement Invitation</div>
+        <div style="font-size:.72rem;color:#1e40af;margin-bottom:10px">Compose and send an email to a prospect who doesn't have an active agreement yet.</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <input type="text" id="agrEmailTo" placeholder="To: client@example.com" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none"/>
+          <input type="text" id="agrEmailSubject" placeholder="Subject" value="Agreement Invitation" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none"/>
+          <textarea id="agrEmailBody" rows="4" placeholder="Dear Client,&#10;&#10;We would like to discuss an agreement..." style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none;resize:vertical"></textarea>
+          <div style="display:flex;gap:8px">
+            <button onclick="sendAgrSectionEmail()" style="flex:1;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.78rem;font-weight:700;cursor:pointer">📤 Send Email</button>
+            <button onclick="toggleAgrEmailPanel()" style="background:#fff;border:1.5px solid #bfdbfe;border-radius:9px;padding:9px 14px;font-size:.78rem;font-weight:700;cursor:pointer;color:#6b7280">✕</button>
+          </div>
+        </div>
       </div>
 
       <div class="agreements-list" id="agreementsList" style="padding:0 16px 90px"></div>
@@ -1124,7 +1141,7 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
             </div>
             <div class="od-status-row">
               <div class="od-status-label">Save location</div>
-              <div class="od-status-val" style="font-size:.72rem">OneDrive / Agreement Tracker / agreements.json</div>
+              <div class="od-status-val" style="font-size:.72rem">OneDrive / EL Tracker / agreements.json</div>
             </div>
             <div id="odConnectedActions" style="display:none">
               <button class="btn-od-connect" onclick="odSyncNow()" style="background:var(--success)">🔄 Sync Now</button>
@@ -1602,7 +1619,7 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
       <div class="wizard-step-title"><span class="wizard-step-num">2</span>Register New App</div>
       <div class="wizard-step-body">
         Search for <code>App registrations</code> → Click <b>+ New registration</b><br/>
-        • Name: <code>Agreement Tracker</code><br/>
+        • Name: <code>EL Tracker</code><br/>
         • Account types: <b>Accounts in any organizational directory and personal Microsoft accounts</b><br/>
         • Redirect URI type: <b>Single-page application (SPA)</b><br/>
         • Redirect URI: <code id="redirectUriDisplay">https://neevjain-eve.github.io/Agreement-Tracker-PDKA/</code><br/>
@@ -3139,6 +3156,22 @@ function updateSummary(){
   }else banner.classList.remove('show');
 }
 
+function toggleAgrEmailPanel(){
+  const p=document.getElementById('agrEmailPanel');
+  const btn=document.getElementById('filter-email-agr');
+  if(!p)return;
+  const show=p.style.display==='none';
+  p.style.display=show?'block':'none';
+  if(btn)btn.classList.toggle('active',show);
+}
+function sendAgrSectionEmail(){
+  const to=document.getElementById('agrEmailTo').value.trim();
+  const subject=document.getElementById('agrEmailSubject').value.trim()||'Agreement Invitation';
+  const body=document.getElementById('agrEmailBody').value.trim();
+  if(!to){showToast('⚠️ Enter recipient email');return;}
+  window.open('mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');
+  showToast('📧 Opening email client...');
+}
 function sendNoAgrEmail(){
   const to=document.getElementById('noAgrEmailTo').value.trim();
   const subject=document.getElementById('noAgrEmailSubject').value.trim();
@@ -3725,7 +3758,7 @@ function downloadReport(){
   });
   const wsData=[headers,...rows];const ws=XLSX.utils.aoa_to_sheet(wsData);
   ws['!cols']=[{wch:4},{wch:30},{wch:28},{wch:28},{wch:13},{wch:13},{wch:14},{wch:15},{wch:14},{wch:14},{wch:18},{wch:18},{wch:24},{wch:28},{wch:26},{wch:26}];
-  const sumData=[['Agreement Tracker — Report Summary'],['Generated on:',now],['',''],['Total Agreements',agreements.length],['Active',counts.active],['Expiring Soon',counts.expiring],['Expired',counts.expired],['Renewed (Historical)',counts.renewed]];
+  const sumData=[['EL Tracker — Report Summary'],['Generated on:',now],['',''],['Total Agreements',agreements.length],['Active',counts.active],['Expiring Soon',counts.expiring],['Expired',counts.expired],['Renewed (Historical)',counts.renewed]];
   const wsSummary=XLSX.utils.aoa_to_sheet(sumData);wsSummary['!cols']=[{wch:28},{wch:20}];
   const expiringRows=sorted.filter(a=>getStatus(a)==='expiring');
   const expiredRows=sorted.filter(a=>getStatus(a)==='expired');
@@ -3743,13 +3776,13 @@ function downloadReport(){
 // ══════════════════════════════════════════════════
 const GRAPH='https://graph.microsoft.com/v1.0';
 function encodePath(path){return path.split('/').map(encodeURIComponent).join('/');}
-const OD_FILE='Agreement Tracker/agreements.json';
-const OD_ATTACH_FOLDER='Agreement Tracker/Attachments';
+const OD_FILE='EL Tracker/agreements.json';
+const OD_ATTACH_FOLDER='EL Tracker/Attachments';
 const SCOPES=['Files.ReadWrite','User.Read','Mail.Send'];
 let msalApp=null;let odAccount=null;
 let odConfig=JSON.parse(localStorage.getItem('odConfig')||'{}');
 
-function getRedirectUri(){if(location.protocol.startsWith('http'))return location.href.split('?')[0].split('#')[0];return'http://localhost:8080/agreement-tracker.html';}
+function getRedirectUri(){if(location.protocol.startsWith('http'))return location.href.split('?')[0].split('#')[0];return'http://localhost:8080/el-tracker.html';}
 
 function initMSAL(){
   if(!odConfig.clientId||typeof msal==='undefined')return false;
@@ -3889,7 +3922,7 @@ function buildEmailBody(a,days){
   const daysMsg=days<0?'Expired '+Math.abs(days)+' day(s) ago':days===0?'Expires TODAY':'Expires in '+days+' day(s)';
   const bgColor=days<0?'#fee2e2':days<=7?'#fef3c7':'#fff7ed';
   const txColor=days<0?'#b91c1c':days<=7?'#92400e':'#c2410c';
-  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#f8a006;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">Agreement Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Type</td><td style="padding:8px 0">'+(a.type||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr></table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">This is an automated reminder from Agreement Tracker. Please do not reply to this email.</div></div>';
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#f8a006;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">EL Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Type</td><td style="padding:8px 0">'+(a.type||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr></table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">This is an automated reminder from EL Tracker. Please do not reply to this email.</div></div>';
 }
 
 let _composeAgrId=null;
@@ -3902,9 +3935,9 @@ function openEmailModal(agrId){
   const toList=[];if(a.toEmail1)toList.push(a.toEmail1.trim());if(a.toEmail2)toList.push(a.toEmail2.trim());if(a.notifEmail&&!toList.includes(a.notifEmail))toList.push(a.notifEmail.trim());if(loggedInUser?.email&&!toList.includes(loggedInUser.email))toList.push(loggedInUser.email);
   document.getElementById('composeToEmail1').value=toList[0]||'';document.getElementById('composeToEmail2').value=toList[1]||'';
   document.getElementById('composeCcEmails').value=a.ccEmails||'';
-  document.getElementById('composeSubject').value=`[Agreement Tracker] ${days<0?'EXPIRED':'Expiry Reminder'}: ${a.name} (${a.client})`;
+  document.getElementById('composeSubject').value=`[EL Tracker] ${days<0?'EXPIRED':'Expiry Reminder'}: ${a.name} (${a.client})`;
   const statusLabel=days<0?`EXPIRED ${Math.abs(days)} day(s) ago`:`expires in ${days} day(s)`;
-  const bodyText=['Dear Recipient,','','This is a reminder regarding the following agreement:','',`  Agreement : ${a.name}`,`  Client    : ${a.client}`,`  Start Date: ${a.startDate||'—'}`,`  End Date  : ${a.endDate||'—'}`,`  Status    : ${statusLabel}`,'','Please take the necessary action at the earliest.','','— Agreement Tracker'].join('\n');
+  const bodyText=['Dear Recipient,','','This is a reminder regarding the following agreement:','',`  Agreement : ${a.name}`,`  Client    : ${a.client}`,`  Start Date: ${a.startDate||'—'}`,`  End Date  : ${a.endDate||'—'}`,`  Status    : ${statusLabel}`,'','Please take the necessary action at the earliest.','','— EL Tracker'].join('\n');
   document.getElementById('composeBody').value=bodyText;
   const btn=document.getElementById('composeSendBtn');btn.disabled=false;btn.textContent='📤 Send Email';
   const acc=getMSAccount();const fromLine=document.getElementById('composeFromLine');if(fromLine)fromLine.textContent=acc?'From: '+acc.username:'';
@@ -3925,7 +3958,7 @@ async function submitEmailCompose(){
   const toList=[];
   for(const e of rawTo){if(!isValidEmail(e)){showComposeError('Invalid email address: "'+e+'" — please check and try again.');return;}toList.push(e);}
   const ccList=ccRaw?ccRaw.split(',').map(e=>e.trim()).filter(e=>{if(!e)return false;if(!isValidEmail(e)){showComposeError('Invalid CC email: "'+e+'"');return false;}return true;}):[];
-  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#f8a006;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">Agreement Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#6b7280;margin:0">Sent via Agreement Tracker - Microsoft 365</p></div></div>';
+  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#f8a006;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">EL Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#6b7280;margin:0">Sent via EL Tracker - Microsoft 365</p></div></div>';
   const btn=document.getElementById('composeSendBtn');btn.disabled=true;btn.textContent='Sending...';
   showToast('Sending via Microsoft 365...');
   try{
@@ -3951,7 +3984,7 @@ async function sendReminderEmail(agrId,silent=false){
   const toList=[...new Set(rawTo)];if(toList.length===0)throw new Error('NO_EMAIL:'+a.name);
   const ccList=[];if(a.ccEmails)a.ccEmails.split(',').forEach(e=>{const t=e.trim();if(t&&isValidEmail(t))ccList.push(t)});
   const statusLabel=days<0?'EXPIRED':'Expiry Reminder';
-  const subject='[Agreement Tracker] '+statusLabel+': '+a.name+' ('+a.client+')';
+  const subject='[EL Tracker] '+statusLabel+': '+a.name+' ('+a.client+')';
   const body=buildEmailBody(a,days);
   if(!silent)showToast('Sending reminder via Microsoft 365...');
   await sendEmailViaGraph(toList,ccList,subject,body);
@@ -3980,7 +4013,7 @@ async function sendTestEmail(){
   if(to.length===0){if(statusEl)statusEl.textContent='Cannot determine your email address.';return;}
   if(statusEl)statusEl.textContent='📨 Sending test email to '+to[0]+'…';
   try{
-    await sendEmailViaGraph(to,[],'[Agreement Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#f8a006">✅ Email is working!</h2><p>Your Agreement Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
+    await sendEmailViaGraph(to,[],'[EL Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#f8a006">✅ Email is working!</h2><p>Your EL Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
     if(statusEl)statusEl.textContent='✅ Test email sent to '+to[0];showToast('✅ Test email sent!');
   }catch(e){if(statusEl)statusEl.textContent='❌ '+e.message;showToast('❌ '+e.message);}
 }
@@ -4013,7 +4046,7 @@ function loadAdminCredsUI(){
 // ══════════════════════════════════════════════════
 // ONEDRIVE — USER LIST SYNC
 // ══════════════════════════════════════════════════
-const OD_USERS_FILE='Agreement Tracker/users.json';
+const OD_USERS_FILE='EL Tracker/users.json';
 
 async function odSaveUsers(users){
   if(!msalApp)return;const token=await getAccessToken(false);if(!token)return;
