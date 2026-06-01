@@ -2871,7 +2871,16 @@ function updateUserChip(u){
   const spa=document.getElementById('sidebarProfileAvatar');if(spa)spa.textContent=ini;
   const spn=document.getElementById('sidebarProfileName');if(spn)spn.textContent=u.name;
   const spr=document.getElementById('sidebarProfileRole');
-  if(spr){spr.textContent=(isAdmin?'⚙️ Admin':'👤 User');spr.className='sidebar-profile-role '+(isAdmin?'role-admin':'role-user');}
+  if(spr){
+    if(isAdmin){
+      spr.textContent='⚙️ Admin';spr.className='sidebar-profile-role role-admin';
+    } else {
+      const cat=getUserAllowedCats(u.id||u.userId||'')[0]||null;
+      const catShort=cat?cat.replace(' Services','').replace(' &','&'):'No Category';
+      spr.innerHTML='👤 User'+(cat?` &nbsp;<span style="opacity:.7;font-size:.6rem">· ${catShort}</span>`:'');
+      spr.className='sidebar-profile-role role-user';
+    }
+  }
 }
 function togglePw(id,btn){const i=document.getElementById(id);if(i.type==='password'){i.type='text';btn.textContent='🙈'}else{i.type='password';btn.textContent='👁'}}
 
