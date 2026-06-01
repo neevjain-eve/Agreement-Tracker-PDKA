@@ -896,13 +896,43 @@
             </div>
 
             <div class="fd-bottom-row">
-              <div class="fd-promo">
-                <div class="fd-promo-brand">PDKA</div>
-                <div class="fd-promo-title">TRACK<br/>EVERY<br/>DEAL</div>
-                <div class="fd-promo-card">
-                  <div style="font-size:.65rem;opacity:.85;letter-spacing:.08em">AGREEMENTS</div>
-                  <div style="font-size:.9rem;font-weight:800;margin-top:8px" id="fdPromoCount">0</div>
-                  <div style="font-size:.6rem;opacity:.7;margin-top:4px" id="fdPromoUser">—</div>
+              <div class="fd-card" style="padding:20px 20px 16px;display:flex;flex-direction:column;gap:14px">
+                <div>
+                  <div class="fd-promo-brand" style="margin-bottom:4px">PDKA</div>
+                  <div style="font-size:1.1rem;font-weight:900;letter-spacing:-.02em;color:var(--text);line-height:1.2">TRACK<br/>EVERY DEAL</div>
+                  <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Filter agreements by status or find clients with no active agreement.</div>
+                </div>
+
+                <!-- Filter buttons -->
+                <div style="display:flex;flex-wrap:wrap;gap:7px">
+                  <button class="filter-btn active" onclick="setFilter('all');showSection('agreements')" id="filter-all">All</button>
+                  <button class="filter-btn" onclick="setFilter('active');showSection('agreements')" id="filter-active">✅ Active</button>
+                  <button class="filter-btn" onclick="setFilter('expiring');showSection('agreements')" id="filter-expiring">⚠️ Expiring</button>
+                  <button class="filter-btn" onclick="setFilter('expired');showSection('agreements')" id="filter-expired">❌ Expired</button>
+                  <button class="filter-btn" onclick="setFilter('renewed');showSection('agreements')" id="filter-renewed">🔄 Renewed</button>
+                  <button class="filter-btn" onclick="setFilter('email');showSection('agreements')" id="filter-email" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
+                </div>
+
+                <!-- No-agreement email panel -->
+                <div id="noAgrEmailPanel" style="display:none;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
+                  <div style="font-size:.78rem;font-weight:800;color:#1d4ed8;margin-bottom:8px">📧 Send Agreement Invitation</div>
+                  <div style="font-size:.72rem;color:#1e40af;margin-bottom:10px">Compose and send an email to a prospect or client who doesn't have an active agreement yet.</div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <input type="text" id="noAgrEmailTo" placeholder="To: client@example.com" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none"/>
+                    <input type="text" id="noAgrEmailSubject" placeholder="Subject" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none" value="Agreement Invitation"/>
+                    <textarea id="noAgrEmailBody" rows="4" placeholder="Dear Client,
+
+We would like to discuss an agreement for our services..." style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none;resize:vertical"></textarea>
+                    <button onclick="sendNoAgrEmail()" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.78rem;font-weight:700;cursor:pointer">📤 Send Email</button>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);padding-top:10px">
+                  <div>
+                    <div style="font-size:.65rem;opacity:.7;letter-spacing:.08em;text-transform:uppercase">Total Agreements</div>
+                    <div style="font-size:1.4rem;font-weight:900;margin-top:2px" id="fdPromoCount">0</div>
+                  </div>
+                  <div style="font-size:.7rem;color:var(--muted)" id="fdPromoUser">—</div>
                 </div>
               </div>
               <div class="fd-card fd-invoices-card">
@@ -972,13 +1002,7 @@
       <div class="search-bar" style="padding:14px 16px 10px">
         <input type="text" id="searchInput" placeholder="Search name, client, PAN, GST..." oninput="renderAgreements()"/>
       </div>
-      <div class="filter-bar" style="padding:0 16px 12px">
-        <button class="filter-btn active" onclick="setFilter('all')" id="filter-all">All</button>
-        <button class="filter-btn" onclick="setFilter('active')" id="filter-active">✅ Active</button>
-        <button class="filter-btn" onclick="setFilter('expiring')" id="filter-expiring">⚠️ Expiring</button>
-        <button class="filter-btn" onclick="setFilter('expired')" id="filter-expired">❌ Expired</button>
-        <button class="filter-btn" onclick="setFilter('renewed')" id="filter-renewed">🔄 Renewed</button>
-      </div>
+
       <div class="agreements-list" id="agreementsList" style="padding:0 16px 90px"></div>
       <button class="fab" onclick="openAddModal()">＋</button>
     </div>
@@ -3015,7 +3039,11 @@ async function renderAgreements(){
   });
   updateSummary();
   if(filtered.length===0){
-    list.innerHTML=`<div class="empty-state"><div class="icon">📂</div><p>${agreements.length===0?'No agreements yet.<br/>Tap <b>+</b> to add your first.':'No matches found.'}</p></div>`;
+    if(currentFilter==='email'){
+      list.innerHTML=`<div class="empty-state"><div class="icon">📧</div><p>Use the <b>Email</b> panel on the dashboard<br/>to send an agreement invitation.</p><button onclick="showSection('dashboard')" style="margin-top:12px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:10px;padding:9px 20px;font-size:.8rem;font-weight:700;cursor:pointer">Go to Dashboard →</button></div>`;
+    } else {
+      list.innerHTML=`<div class="empty-state"><div class="icon">📂</div><p>${agreements.length===0?'No agreements yet.<br/>Tap <b>+</b> to add your first.':'No matches found.'}</p></div>`;
+    }
     return;
   }
   const parts=await Promise.all(filtered.map(a=>buildCard(a)));
@@ -3111,8 +3139,23 @@ function updateSummary(){
   }else banner.classList.remove('show');
 }
 
+function sendNoAgrEmail(){
+  const to=document.getElementById('noAgrEmailTo').value.trim();
+  const subject=document.getElementById('noAgrEmailSubject').value.trim();
+  const body=document.getElementById('noAgrEmailBody').value.trim();
+  if(!to){showToast('⚠️ Enter recipient email');return;}
+  if(!subject){showToast('⚠️ Enter a subject');return;}
+  // Open mail client with mailto link
+  const mailtoLink='mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  window.open(mailtoLink,'_blank');
+  showToast('📧 Opening email client...');
+}
+
 function setFilter(f){
   currentFilter=f;
+  // Show/hide email panel on dashboard
+  const ep=document.getElementById('noAgrEmailPanel');
+  if(ep)ep.style.display=f==='email'?'block':'none';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('filter-'+f).classList.add('active');
   renderAgreements();
