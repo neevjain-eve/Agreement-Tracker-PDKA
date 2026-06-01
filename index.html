@@ -4135,13 +4135,44 @@ async function previewFile(fileId){
 // ══════════════════════════════════════════════════
 function downloadTemplate(){
   if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
-  const headers=[['Agreement Name*','Client/Vendor Name*','Type','Start Date* (DD/MM/YYYY)','End Date* (DD/MM/YYYY)','PAN Number','GST Registered (Yes/No)','GST Number','Contact Person','Contact Email/Phone','Notes']];
-  const sample=[['Annual Audit Engagement','TechCorp Pvt. Ltd.','Auditing & Assurance Services','01/04/2026','31/03/2027','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
-                ['Monthly Bookkeeping','Property Holdings Ltd.','Accounting Retainer Services','01/01/2026','31/12/2026','FGHIJ5678K','No','','Sunita Sharma','+91 9876543210','Monthly retainer']];
+  const headers=[['Agreement Name*','Client/Vendor Name*','Type/Category','Sub-Service','Engagement Letter (With/Without)','Description','Amount (Rs.)','Billing Frequency','Start Date* (DD/MM/YYYY)','End Date* (DD/MM/YYYY)','Billing Month (MM/YYYY)','PAN Number','GST Registered (Yes/No)','GST Number','Contact Person','Contact Email/Phone','Notes']];
+  const sample=[
+    ['Auditing & Assurance Services Agreement','TechCorp Pvt. Ltd.','Auditing & Assurance Services','Statutory Audit','With','Annual statutory audit engagement','150000','Yearly','01/04/2026','31/03/2027','','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
+    ['Accounting Retainer Services Agreement','Property Holdings Ltd.','Accounting Retainer Services','One Time Services','Without','Monthly bookkeeping and accounts','25000','Monthly','01/01/2026','31/12/2026','01/2026','FGHIJ5678K','No','','Sunita Sharma','+91 9876543210','Monthly retainer'],
+    ['Tax Services Agreement','Alpha Enterprises','Tax Services','Income Tax Return and Compliance','With','ITR filing and compliance','50000','Yearly','01/04/2026','31/03/2027','','KLMNO9012P','Yes','27KLMNO9012P1Z3','Amit Shah','amit@alpha.com','FY 2026-27'],
+    ['CS Retainer Services Agreement','Beta Solutions Pvt. Ltd.','CS Retainer Services','Secretarial CA Act 2013','With','Secretarial compliance services','30000','Quarterly','01/01/2026','31/12/2026','','PQRST3456U','No','','Priya Mehta','priya@beta.com','Quarterly compliance']
+  ];
+  const instrSheet=[
+    ['INSTRUCTIONS FOR BULK UPLOAD'],[''],
+    ['Column','Required','Allowed Values / Format'],
+    ['Agreement Name*','Yes','Any text — e.g. "Tax Services Agreement"'],
+    ['Client/Vendor Name*','Yes','Any text — company or individual name'],
+    ['Type/Category','Recommended','Accounting Retainer Services | CS Retainer Services | Advisory Services | Auditing & Assurance Services | Tax Services'],
+    ['Sub-Service','Optional','Must match a sub-service for the selected Type (e.g. Statutory Audit, FEMA, Income Tax Return and Compliance)'],
+    ['Engagement Letter','Recommended','With | Without (leave blank for unspecified)'],
+    ['Description','Optional','Free text description of the specific service'],
+    ['Amount (Rs.)','Optional','Numeric value only — e.g. 50000'],
+    ['Billing Frequency','Optional','Monthly | Quarterly | Half Yearly | Yearly'],
+    ['Start Date*','Yes','DD/MM/YYYY format — e.g. 01/04/2026'],
+    ['End Date*','Yes','DD/MM/YYYY format — e.g. 31/03/2027'],
+    ['Billing Month','Optional','MM/YYYY format — e.g. 04/2026 (for monthly billing cycles)'],
+    ['PAN Number','Optional','10-character PAN — e.g. ABCDE1234F'],
+    ['GST Registered','Optional','Yes or No'],
+    ['GST Number','Optional','15-character GSTIN (required if GST Registered = Yes)'],
+    ['Contact Person','Optional','Name of the primary contact at client'],
+    ['Contact Email/Phone','Optional','Email or phone number'],
+    ['Notes','Optional','Any additional remarks'],
+    [''],['* = Mandatory field']
+  ];
+  const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet([...headers,...sample]);
-  ws['!cols']=[{wch:28},{wch:26},{wch:28},{wch:22},{wch:22},{wch:14},{wch:22},{wch:20},{wch:18},{wch:24},{wch:30}];
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Agreements Template');
-  XLSX.writeFile(wb,'Agreement_Upload_Template.xlsx');showToast('✅ Template downloaded!');
+  ws['!cols']=[{wch:30},{wch:26},{wch:30},{wch:26},{wch:20},{wch:26},{wch:14},{wch:18},{wch:22},{wch:22},{wch:18},{wch:14},{wch:20},{wch:20},{wch:18},{wch:26},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,ws,'Agreements Template');
+  const wsI=XLSX.utils.aoa_to_sheet(instrSheet);
+  wsI['!cols']=[{wch:26},{wch:12},{wch:70}];
+  XLSX.utils.book_append_sheet(wb,wsI,'Instructions');
+  XLSX.writeFile(wb,'EL_Tracker_Upload_Template.xlsx');
+  showToast('✅ Template downloaded!');
 }
 
 // ══════════════════════════════════════════════════
@@ -4165,7 +4196,25 @@ function processBulkFile(file){
       if(raw.length<2){showToast('⚠️ File is empty or has no data rows');return}
       const headerRow=raw[0].map(h=>(h||'').toString().toLowerCase().trim());
       const col=name=>{const idx=headerRow.findIndex(h=>h.includes(name));return idx>=0?idx:null;};
-      const colMap={name:col('agreement name'),client:col('client')||col('vendor')||col('party'),type:col('type'),startDate:col('start date')||col('start'),endDate:col('end date')||col('end'),pan:col('pan'),gstReg:col('gst registered')||col('gst reg'),gst:col('gst number')||col('gstin'),contact:col('contact person')||col('contact'),contactInfo:col('email')||col('phone')||col('contact email'),notes:col('notes')||col('remarks')};
+      const colMap={
+        name:col('agreement name'),
+        client:col('client')||col('vendor')||col('party'),
+        type:col('type')||col('category'),
+        subType:col('sub-service')||col('sub service'),
+        elType:col('engagement letter'),
+        description:col('description'),
+        amount:col('amount'),
+        billingFreq:col('billing frequency')||col('frequency'),
+        startDate:col('start date')||col('start'),
+        endDate:col('end date')||col('end'),
+        billingMonth:col('billing month'),
+        pan:col('pan'),
+        gstReg:col('gst registered')||col('gst reg'),
+        gst:col('gst number')||col('gstin'),
+        contact:col('contact person')||col('contact'),
+        contactInfo:col('email')||col('phone')||col('contact email'),
+        notes:col('notes')||col('remarks')
+      };
       parsedRows=[];
       for(let i=1;i<raw.length;i++){
         const r=raw[i];if(!r||r.every(c=>!c))continue;
@@ -4176,7 +4225,12 @@ function processBulkFile(file){
         const pan=get('pan').toUpperCase();if(pan&&!validatePAN(pan))errors.push('Invalid PAN');
         const gstRegRaw=get('gstReg').toLowerCase();const gstRegistered=gstRegRaw==='yes'||gstRegRaw==='y'||gstRegRaw==='true'||gstRegRaw==='1';
         const gstNum=get('gst').toUpperCase();if(gstRegistered&&gstNum&&!validateGST(gstNum))errors.push('Invalid GST');
-        parsedRows.push({rowNum:i+1,name,client,startDate,endDate,type:get('type'),pan,gstRegistered,gst:gstRegistered?gstNum:'',contact:get('contact'),contactInfo:get('contactInfo'),notes:get('notes'),errors});
+        const elRaw=get('elType').toLowerCase();
+        const elType=elRaw.includes('with')&&!elRaw.includes('without')?'with':elRaw.includes('without')?'without':'';
+        const billingFreqRaw=get('billingFreq');
+        const validFreqs=['Monthly','Quarterly','Half Yearly','Yearly'];
+        const billingFreq=validFreqs.find(f=>f.toLowerCase()===billingFreqRaw.toLowerCase())||billingFreqRaw;
+        parsedRows.push({rowNum:i+1,name,client,startDate,endDate,type:get('type'),subType:get('subType'),elType,description:get('description'),amount:get('amount'),billingFreq,billingMonth:get('billingMonth'),pan,gstRegistered,gst:gstRegistered?gstNum:'',contact:get('contact'),contactInfo:get('contactInfo'),notes:get('notes'),errors});
       }
       showImportPreview();
     }catch(err){showToast('⚠️ Could not read file: '+err.message)}
@@ -4186,8 +4240,8 @@ function processBulkFile(file){
 function showImportPreview(){
   const valid=parsedRows.filter(r=>r.errors.length===0);const invalid=parsedRows.filter(r=>r.errors.length>0);
   document.getElementById('importSummary').innerHTML=`<b>📊 ${parsedRows.length} rows found</b> &nbsp;·&nbsp; ✅ <b>${valid.length} valid</b> &nbsp;·&nbsp; ❌ <b>${invalid.length} with errors</b>`;
-  const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Start Date</th><th>End Date</th><th>PAN</th><th>GST</th><th>Type</th><th>Notes</th></tr></thead>`;
-  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.gstRegistered?(r.gst||'Registered'):'Not Reg.'}</td><td>${r.type||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
+  const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Type</th><th>EL</th><th>Amount</th><th>Start</th><th>End</th><th>PAN</th><th>Notes</th></tr></thead>`;
+  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;const elBadge=r.elType==='with'?'<span style="font-size:.6rem;background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:8px">✅ EL</span>':r.elType==='without'?'<span style="font-size:.6rem;background:#fff7ed;color:#c2410c;padding:1px 5px;border-radius:8px">📄 No EL</span>':'—';return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.type||'—'}</td><td>${elBadge}</td><td>${r.amount?'₹'+Number(r.amount).toLocaleString('en-IN'):'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
   document.getElementById('importTable').innerHTML=thead+`<tbody>${tbody}</tbody>`;
   if(invalid.length>0)document.getElementById('importErrorNote').textContent=`⚠️ ${invalid.length} row(s) with errors will be skipped.`;
   else document.getElementById('importErrorNote').textContent='';
@@ -4196,7 +4250,7 @@ function showImportPreview(){
 
 async function confirmBulkImport(){
   const valid=parsedRows.filter(r=>r.errors.length===0);if(valid.length===0){showToast('⚠️ No valid rows to import');return}
-  for(const r of valid){await dbPut('agreements',{id:Date.now().toString()+Math.random().toString(36).slice(2),name:r.name,client:r.client,startDate:r.startDate,endDate:r.endDate,type:r.type,pan:r.pan,gstRegistered:r.gstRegistered,gst:r.gst,contact:r.contact,contactInfo:r.contactInfo,notes:r.notes,createdAt:new Date().toISOString(),fileIds:[],renewedFrom:null,renewedTo:null});}
+  for(const r of valid){await dbPut('agreements',{id:Date.now().toString()+Math.random().toString(36).slice(2),name:r.name,client:r.client,startDate:r.startDate,endDate:r.endDate,type:r.type,subType:r.subType||'',elType:r.elType||'',specialService:r.description||'',amount:r.amount||'',billingFreq:r.billingFreq||'',billingMonth:r.billingMonth||'',pan:r.pan,gstRegistered:r.gstRegistered,gst:r.gst,contact:r.contact,contactInfo:r.contactInfo,notes:r.notes,createdAt:new Date().toISOString(),fileIds:[],renewedFrom:null,renewedTo:null});}
   agreements=await dbGetAll('agreements');closeModal('bulkModal');resetBulkUpload();renderAgreements();showToast(`✅ ${valid.length} agreement(s) imported successfully!`);odSyncToOneDrive();
 }
 
@@ -4425,17 +4479,18 @@ function downloadReport(){
   const sorted=[...agreements].sort((a,b)=>{const o={expiring:0,active:1,expired:2,renewed:3};return o[getStatus(a)]-o[getStatus(b)]||new Date(a.endDate)-new Date(b.endDate);});
   const now=new Date().toLocaleDateString('en-IN');
   const counts={active:0,expiring:0,expired:0,renewed:0};sorted.forEach(a=>counts[getStatus(a)]++);
-  const headers=['#','Agreement Name','Client / Vendor','Type','Start Date','End Date','Days Left','Status','PAN','GST Registered','GST Number','Contact Person','Contact Info','Notes','Renewal Of','Renewed To'];
+  const headers=['#','Agreement Name','Client / Vendor','Type','Sub-Service','Engagement Letter','Description','Amount (Rs.)','Billing Freq','Start Date','End Date','Days Left','Status','PAN','GST Registered','GST Number','Contact Person','Contact Info','Notes','Renewal Of','Renewed To'];
   const rows=sorted.map((a,i)=>{
     const status=getStatus(a);const days=getDaysLeft(a.endDate);
     const statusLabel={active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[status];
     const daysLabel=status==='renewed'?'Renewed':status==='expired'?`-${Math.abs(days)} (Expired)`:`${days} days`;
     const prevAgr=a.renewedFrom?agreements.find(x=>x.id===a.renewedFrom):null;
     const nextAgr=a.renewedTo?agreements.find(x=>x.id===a.renewedTo):null;
-    return[i+1,a.name,a.client,a.type||'',fDate(a.startDate),fDate(a.endDate),daysLabel,statusLabel,a.pan||'',a.gstRegistered?'Yes':'No',a.gst||'',a.contact||'',a.contactInfo||'',a.notes||'',prevAgr?prevAgr.name:'',nextAgr?nextAgr.name:''];
+    const elLabel=a.elType==='with'?'With EL':a.elType==='without'?'Without EL':'';
+    return[i+1,a.name,a.client,a.type||'',a.subType||'',elLabel,a.specialService||'',a.amount||'',a.billingFreq||'',fDate(a.startDate),fDate(a.endDate),daysLabel,statusLabel,a.pan||'',a.gstRegistered?'Yes':'No',a.gst||'',a.contact||'',a.contactInfo||'',a.notes||'',prevAgr?prevAgr.name:'',nextAgr?nextAgr.name:''];
   });
   const wsData=[headers,...rows];const ws=XLSX.utils.aoa_to_sheet(wsData);
-  ws['!cols']=[{wch:4},{wch:30},{wch:28},{wch:28},{wch:13},{wch:13},{wch:14},{wch:15},{wch:14},{wch:14},{wch:18},{wch:18},{wch:24},{wch:28},{wch:26},{wch:26}];
+  ws['!cols']=[{wch:4},{wch:30},{wch:26},{wch:26},{wch:22},{wch:14},{wch:22},{wch:13},{wch:14},{wch:13},{wch:13},{wch:14},{wch:15},{wch:14},{wch:14},{wch:18},{wch:18},{wch:24},{wch:28},{wch:26},{wch:26}];
   const sumData=[['EL Tracker — Report Summary'],['Generated on:',now],['',''],['Total Agreements',agreements.length],['Active',counts.active],['Expiring Soon',counts.expiring],['Expired',counts.expired],['Renewed (Historical)',counts.renewed]];
   const wsSummary=XLSX.utils.aoa_to_sheet(sumData);wsSummary['!cols']=[{wch:28},{wch:20}];
   const expiringRows=sorted.filter(a=>getStatus(a)==='expiring');
