@@ -651,6 +651,26 @@
     .tc-badge.active{background:var(--success-bg);color:var(--success)}
     .tc-badge.expiring{background:var(--warning-bg);color:var(--warning)}
     .tc-badge.expired{background:var(--danger-bg);color:var(--danger)}
+
+    /* AI ASSISTANT */
+    #aiBtn{position:fixed;bottom:90px;right:18px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,.5);z-index:1200;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+    #aiBtn:hover{transform:scale(1.1)}
+    #aiPane{position:fixed;bottom:150px;right:18px;width:320px;max-height:480px;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.18);z-index:1200;display:none;flex-direction:column;overflow:hidden;border:1.5px solid #e0e7ff}
+    #aiPane.open{display:flex}
+    .ai-head{background:linear-gradient(135deg,#6366f1,#4f46e5);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .ai-head-title{color:#fff;font-size:.88rem;font-weight:800;flex:1}
+    .ai-close{background:none;border:none;color:rgba(255,255,255,.75);font-size:1.1rem;cursor:pointer;padding:0}
+    .ai-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+    .ai-msg{padding:9px 12px;border-radius:12px;font-size:.78rem;line-height:1.5;max-width:90%}
+    .ai-msg.bot{background:#f0f0ff;color:#312e81;align-self:flex-start;border-bottom-left-radius:4px}
+    .ai-msg.user{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+    .ai-chips{padding:8px 12px;display:flex;flex-wrap:wrap;gap:5px;border-top:1px solid #e0e7ff;flex-shrink:0}
+    .ai-chip{background:#ede9fe;color:#4f46e5;border:none;border-radius:20px;padding:4px 11px;font-size:.7rem;font-weight:700;cursor:pointer;transition:background .15s}
+    .ai-chip:hover{background:#c4b5fd}
+    .ai-input-row{display:flex;gap:6px;padding:10px 12px;border-top:1px solid #e0e7ff;flex-shrink:0}
+    .ai-input{flex:1;padding:8px 12px;border:1.5px solid #c4b5fd;border-radius:20px;font-size:.78rem;outline:none;font-family:inherit}
+    .ai-input:focus{border-color:#6366f1}
+    .ai-send{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:.9rem;flex-shrink:0;display:flex;align-items:center;justify-content:center}
   </style>
 </head>
 <body>
@@ -3101,7 +3121,7 @@ async function buildCard(a){
   const editBtn=`<button class="btn-edit" onclick="openEditModal('${a.id}')">✏️ Edit</button>`;
   const delBtn=`<button class="btn-delete" onclick="deleteAgreement('${a.id}')">🗑️ Delete</button>`;
   return`<div class="agreement-card status-${status}" id="card-${a.id}">
-    <div class="card-top"><div class="card-title">${a.name}</div><div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div></div>
+    <div class="card-top"><div class="card-title">${a.name}${a.isEmail||a.emailAttachName?'<span style="font-size:.6rem;background:#eff6ff;color:#1d4ed8;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle">📧</span>':''}</div><div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div></div>
     <div class="card-client">👤 ${a.client}${a.type?' · '+a.type:''}</div>
     <div class="card-details">
       <div class="detail-item"><div class="detail-label">Start Date</div><div class="detail-value">${fDate(a.startDate)}</div></div>
@@ -3112,6 +3132,7 @@ async function buildCard(a){
     <div class="compliance-row">${panTag}${gstTag}</div>
     <div class="days-left ${daysClass}">${daysText}</div>
     ${a.notes?`<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>`:''}
+    ${a.emailAttachName?`<div style="margin-top:8px;display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:6px 10px"><span style="font-size:.8rem">📧</span><a href="${a.emailAttachData||'#'}" download="${a.emailAttachName}" style="font-size:.74rem;font-weight:600;color:#1d4ed8;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.emailAttachName}</a></div>`:''}
     ${chainHtml}${filesHtml}
     <button class="btn-add-file" onclick="quickAddFile('${a.id}')">📎 Attach Files</button>
     <div class="card-actions">${editBtn}${renewBtn}${histBtn}${remindBtn}${delBtn}</div>
@@ -3187,6 +3208,101 @@ function sendAgrSectionEmail(){
   window.open('mailto:'+encodeURIComponent(to)+'?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body),'_blank');
   showToast('📧 Opening email client...');
 }
+// ══════════════════════════════════════════════════
+// AI ASSISTANT
+// ══════════════════════════════════════════════════
+const AI_KNOWLEDGE = [
+  {k:['add agreement','new agreement','create agreement'],action:()=>{showSection('agreements');setTimeout(openAddModal,200);},reply:'Opening the Add Agreement form for you! 📋'},
+  {k:['add bill','new bill','one time bill','create bill'],action:()=>{showSection('billing');setTimeout(openAddBillModal,200);},reply:'Opening the Add Bill form! 🧾'},
+  {k:['dashboard','home','overview'],action:()=>{const s=getSession();showSection(s&&s.role!=='admin'?'userdash':'dashboard');},reply:'Taking you to the Dashboard! 🏠'},
+  {k:['expiring','expire soon','about to expire'],action:()=>{showSection('agreements');setFilter('expiring');},reply:'Showing expiring agreements! ⚠️'},
+  {k:['expired'],action:()=>{showSection('agreements');setFilter('expired');},reply:'Showing expired agreements! ❌'},
+  {k:['active'],action:()=>{showSection('agreements');setFilter('active');},reply:'Showing active agreements! ✅'},
+  {k:['email','email records','email filter'],action:()=>{showSection('agreements');setFilter('email');},reply:'Showing agreements with attached emails! 📧'},
+  {k:['all agreements','show all'],action:()=>{showSection('agreements');setFilter('all');},reply:'Showing all agreements! 📋'},
+  {k:['monthly','monthly statement','this month'],action:()=>{showSection('monthly');},reply:'Opening Monthly Statement! 📅'},
+  {k:['export','download report','excel'],action:()=>{showSection('export');},reply:'Going to Export / Import! 📊'},
+  {k:['billing','bills','one time'],action:()=>{showSection('billing');},reply:'Opening One Time Billing! 🧾'},
+  {k:['notification','alert','reminder'],action:()=>{showSection('notifications');},reply:'Opening Notification Settings! 🔔'},
+  {k:['admin','settings','admin settings'],action:()=>{const s=getSession();if(s&&s.role==='admin')showSection('admin');else aiBot('⚠️ Admin access required for that section.');},reply:'Opening Admin Settings! ⚙️'},
+  {k:['search','find','look for'],action:()=>{showSection('agreements');setTimeout(()=>document.getElementById('searchInput').focus(),300);},reply:'Ready to search! Type in the search box. 🔍'},
+  {k:['help','what can you do','guide','options'],action:null,reply:'I can help you:
+• Add agreements or bills
+• Navigate to any section
+• Filter by status (active, expiring, expired)
+• Find monthly statements
+• Export reports
+
+Just ask or tap a quick option below! 👆'},
+  {k:['zoho','zoho books','sync'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('zohoAdminPanel')?.scrollIntoView({behavior:'smooth'}),400);}else aiBot('⚠️ Only admins can access Zoho Books sync.');},reply:'Going to Zoho Books settings! ☁️'},
+  {k:['onedrive','one drive','cloud'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('odAdminPanel')?.scrollIntoView({behavior:'smooth'}),400);}else aiBot('⚠️ Only admins can access OneDrive sync.');},reply:'Going to OneDrive settings! ☁️'},
+  {k:['parent company','companies','sub company'],action:()=>{showSection('dashboard');setTimeout(()=>document.getElementById('pcList')?.scrollIntoView({behavior:'smooth'}),400);},reply:'Scrolling to Parent Companies on the dashboard! 🏢'},
+  {k:['sign out','logout','log out'],action:()=>{aiBot('To sign out, tap your name in the top right corner, or use the Sign Out button at the bottom of the sidebar.');},reply:''},
+  {k:['password','change password','reset'],action:()=>{aiBot('To change your password, click your profile in the sidebar footer and select Change Password.');},reply:''},
+];
+
+let _aiOpen=false;
+
+function toggleAI(){
+  _aiOpen=!_aiOpen;
+  const pane=document.getElementById('aiPane');
+  pane.classList.toggle('open',_aiOpen);
+  if(_aiOpen&&document.getElementById('aiMsgs').children.length===0){
+    aiBot('Hi! 👋 I'm your EL Tracker assistant. I can help you navigate the app, add agreements, find records, and more. What would you like to do?');
+  }
+  if(_aiOpen)document.getElementById('aiInput').focus();
+}
+
+function aiBot(msg){
+  const el=document.getElementById('aiMsgs');
+  const d=document.createElement('div');
+  d.className='ai-msg bot';
+  d.style.whiteSpace='pre-wrap';
+  d.textContent=msg;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+
+function aiUser(msg){
+  const el=document.getElementById('aiMsgs');
+  const d=document.createElement('div');
+  d.className='ai-msg user';
+  d.textContent=msg;
+  el.appendChild(d);
+  el.scrollTop=el.scrollHeight;
+}
+
+function aiSend(text){
+  const inp=document.getElementById('aiInput');
+  const msg=(text||inp.value).trim();
+  if(!msg)return;
+  if(inp)inp.value='';
+  aiUser(msg);
+  const lower=msg.toLowerCase();
+  const match=AI_KNOWLEDGE.find(k=>k.k.some(kw=>lower.includes(kw)));
+  if(match){
+    if(match.reply)aiBot(match.reply);
+    if(match.action){setTimeout(match.action,match.reply?400:0);}
+  } else {
+    // Try fuzzy match
+    const words=lower.split(/\s+/);
+    const fuzzy=AI_KNOWLEDGE.find(k=>k.k.some(kw=>words.some(w=>kw.includes(w)&&w.length>3)));
+    if(fuzzy){
+      if(fuzzy.reply)aiBot(fuzzy.reply);
+      if(fuzzy.action)setTimeout(fuzzy.action,400);
+    } else {
+      aiBot('I'm not sure about that. Here's what I can help with:
+• "Add agreement" or "Add bill"
+• "Show expiring" / "Show active"
+• "Monthly statement"
+• "Export report"
+• "Go to dashboard"
+
+Try one of the quick buttons below! 👆');
+    }
+  }
+}
+
 function sendNoAgrEmail(){
   const to=document.getElementById('noAgrEmailTo').value.trim();
   const subject=document.getElementById('noAgrEmailSubject').value.trim();
@@ -3202,12 +3318,14 @@ function sendNoAgrEmail(){
 function setFilter(f){
   currentFilter=f;
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  // Also sync the inline agreement filter buttons
+  // Sync dashboard filter buttons
+  const dashBtn=document.getElementById('filter-'+f);
+  if(dashBtn)dashBtn.classList.add('active');
+  // Sync agreement section filter buttons
   const agr_all=document.getElementById('filter-all-agr');
   const agr_email=document.getElementById('filter-email-agr-view');
   if(agr_all)agr_all.classList.toggle('active',f==='all');
   if(agr_email)agr_email.classList.toggle('active',f==='email');
-  document.getElementById('filter-'+f).classList.add('active');
   renderAgreements();
 }
 
@@ -4127,6 +4245,30 @@ openDB().then(async()=>{
   },1200);
 }).catch(()=>showToast('⚠️ Storage error. Try refreshing.'));
 </script>
+
+<!-- AI ASSISTANT -->
+<button id="aiBtn" onclick="toggleAI()" title="AI Assistant">🤖</button>
+<div id="aiPane">
+  <div class="ai-head">
+    <span style="font-size:1.2rem">🤖</span>
+    <span class="ai-head-title">EL Tracker Assistant</span>
+    <button class="ai-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-msgs" id="aiMsgs"></div>
+  <div class="ai-chips" id="aiChips">
+    <button class="ai-chip" onclick="aiSend('Add a new agreement')">Add agreement</button>
+    <button class="ai-chip" onclick="aiSend('Add a one time bill')">Add bill</button>
+    <button class="ai-chip" onclick="aiSend('Show expiring agreements')">Expiring</button>
+    <button class="ai-chip" onclick="aiSend('Go to dashboard')">Dashboard</button>
+    <button class="ai-chip" onclick="aiSend('Monthly statement')">Monthly</button>
+    <button class="ai-chip" onclick="aiSend('Export report')">Export</button>
+  </div>
+  <div class="ai-input-row">
+    <input class="ai-input" id="aiInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')aiSend()"/>
+    <button class="ai-send" onclick="aiSend()">➤</button>
+  </div>
+</div>
+
 </body>
 </html>
 
