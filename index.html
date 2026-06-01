@@ -736,8 +736,6 @@
       <button class="nav-item" onclick="showSection('userdash')" id="nav-userdash" style="display:none">
         <span class="nav-icon">🏠</span><span class="nav-label">My Services</span>
       </button>
-      <!-- User approved category nav items (injected dynamically) -->
-      <div id="nav-cat-items"></div>
       <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
         <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
       </button>
@@ -2012,100 +2010,65 @@ function getUserAllowedCats(userId){
 }
 
 function renderUserCatDash(){
-  const el=document.getElementById('userCatGrid');if(!el)return;
   const session=getSession();if(!session)return;
   const allowed=getUserAllowedCats(session.userId);
   const reqs=getCatRequests();
 
+  // If user has an approved category → go straight to its dashboard
+  if(allowed.length>0){
+    const cat=allowed[0];
+    window._activeCat=cat;
+    // Show nav items for this user
+    ['nav-agreements','nav-billing','nav-monthly','nav-export','nav-notifications'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.style.display='flex';
+    });
+    // Update topbar
+    const tb=document.getElementById('topbarTitle');
+    if(tb)tb.textContent=(CAT_ICONS[cat]||'📁')+' '+cat;
+    // Switch to agreements section (filtered to their category)
+    ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
+      const el=document.getElementById('sec-'+s);if(el)el.classList.remove('active');
+      const nv=document.getElementById('nav-'+s);if(nv)nv.classList.remove('active');
+    });
+    document.getElementById('sec-agreements')?.classList.add('active');
+    document.getElementById('nav-agreements')?.classList.add('active');
+    renderAgreements();
+    return;
+  }
+
+  // No approved category yet → show request tiles
+  const el=document.getElementById('userCatGrid');if(!el)return;
   const tiles=ALL_CATEGORIES.map((cat,idx)=>{
-    const isApproved=allowed.includes(cat);
     const req=reqs.find(r=>r.userId===session.userId&&r.cat===cat);
     const isPending=req&&req.status==='pending';
-    let agrCount=0,billCount=0,totalAmt=0;
-    if(isApproved){
-      agrCount=agreements.filter(a=>a.type===cat).length;
-      billCount=bills.filter(b=>b.type===cat).length;
-      totalAmt=agreements.filter(a=>a.type===cat).reduce((s,a)=>s+(parseFloat(a.amount)||0),0)
-              +bills.filter(b=>b.type===cat).reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
-    }
-    const bg=isApproved?'#f0fdf4':isPending?'#fffbeb':'#f5f3ff';
-    const border=isApproved?'#86efac':isPending?'#fcd34d':'#c4b5fd';
+    const bg=isPending?'#fffbeb':'#f5f3ff';
+    const border=isPending?'#fcd34d':'#c4b5fd';
     const div=document.createElement('div');
-    div.style.cssText=`background:${bg};border:2px solid ${border};border-radius:16px;padding:16px;cursor:${isApproved?'pointer':'default'}`;
-    if(isApproved) div.onclick=()=>openCatSection(cat);
+    div.style.cssText=`background:${bg};border:2px solid ${border};border-radius:16px;padding:18px;`;
     div.innerHTML=`
-      <div style="font-size:1.6rem;margin-bottom:6px">${CAT_ICONS[cat]||'📁'}</div>
-      <div style="font-size:.83rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(cat)}</div>
-      <div style="font-size:.68rem;color:var(--muted);margin-bottom:10px">${CAT_DESC[cat]||''}</div>
-      ${isApproved
-        ?`<div style="font-size:.7rem;font-weight:700;color:#16a34a;margin-bottom:6px">✅ Access Granted</div>
-           <div style="font-size:.72rem;color:var(--muted)">${agrCount} agreement${agrCount!==1?'s':''} · ${billCount} bill${billCount!==1?'s':''}</div>
-           <div style="font-size:.78rem;font-weight:800;color:#16a34a;margin-top:4px">₹${totalAmt.toLocaleString('en-IN')}</div>`
-        :isPending
-          ?`<div style="font-size:.72rem;font-weight:700;color:#d97706;background:#fef9c3;padding:4px 10px;border-radius:20px;display:inline-block">⏳ Pending Approval</div>`
-          :`<button class="_req_btn_${idx}" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:.72rem;font-weight:700;cursor:pointer;width:100%;margin-top:4px">Request Access</button>`
+      <div style="font-size:1.8rem;margin-bottom:8px">${CAT_ICONS[cat]||'📁'}</div>
+      <div style="font-size:.85rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(cat)}</div>
+      <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px">${CAT_DESC[cat]||''}</div>
+      ${isPending
+        ?`<div style="font-size:.72rem;font-weight:700;color:#d97706;background:#fef9c3;padding:5px 12px;border-radius:20px;display:inline-block">⏳ Awaiting Admin Approval</div>`
+        :`<button class="_req_btn_${idx}" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.75rem;font-weight:700;cursor:pointer;width:100%">Request Access</button>`
       }`;
-    if(!isApproved&&!isPending){
+    if(!isPending){
       const btn=div.querySelector(`._req_btn_${idx}`);
-      if(btn) btn.onclick=(e)=>{e.stopPropagation();requestCatAccess(cat);};
+      if(btn)btn.onclick=(e)=>{e.stopPropagation();requestCatAccess(cat);};
     }
     return div;
   });
   el.innerHTML='';tiles.forEach(t=>el.appendChild(t));
-
-  // Build approved category nav items
-  renderUserCatNav(allowed);
 }
 
-function renderUserCatNav(allowed){
-  const container=document.getElementById('nav-cat-items');if(!container)return;
-  container.innerHTML=allowed.map(cat=>`
-    <button class="nav-item" onclick="openCatSection('${cat}')" id="nav-cat-${cat.replace(/[^a-z]/gi,'_')}">
-      <span class="nav-icon">${CAT_ICONS[cat]||'📁'}</span>
-      <span class="nav-label" style="font-size:.72rem">${cat.split(' ')[0]} ${cat.split(' ')[1]||''}</span>
-    </button>`).join('');
-}
+function renderUserCatNav(allowed){/* replaced — no longer needed */}
 
-function openCatSection(cat){
-  // Filter agreements and bills to this category and open Agreements section
-  window._activeCat=cat;
-  document.getElementById('topbarTitle').textContent=CAT_ICONS[cat]+' '+cat;
-  // Show agreements section filtered
-  showCatView(cat);
-}
+function openCatSection(cat){window._activeCat=cat;renderUserCatDash();}
 
-function showCatView(cat){
-  ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
-    const el=document.getElementById('sec-'+s);if(el)el.classList.remove('active');
-  });
-  // Ensure sec-userdash stays hidden, show agreements section with filtered data
-  const session=getSession();
-  if(!session)return;
-  // Re-route to agreements+billing filtered view
-  window._activeCat=cat;
-  // Show agreements section
-  const sec=document.getElementById('sec-agreements');if(sec){sec.classList.add('active');}
-  ['nav-agreements','nav-billing'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.style.display='flex';
-  });
-  renderAgreements();
-  // Update topbar
-  const tb=document.getElementById('topbarTitle');if(tb)tb.textContent=(CAT_ICONS[cat]||'📁')+' '+cat;
-  // Add back button
-  addCatBackBtn();
-}
+function showCatView(cat){openCatSection(cat);}
 
-function addCatBackBtn(){
-  let btn=document.getElementById('catBackBtn');
-  if(!btn){
-    btn=document.createElement('button');
-    btn.id='catBackBtn';
-    btn.style.cssText='position:fixed;top:14px;right:16px;z-index:500;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--text);box-shadow:var(--shadow-sm)';
-    btn.innerHTML='← My Services';
-    btn.onclick=()=>{window._activeCat=null;btn.remove();showSection('userdash');['nav-agreements','nav-billing'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});};
-    document.body.appendChild(btn);
-  }
-}
+function addCatBackBtn(){/* removed */}
 
 function requestCatAccess(cat){
   const session=getSession();if(!session)return;
@@ -2356,6 +2319,7 @@ function resetBillForm(){
   document.getElementById('billDateCustomStart').value='';
   document.getElementById('billDateCustomEnd').value='';
   document.getElementById('billType').value='';
+  document.getElementById('billType').disabled=false;
   document.getElementById('billSubType').value='';
   if(typeof hideBillAddSub==='function')hideBillAddSub();
   document.getElementById('billSubTypeGroup').style.display='none';
@@ -2369,6 +2333,16 @@ function openAddBillModal(){
   resetBillForm();
   document.getElementById('billModalTitle').textContent='Add One Time Bill';
   document.getElementById('billSaveBtn').textContent='💾 Save Bill';
+  // For non-admin: lock type to approved category
+  const session=getSession();
+  if(session&&session.role!=='admin'){
+    const cat=window._activeCat||(getUserAllowedCats(session.userId)[0]||'');
+    if(cat){
+      const typeEl=document.getElementById('billType');
+      if(typeEl){typeEl.value=cat;typeEl.disabled=true;}
+      onBillTypeChange();
+    }
+  }
   document.getElementById('billModal').classList.add('open');
 }
 
@@ -3214,8 +3188,10 @@ async function deleteFile(agrId,fileId){
 function resetForm(){
   ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('agrNameSelect').value='';
+  document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
   document.getElementById('agrType').value='';
+  document.getElementById('agrType').disabled=false;
   document.getElementById('agrSubType').value='';
   if(typeof hideAgrAddSub==='function')hideAgrAddSub();
   document.getElementById('agrAmount').value='';
@@ -3230,7 +3206,31 @@ function resetForm(){
   document.getElementById('renewalNotice').style.display='none';
   pendingFiles=[];renderPendingFiles();
 }
-function openAddModal(){resetForm();document.getElementById('modalTitle').textContent='Add New Agreement';document.getElementById('saveBtn').textContent='💾 Save Agreement';document.getElementById('addModal').classList.add('open');}
+function openAddModal(){
+  resetForm();
+  document.getElementById('modalTitle').textContent='Add New Agreement';
+  document.getElementById('saveBtn').textContent='💾 Save Agreement';
+  // For non-admin users: pre-fill and lock category to their approved category
+  const session=getSession();
+  if(session&&session.role!=='admin'){
+    const cat=window._activeCat||(getUserAllowedCats(session.userId)[0]||'');
+    if(cat){
+      // Lock Agreement Name select
+      const nameEl=document.getElementById('agrNameSelect');
+      const typeEl=document.getElementById('agrType');
+      // Find matching name option or set it
+      const catName=cat+' Agreement';
+      if(nameEl){
+        [...nameEl.options].forEach(o=>{ if(o.value===catName) nameEl.value=catName; });
+        nameEl.disabled=true;
+      }
+      if(typeEl){typeEl.value=cat;typeEl.disabled=true;}
+      document.getElementById('agrName').value=catName;
+      onTypeChange();
+    }
+  }
+  document.getElementById('addModal').classList.add('open');
+}
 function openEditModal(id){
   const a=agreements.find(x=>x.id===id);if(!a)return;
   resetForm();document.getElementById('modalTitle').textContent='✏️ Edit Agreement';document.getElementById('saveBtn').textContent='💾 Save Changes';
