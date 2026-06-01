@@ -3291,23 +3291,86 @@ function aiComposeBillsMail(toEmail){
   aiBot('Bills email opened for '+toEmail+'.');
 }
 
-// ── Smart search from AI ──
+// ── AI Independent Search (never touches search boxes) ──
 function aiSearch(query){
-  showSection('agreements');
-  setFilter('all');
-  setTimeout(()=>{
-    const inp=document.getElementById('searchInput');
-    if(inp){inp.value=query;renderAgreements();}
-  },300);
-  aiBot('Showing results for "'+query+'"');
+  const q=query.toLowerCase().trim();
+  const results=agreements.filter(a=>
+    (a.name&&a.name.toLowerCase().includes(q))||
+    (a.client&&a.client.toLowerCase().includes(q))||
+    (a.type&&a.type.toLowerCase().includes(q))||
+    (a.subType&&a.subType.toLowerCase().includes(q))||
+    (a.pan&&a.pan.toLowerCase().includes(q))||
+    (a.gst&&a.gst.toLowerCase().includes(q))||
+    (a.contact&&a.contact.toLowerCase().includes(q))||
+    (a.notes&&a.notes.toLowerCase().includes(q))
+  );
+  aiShowAgrResults(results,query);
 }
+
 function aiSearchBills(query){
-  showSection('billing');
-  setTimeout(()=>{
-    const inp=document.getElementById('billSearchInput');
-    if(inp){inp.value=query;renderBills();}
-  },300);
-  aiBot('Showing bill results for "'+query+'"');
+  const q=query.toLowerCase().trim();
+  const results=bills.filter(b=>
+    (b.client&&b.client.toLowerCase().includes(q))||
+    (b.type&&b.type.toLowerCase().includes(q))||
+    (b.subType&&b.subType.toLowerCase().includes(q))||
+    (b.specialService&&b.specialService.toLowerCase().includes(q))||
+    (b.invoice&&b.invoice.toLowerCase().includes(q))||
+    (b.notes&&b.notes.toLowerCase().includes(q))
+  );
+  aiShowBillResults(results,query);
+}
+
+function aiShowAgrResults(results,query){
+  if(!results.length){aiBot('No agreements found matching "'+query+'".');return;}
+  const el=document.getElementById('aiMsgs');
+  const d=document.createElement('div');
+  d.className='ai-msg bot';
+  d.innerHTML='<strong>Found '+results.length+' agreement(s) for "'+query+'":</strong>';
+  el.appendChild(d);
+  results.slice(0,5).forEach(a=>{
+    const st=getStatus(a);
+    const stc={active:'#16a34a',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
+    const stl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
+    const card=document.createElement('div');
+    card.className='ai-msg bot';
+    card.style.cssText='padding:8px 10px;cursor:pointer;';
+    card.innerHTML='<div style="font-weight:700;font-size:.8rem">'+esc(a.name||'')+'</div>'
+      +'<div style="font-size:.72rem;color:#555;margin-top:2px">👤 '+esc(a.client||'—')
+      +(a.endDate?' · ends '+fDate(a.endDate):'')+'</div>'
+      +'<span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:'+stc+'22;color:'+stc+'">'+stl+'</span>'
+      +(a.amount?'<span style="float:right;font-size:.75rem;font-weight:800;color:#c2410c">₹'+Number(a.amount).toLocaleString('en-IN')+'</span>':'');
+    card.onclick=()=>{showSection('agreements');setFilter('all');};
+    el.appendChild(card);
+  });
+  if(results.length>5){
+    const more=document.createElement('div');
+    more.className='ai-msg bot';
+    more.style.cssText='font-size:.72rem;color:#6366f1;cursor:pointer;font-weight:700;';
+    more.textContent='+ '+(results.length-5)+' more — click to view all';
+    more.onclick=()=>{showSection('agreements');setFilter('all');};
+    el.appendChild(more);
+  }
+  el.scrollTop=el.scrollHeight;
+}
+
+function aiShowBillResults(results,query){
+  if(!results.length){aiBot('No bills found matching "'+query+'".');return;}
+  const el=document.getElementById('aiMsgs');
+  const d=document.createElement('div');
+  d.className='ai-msg bot';
+  d.innerHTML='<strong>Found '+results.length+' bill(s) for "'+query+'":</strong>';
+  el.appendChild(d);
+  results.slice(0,5).forEach(b=>{
+    const card=document.createElement('div');
+    card.className='ai-msg bot';
+    card.style.cssText='padding:8px 10px;cursor:pointer;';
+    card.innerHTML='<div style="font-weight:700;font-size:.8rem">'+esc(b.client||'—')+'</div>'
+      +'<div style="font-size:.72rem;color:#555;margin-top:2px">🏷️ '+esc(b.type||'')+(b.subType?' › '+b.subType:'')+'</div>'
+      +(b.amount?'<span style="font-size:.75rem;font-weight:800;color:#0369a1">₹'+Number(b.amount).toLocaleString('en-IN')+'</span>':'');
+    card.onclick=()=>{showSection('billing');};
+    el.appendChild(card);
+  });
+  el.scrollTop=el.scrollHeight;
 }
 
 // ── Main AI send ──
