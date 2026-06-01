@@ -3309,6 +3309,18 @@ function aiComposeBillsMail(toEmail){
   aiBot('Bills email opened for '+toEmail+'.');
 }
 
+// ── Show filtered results inside chat ──
+function aiShowFilterResults(filter,label){
+  const list=aiGetAgreements(filter);
+  if(!list.length){aiBot('No '+label+' agreements found.');return;}
+  aiShowAgrResults(list,'('+label+')');
+}
+function aiShowAllBillsInChat(){
+  const list=aiGetBills();
+  if(!list.length){aiBot('No bills found.');return;}
+  aiShowBillResults(list,'(all)');
+}
+
 // ── AI Independent Search (never touches search boxes) ──
 function aiSearch(query){
   const q=query.toLowerCase().trim();
@@ -3339,55 +3351,78 @@ function aiSearchBills(query){
 }
 
 function aiShowAgrResults(results,query){
-  if(!results.length){aiBot('No agreements found matching "'+query+'".');return;}
+  if(!results.length){aiBot('No agreements found for '+query+'.');return;}
   const el=document.getElementById('aiMsgs');
-  const d=document.createElement('div');
-  d.className='ai-msg bot';
-  d.innerHTML='<strong>Found '+results.length+' agreement(s) for "'+query+'":</strong>';
-  el.appendChild(d);
-  results.slice(0,5).forEach(a=>{
+  const hdr=document.createElement('div');hdr.className='ai-msg bot';
+  hdr.innerHTML='<strong>'+results.length+' agreement(s):</strong>';
+  el.appendChild(hdr);
+  const totalAmt=results.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  results.slice(0,8).forEach(a=>{
     const st=getStatus(a);
     const stc={active:'#16a34a',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
     const stl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
     const card=document.createElement('div');
     card.className='ai-msg bot';
-    card.style.cssText='padding:8px 10px;cursor:pointer;';
-    card.innerHTML='<div style="font-weight:700;font-size:.8rem">'+esc(a.name||'')+'</div>'
-      +'<div style="font-size:.72rem;color:#555;margin-top:2px">👤 '+esc(a.client||'—')
-      +(a.endDate?' · ends '+fDate(a.endDate):'')+'</div>'
-      +'<span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:'+stc+'22;color:'+stc+'">'+stl+'</span>'
-      +(a.amount?'<span style="float:right;font-size:.75rem;font-weight:800;color:#c2410c">₹'+Number(a.amount).toLocaleString('en-IN')+'</span>':'');
-    card.onclick=()=>{showSection('agreements');setFilter('all');};
+    card.style.cssText='padding:9px 11px;border-left:3px solid '+stc+';background:#f9f9ff;border-radius:8px;margin:2px 0;';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+      +'<div style="font-weight:700;font-size:.8rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.name||'Unnamed')+'</div>'
+      +(a.amount?'<div style="font-size:.75rem;font-weight:800;color:#c2410c;flex-shrink:0;margin-left:6px">₹'+Number(a.amount).toLocaleString('en-IN')+'</div>':'')
+      +'</div>'
+      +'<div style="font-size:.7rem;color:#555;margin-top:2px">👤 '+esc(a.client||'—')+'</div>'
+      +'<div style="font-size:.68rem;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap">'
+      +'<span style="background:'+stc+'22;color:'+stc+';font-weight:700;padding:1px 6px;border-radius:10px">'+stl+'</span>'
+      +(a.endDate?'<span style="color:#888">ends '+fDate(a.endDate)+'</span>':'')
+      +(a.type?'<span style="color:#888">'+esc(a.type.split(' ')[0])+'</span>':'')
+      +'</div>';
     el.appendChild(card);
   });
-  if(results.length>5){
-    const more=document.createElement('div');
-    more.className='ai-msg bot';
-    more.style.cssText='font-size:.72rem;color:#6366f1;cursor:pointer;font-weight:700;';
-    more.textContent='+ '+(results.length-5)+' more — click to view all';
-    more.onclick=()=>{showSection('agreements');setFilter('all');};
+  if(results.length>8){
+    const more=document.createElement('div');more.className='ai-msg bot';
+    more.style.cssText='font-size:.72rem;color:#6366f1;font-weight:700;';
+    more.textContent='...and '+(results.length-8)+' more agreements.';
     el.appendChild(more);
+  }
+  if(totalAmt>0){
+    const tot=document.createElement('div');tot.className='ai-msg bot';
+    tot.style.cssText='font-weight:800;font-size:.8rem;color:#c2410c;border-top:1px solid #eee;padding-top:6px;';
+    tot.textContent='Total: ₹'+totalAmt.toLocaleString('en-IN');
+    el.appendChild(tot);
   }
   el.scrollTop=el.scrollHeight;
 }
 
 function aiShowBillResults(results,query){
-  if(!results.length){aiBot('No bills found matching "'+query+'".');return;}
+  if(!results.length){aiBot('No bills found for '+query+'.');return;}
   const el=document.getElementById('aiMsgs');
-  const d=document.createElement('div');
-  d.className='ai-msg bot';
-  d.innerHTML='<strong>Found '+results.length+' bill(s) for "'+query+'":</strong>';
-  el.appendChild(d);
-  results.slice(0,5).forEach(b=>{
-    const card=document.createElement('div');
-    card.className='ai-msg bot';
-    card.style.cssText='padding:8px 10px;cursor:pointer;';
-    card.innerHTML='<div style="font-weight:700;font-size:.8rem">'+esc(b.client||'—')+'</div>'
-      +'<div style="font-size:.72rem;color:#555;margin-top:2px">🏷️ '+esc(b.type||'')+(b.subType?' › '+b.subType:'')+'</div>'
-      +(b.amount?'<span style="font-size:.75rem;font-weight:800;color:#0369a1">₹'+Number(b.amount).toLocaleString('en-IN')+'</span>':'');
-    card.onclick=()=>{showSection('billing');};
+  const hdr=document.createElement('div');hdr.className='ai-msg bot';
+  hdr.innerHTML='<strong>'+results.length+' bill(s):</strong>';
+  el.appendChild(hdr);
+  const totalAmt=results.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  results.slice(0,8).forEach(b=>{
+    const card=document.createElement('div');card.className='ai-msg bot';
+    card.style.cssText='padding:9px 11px;border-left:3px solid #0369a1;background:#f0f9ff;border-radius:8px;margin:2px 0;';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between">'
+      +'<div style="font-weight:700;font-size:.8rem">'+esc(b.client||'—')+'</div>'
+      +(b.amount?'<div style="font-size:.75rem;font-weight:800;color:#0369a1">₹'+Number(b.amount).toLocaleString('en-IN')+'</div>':'')
+      +'</div>'
+      +'<div style="font-size:.7rem;color:#555;margin-top:2px">'+esc(b.type||'')+(b.subType?' › '+esc(b.subType):'')+(b.specialService?' · '+esc(b.specialService):'')+'</div>'
+      +(b.invoice?'<div style="font-size:.67rem;color:#888;margin-top:2px">Inv: '+esc(b.invoice)+'</div>':'');
     el.appendChild(card);
   });
+  if(results.length>8){
+    const more=document.createElement('div');more.className='ai-msg bot';
+    more.style.cssText='font-size:.72rem;color:#6366f1;font-weight:700;';
+    more.textContent='...and '+(results.length-8)+' more bills.';
+    el.appendChild(more);
+  }
+  if(totalAmt>0){
+    const tot=document.createElement('div');tot.className='ai-msg bot';
+    tot.style.cssText='font-weight:800;font-size:.8rem;color:#0369a1;border-top:1px solid #eee;padding-top:6px;';
+    tot.textContent='Total: ₹'+totalAmt.toLocaleString('en-IN');
+    el.appendChild(tot);
+  }
   el.scrollTop=el.scrollHeight;
 }
 
@@ -3399,12 +3434,12 @@ const AI_KNOWLEDGE = [
   {k:['delete agreement'],action:(m)=>{showSection('agreements');aiBot('Click the 🗑️ Delete button on any agreement card to delete it.');},reply:''},
   {k:['renew agreement'],action:(m)=>{showSection('agreements');setFilter('expired');aiBot('Click 🔄 Renew on any expired agreement card to renew it.');},reply:'Showing expired agreements for renewal! 🔄'},
   {k:['attach file','attach document'],action:(m)=>{showSection('agreements');aiBot('Click 📎 Attach Files on any agreement card, or attach in the form when adding.');},reply:''},
-  {k:['show expiring','expiring agreements','expiring soon'],action:(m)=>{showSection('agreements');setFilter('expiring');},reply:'Showing expiring agreements! ⚠️'},
-  {k:['show expired','expired agreements'],action:(m)=>{showSection('agreements');setFilter('expired');},reply:'Showing expired agreements! ❌'},
-  {k:['show active','active agreements'],action:(m)=>{showSection('agreements');setFilter('active');},reply:'Showing active agreements! ✅'},
-  {k:['show renewed','renewed agreements'],action:(m)=>{showSection('agreements');setFilter('renewed');},reply:'Showing renewed agreements! 🔄'},
-  {k:['show all','all agreements','el tracker'],action:(m)=>{showSection('agreements');setFilter('all');},reply:'Showing all agreements! 📋'},
-  {k:['email agreements','email records'],action:(m)=>{showSection('agreements');setFilter('email');},reply:'Showing email-attached agreements! 📧'},
+  {k:['show expiring','expiring agreements','expiring soon'],action:(m)=>{aiShowFilterResults('expiring','Expiring');},reply:''},
+  {k:['show expired','expired agreements'],action:(m)=>{aiShowFilterResults('expired','Expired');},reply:''},
+  {k:['show active','active agreements'],action:(m)=>{aiShowFilterResults('active','Active');},reply:''},
+  {k:['show renewed','renewed agreements'],action:(m)=>{aiShowFilterResults('renewed','Renewed');},reply:''},
+  {k:['show all','all agreements','el tracker'],action:(m)=>{aiShowFilterResults('all','All');},reply:''},
+  {k:['email agreements','email records'],action:(m)=>{aiShowFilterResults('email','Email');},reply:''},
   {k:['search agreement','search client','find agreement','find client'],action:(msg)=>{
     const q=msg.replace(/search|find|look for|show me|agreements?|clients?/gi,'').trim();
     if(q){aiSearch(q);}else{showSection('agreements');setFilter('all');setTimeout(()=>document.getElementById('searchInput').focus(),300);aiBot('Type what you want to find in the search box.');}
@@ -3413,7 +3448,7 @@ const AI_KNOWLEDGE = [
   {k:['send reminder','email reminder'],action:(m)=>{showSection('agreements');aiBot('Click the 📧 icon on any agreement card to send a reminder email.');},reply:''},
   // ─ One Time Billing ─
   {k:['add bill','new bill','one time bill','create bill'],action:(m)=>{showSection('billing');setTimeout(openAddBillModal,200);},reply:'Opening Add Bill form! 🧾'},
-  {k:['billing','bills','one time billing','invoices'],action:(m)=>{showSection('billing');},reply:'Opening One Time Billing! 🧾'},
+  {k:['billing','bills','one time billing','invoices'],action:(m)=>{aiShowAllBillsInChat();},reply:''},
   {k:['search bill','find bill'],action:(msg)=>{
     const q=msg.replace(/search|find|look for|show me|bills?/gi,'').trim();
     if(q){aiSearchBills(q);}else{showSection('billing');setTimeout(()=>document.getElementById('billSearchInput').focus(),300);aiBot('Type what you want to find in the search box.');}
