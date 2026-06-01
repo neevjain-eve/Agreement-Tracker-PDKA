@@ -910,21 +910,6 @@
                   <button class="filter-btn" onclick="setFilter('expiring');showSection('agreements')" id="filter-expiring">⚠️ Expiring</button>
                   <button class="filter-btn" onclick="setFilter('expired');showSection('agreements')" id="filter-expired">❌ Expired</button>
                   <button class="filter-btn" onclick="setFilter('renewed');showSection('agreements')" id="filter-renewed">🔄 Renewed</button>
-                  <button class="filter-btn" onclick="setFilter('email');showSection('agreements')" id="filter-email" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
-                </div>
-
-                <!-- No-agreement email panel -->
-                <div id="noAgrEmailPanel" style="display:none;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
-                  <div style="font-size:.78rem;font-weight:800;color:#1d4ed8;margin-bottom:8px">📧 Send Agreement Invitation</div>
-                  <div style="font-size:.72rem;color:#1e40af;margin-bottom:10px">Compose and send an email to a prospect or client who doesn't have an active agreement yet.</div>
-                  <div style="display:flex;flex-direction:column;gap:7px">
-                    <input type="text" id="noAgrEmailTo" placeholder="To: client@example.com" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none"/>
-                    <input type="text" id="noAgrEmailSubject" placeholder="Subject" style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none" value="Agreement Invitation"/>
-                    <textarea id="noAgrEmailBody" rows="4" placeholder="Dear Client,
-
-We would like to discuss an agreement for our services..." style="padding:8px 12px;border:1.5px solid #bfdbfe;border-radius:9px;font-size:.8rem;font-family:inherit;outline:none;resize:vertical"></textarea>
-                    <button onclick="sendNoAgrEmail()" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:9px;padding:9px;font-size:.78rem;font-weight:700;cursor:pointer">📤 Send Email</button>
-                  </div>
                 </div>
 
                 <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);padding-top:10px">
@@ -3216,9 +3201,6 @@ function sendNoAgrEmail(){
 
 function setFilter(f){
   currentFilter=f;
-  // Show/hide email panel on dashboard
-  const ep=document.getElementById('noAgrEmailPanel');
-  if(ep)ep.style.display=f==='email'?'block':'none';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   // Also sync the inline agreement filter buttons
   const agr_all=document.getElementById('filter-all-agr');
