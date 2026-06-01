@@ -671,6 +671,22 @@
     .ai-input{flex:1;padding:8px 12px;border:1.5px solid #c4b5fd;border-radius:20px;font-size:.78rem;outline:none;font-family:inherit}
     .ai-input:focus{border-color:#6366f1}
     .ai-send{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:.9rem;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+
+    /* EL TYPE CHOOSER */
+    #elTypeChooser{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2100;display:none;align-items:center;justify-content:center;padding:20px}
+    #elTypeChooser.open{display:flex}
+    .el-chooser-card{background:#fff;border-radius:22px;padding:28px 24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
+    .el-chooser-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px}
+    .el-chooser-sub{font-size:.8rem;color:var(--muted);margin-bottom:24px;line-height:1.5}
+    .el-chooser-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .el-choice-btn{padding:18px 12px;border-radius:14px;border:2px solid transparent;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit}
+    .el-choice-btn .el-icon{font-size:2rem}
+    .el-choice-btn .el-label{font-size:.82rem;font-weight:800;color:var(--text)}
+    .el-choice-btn .el-desc{font-size:.68rem;color:var(--muted);line-height:1.4}
+    .el-choice-btn.with-el{background:#f0fdf4;border-color:#86efac}
+    .el-choice-btn.with-el:hover{background:#dcfce7;border-color:#16a34a}
+    .el-choice-btn.without-el{background:#fff7ed;border-color:#fdba74}
+    .el-choice-btn.without-el:hover{background:#fef9ec;border-color:#c2410c}
   </style>
 </head>
 <body>
@@ -1009,6 +1025,8 @@
       </div>
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
+        <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="border-color:#86efac;color:#16a34a">✅ With EL</button>
+        <button class="filter-btn" onclick="setFilter('without_el')" id="filter-without-el" style="border-color:#fdba74;color:#c2410c">📄 Without EL</button>
         <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
       </div>
 
@@ -3092,13 +3110,16 @@ async function renderAgreements(){
   const allowedCats=(!isAdmin&&session)?getUserAllowedCats(session.userId):null;
   let filtered=agreements.filter(a=>{
     const status=getStatus(a);
-    const mf=currentFilter==='all'||currentFilter==='email'||status===currentFilter;
+    const mf=currentFilter==='all'||currentFilter==='email'||currentFilter==='with_el'||currentFilter==='without_el'||status===currentFilter;
     const ms=!search||a.name.toLowerCase().includes(search)||a.client.toLowerCase().includes(search)||
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
     const af=isAdmin||!allowedCats||(a.type&&allowedCats.includes(a.type))||a.isEmail;
-    const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName):true;
+    const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
+      :currentFilter==='with_el'?(a.elType==='with')
+      :currentFilter==='without_el'?(a.elType==='without'||!a.elType)
+      :true;
     return mf&&ms&&cf&&af&&ef;
   });
   filtered.sort((a,b)=>{
@@ -3806,8 +3827,12 @@ function setFilter(f){
   // Sync agreement section filter buttons
   const agr_all=document.getElementById('filter-all-agr');
   const agr_email=document.getElementById('filter-email-agr-view');
+  const agr_with=document.getElementById('filter-with-el');
+  const agr_without=document.getElementById('filter-without-el');
   if(agr_all)agr_all.classList.toggle('active',f==='all');
   if(agr_email)agr_email.classList.toggle('active',f==='email');
+  if(agr_with)agr_with.classList.toggle('active',f==='with_el');
+  if(agr_without)agr_without.classList.toggle('active',f==='without_el');
   renderAgreements();
 }
 
@@ -3887,6 +3912,7 @@ async function saveAgreement(){
     id:editId||Date.now().toString(),name,client,startDate,endDate,
     type:document.getElementById('agrType').value==='__email__'?'':document.getElementById('agrType').value,
     isEmail:document.getElementById('agrType').value==='__email__',
+    elType:window._currentElType||'',
     subType:document.getElementById('agrSubType').value,
     amount:document.getElementById('agrAmount').value,
     specialService:document.getElementById('agrSpecialService').value.trim(),
@@ -3949,6 +3975,7 @@ function resetForm(){
   document.getElementById('agrName').value='';
   const _en=document.getElementById('emailAgrNote');if(_en)_en.remove();
   clearAgrEmailAttach&&clearAgrEmailAttach();
+  window._currentElType='';
   document.getElementById('agrType').value='';
   document.getElementById('agrType').disabled=false;
   document.getElementById('agrSubType').value='';
@@ -3966,18 +3993,22 @@ function resetForm(){
   pendingFiles=[];renderPendingFiles();
 }
 function openAddModal(){
+  // Show EL type chooser first
+  document.getElementById('elTypeChooser').classList.add('open');
+}
+function selectElType(elType){
+  document.getElementById('elTypeChooser').classList.remove('open');
+  window._currentElType=elType;
   resetForm();
-  document.getElementById('modalTitle').textContent='Add New Agreement';
+  document.getElementById('modalTitle').textContent='Add New Agreement — '+(elType==='with'?'✅ With Engagement Letter':'📄 Without Engagement Letter');
   document.getElementById('saveBtn').textContent='💾 Save Agreement';
   // For non-admin users: pre-fill and lock category to their approved category
   const session=getSession();
   if(session&&session.role!=='admin'){
     const cat=window._activeCat||(getUserAllowedCats(session.userId)[0]||'');
     if(cat){
-      // Lock Agreement Name select
       const nameEl=document.getElementById('agrNameSelect');
       const typeEl=document.getElementById('agrType');
-      // Find matching name option or set it
       const catName=cat+' Agreement';
       if(nameEl){
         [...nameEl.options].forEach(o=>{ if(o.value===catName) nameEl.value=catName; });
@@ -4770,6 +4801,26 @@ openDB().then(async()=>{
   <div class="ai-input-row">
     <input class="ai-input" id="aiInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')aiSend()"/>
     <button class="ai-send" onclick="aiSend()">➤</button>
+  </div>
+</div>
+
+<!-- EL TYPE CHOOSER -->
+<div id="elTypeChooser">
+  <div class="el-chooser-card">
+    <div class="el-chooser-title">📋 New Agreement</div>
+    <div class="el-chooser-sub">Is this agreement accompanied by an Engagement Letter?</div>
+    <div class="el-chooser-btns">
+      <button class="el-choice-btn with-el" onclick="selectElType('with')">
+        <span class="el-icon">✅</span>
+        <span class="el-label">With Engagement Letter</span>
+        <span class="el-desc">Agreement has a formal engagement letter attached or on record</span>
+      </button>
+      <button class="el-choice-btn without-el" onclick="selectElType('without')">
+        <span class="el-icon">📄</span>
+        <span class="el-label">Without Engagement Letter</span>
+        <span class="el-desc">Proceeding without a formal engagement letter</span>
+      </button>
+    </div>
   </div>
 </div>
 
