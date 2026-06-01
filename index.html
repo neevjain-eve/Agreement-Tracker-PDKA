@@ -1474,7 +1474,14 @@
       <!-- RIGHT: Client + Email Details -->
       <div>
         <div class="form-section-title">👤 Party / Client / Vendor Details</div>
-        <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
+        <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd." oninput="onAgrClientInput()"/></div>
+        <div class="form-group">
+          <label>Parent Group <span style="font-size:.7rem;color:var(--muted)">(optional — select from dashboard parent companies)</span></label>
+          <select id="agrParentGroup" style="font-family:inherit">
+            <option value="">None / Independent</option>
+          </select>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:3px">Manage parent companies on the <button type="button" onclick="closeModal('addModal');showSection('dashboard');setTimeout(()=>document.getElementById('pcList')?.scrollIntoView({behavior:'smooth'}),400)" style="background:none;border:none;color:var(--fd-primary);font-size:.7rem;font-weight:700;cursor:pointer;padding:0">Dashboard →</button></div>
+        </div>
         <div class="form-group"><label>PAN Number</label><input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
         <div class="form-group"><label>Contact Person</label><input type="text" id="agrContact" placeholder="Name"/></div>
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
@@ -1600,6 +1607,12 @@
       <div>
         <div class="form-section-title">👤 Client Details</div>
         <div class="form-group"><label>Client Name *</label><input type="text" id="billClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
+        <div class="form-group">
+          <label>Parent Group <span style="font-size:.7rem;color:var(--muted)">(optional)</span></label>
+          <select id="billParentGroup" style="font-family:inherit">
+            <option value="">None / Independent</option>
+          </select>
+        </div>
         <div class="form-group"><label>PAN Number</label><input type="text" id="billPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
         <div class="form-group"><label>Contact Person</label><input type="text" id="billContact" placeholder="Name"/></div>
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="billContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
@@ -1916,6 +1929,32 @@ const SUB_SERVICES = {
 };
 // Merge any user-added sub-categories from localStorage
 (function(){try{const approved=JSON.parse(localStorage.getItem('agrApprovedSubs')||'{}');Object.keys(approved).forEach(k=>{if(!SUB_SERVICES[k])SUB_SERVICES[k]=[];approved[k].forEach(v=>{if(!SUB_SERVICES[k].includes(v))SUB_SERVICES[k].push(v);});});}catch(e){}})();
+
+function populateParentGroupDropdown(selectId){
+  const sel=document.getElementById(selectId);if(!sel)return;
+  const current=sel.value;
+  sel.innerHTML='<option value="">None / Independent</option>';
+  const pcs=getParentCompanies();
+  pcs.forEach(p=>{
+    const opt=document.createElement('option');
+    opt.value=p.id;
+    opt.textContent=p.name+(p.subs&&p.subs.length?' ('+p.subs.length+' sub-co)':'');
+    sel.appendChild(opt);
+  });
+  if(current)sel.value=current;
+}
+
+function onAgrClientInput(){
+  // Auto-suggest parent group based on client name matching sub-company
+  const client=document.getElementById('agrClient').value.trim().toLowerCase();
+  if(!client)return;
+  const pcs=getParentCompanies();
+  const match=pcs.find(p=>p.subs&&p.subs.some(s=>s.toLowerCase().includes(client)||client.includes(s.toLowerCase())));
+  if(match){
+    const sel=document.getElementById('agrParentGroup');
+    if(sel&&!sel.value){sel.value=match.id;}
+  }
+}
 
 function onAgrNameSelect(){
   const sel=document.getElementById('agrNameSelect');
@@ -2500,6 +2539,8 @@ function resetBillForm(){
   document.getElementById('billDateCustomEnd').value='';
   document.getElementById('billType').value='';
   document.getElementById('billType').disabled=false;
+  populateParentGroupDropdown('billParentGroup');
+  document.getElementById('billParentGroup').value='';
   document.getElementById('billSubType').value='';
   if(typeof hideBillAddSub==='function')hideBillAddSub();
   document.getElementById('billSubTypeGroup').style.display='none';
@@ -2581,6 +2622,7 @@ function saveBill(){
   const bill={
     id: editId||Date.now().toString(),
     name: desc, client, date, amount,
+    parentGroup:document.getElementById('billParentGroup').value||'',
     type: document.getElementById('billType').value,
     subType: document.getElementById('billSubType').value,
     specialService: document.getElementById('billSpecialService').value.trim(),
@@ -3939,6 +3981,7 @@ async function saveAgreement(){
     subType:document.getElementById('agrSubType').value,
     amount:document.getElementById('agrAmount').value,
     specialService:document.getElementById('agrSpecialService').value.trim(),
+    parentGroup:document.getElementById('agrParentGroup').value||'',
     emailAttachName:document.getElementById('agrEmailAttach').dataset.fname||'',
     emailAttachData:document.getElementById('agrEmailAttach').dataset.b64||'',
     billingMonth:document.getElementById('agrMonth').value,
@@ -3997,6 +4040,8 @@ function resetForm(){
   document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
   const _en=document.getElementById('emailAgrNote');if(_en)_en.remove();
+  populateParentGroupDropdown('agrParentGroup');
+  document.getElementById('agrParentGroup').value='';
   clearAgrEmailAttach&&clearAgrEmailAttach();
   window._currentElType='';
   document.getElementById('agrType').value='';
@@ -4058,6 +4103,8 @@ function openEditModal(id){
   if(a.subType){document.getElementById('agrSubType').value=a.subType||'';}
   document.getElementById('agrAmount').value=a.amount||'';
   document.getElementById('agrSpecialService').value=a.specialService||'';
+  populateParentGroupDropdown('agrParentGroup');
+  document.getElementById('agrParentGroup').value=a.parentGroup||'';
   document.getElementById('agrMonth').value=a.billingMonth||'';
   document.getElementById('agrBillingFreq').value=a.billingFreq||'';
   document.getElementById('agrContact').value=a.contact||'';
