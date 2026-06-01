@@ -3293,19 +3293,52 @@ function aiComposeBillsMail(toEmail){
 
 // ── Main AI send ──
 const AI_KNOWLEDGE = [
+  // ─ Agreements ─
   {k:['add agreement','new agreement','create agreement'],action:()=>{showSection('agreements');setTimeout(openAddModal,200);},reply:'Opening Add Agreement form! 📋'},
+  {k:['edit agreement'],action:()=>{showSection('agreements');aiBot('Click the ✏️ Edit button on any agreement card to edit it.');},reply:''},
+  {k:['delete agreement'],action:()=>{showSection('agreements');aiBot('Click the 🗑️ Delete button on any agreement card to delete it.');},reply:''},
+  {k:['renew agreement'],action:()=>{showSection('agreements');setFilter('expired');aiBot('Click 🔄 Renew on any expired agreement card to renew it.');},reply:'Showing expired agreements for renewal! 🔄'},
+  {k:['attach file','attach document'],action:()=>{showSection('agreements');aiBot('Click 📎 Attach Files on any agreement card, or attach in the form when adding.');},reply:''},
+  {k:['show expiring','expiring agreements','expiring soon'],action:()=>{showSection('agreements');setFilter('expiring');},reply:'Showing expiring agreements! ⚠️'},
+  {k:['show expired','expired agreements'],action:()=>{showSection('agreements');setFilter('expired');},reply:'Showing expired agreements! ❌'},
+  {k:['show active','active agreements'],action:()=>{showSection('agreements');setFilter('active');},reply:'Showing active agreements! ✅'},
+  {k:['show renewed','renewed agreements'],action:()=>{showSection('agreements');setFilter('renewed');},reply:'Showing renewed agreements! 🔄'},
+  {k:['show all','all agreements','el tracker'],action:()=>{showSection('agreements');setFilter('all');},reply:'Showing all agreements! 📋'},
+  {k:['email agreements','email records'],action:()=>{showSection('agreements');setFilter('email');},reply:'Showing email-attached agreements! 📧'},
+  {k:['search agreement','search client','find agreement','find client'],action:()=>{showSection('agreements');setTimeout(()=>document.getElementById('searchInput').focus(),300);},reply:'Ready to search! Type in the search box 🔍'},
+  {k:['history','agreement history','renewal history'],action:()=>{showSection('agreements');aiBot('Click 📜 History on any agreement card to see its renewal chain.');},reply:''},
+  {k:['send reminder','email reminder'],action:()=>{showSection('agreements');aiBot('Click the 📧 icon on any agreement card to send a reminder email.');},reply:''},
+  // ─ One Time Billing ─
   {k:['add bill','new bill','one time bill','create bill'],action:()=>{showSection('billing');setTimeout(openAddBillModal,200);},reply:'Opening Add Bill form! 🧾'},
-  {k:['dashboard','home','overview'],action:()=>{const s=getSession();showSection(s&&s.role!=='admin'?'userdash':'dashboard');},reply:'Taking you to the Dashboard! 🏠'},
-  {k:['show expiring','filter expiring'],action:()=>{showSection('agreements');setFilter('expiring');},reply:'Showing expiring agreements! ⚠️'},
-  {k:['show expired','filter expired'],action:()=>{showSection('agreements');setFilter('expired');},reply:'Showing expired agreements! ❌'},
-  {k:['show active','filter active'],action:()=>{showSection('agreements');setFilter('active');},reply:'Showing active agreements! ✅'},
-  {k:['show all','all agreements'],action:()=>{showSection('agreements');setFilter('all');},reply:'Showing all agreements! 📋'},
-  {k:['monthly','monthly statement'],action:()=>{showSection('monthly');},reply:'Opening Monthly Statement! 📅'},
-  {k:['billing','bills section'],action:()=>{showSection('billing');},reply:'Opening One Time Billing! 🧾'},
-  {k:['notification','alert','reminder setting'],action:()=>{showSection('notifications');},reply:'Opening Notifications! 🔔'},
-  {k:['admin','admin settings'],action:()=>{const s=getSession();if(s&&s.role==='admin')showSection('admin');else aiBot('Admin access required.');},reply:'Opening Admin Settings! ⚙️'},
-  {k:['search','find agreement'],action:()=>{showSection('agreements');setTimeout(()=>document.getElementById('searchInput').focus(),300);},reply:'Ready to search! 🔍'},
-  {k:['help','what can you do'],action:null,reply:'I can navigate, generate Excel, and compose emails. Try: "Excel for expiring", "Mail expiring to name@email.com", "Download bills Excel", or "Send bills to email@domain.com"'},
+  {k:['billing','bills','one time billing','invoices'],action:()=>{showSection('billing');},reply:'Opening One Time Billing! 🧾'},
+  {k:['search bill','find bill'],action:()=>{showSection('billing');setTimeout(()=>document.getElementById('billSearchInput').focus(),300);},reply:'Ready to search bills! 🔍'},
+  // ─ Dashboard ─
+  {k:['dashboard','home','overview','go home'],action:()=>{const s=getSession();showSection(s&&s.role!=='admin'?'userdash':'dashboard');},reply:'Taking you to the Dashboard! 🏠'},
+  {k:['parent company','parent companies'],action:()=>{showSection('dashboard');setTimeout(()=>document.getElementById('pcList')?.scrollIntoView({behavior:'smooth'}),500);},reply:'Scrolling to Parent Companies! 🏢'},
+  {k:['top clients','top 10'],action:()=>{showSection('dashboard');setTimeout(()=>document.getElementById('tcList')?.scrollIntoView({behavior:'smooth'}),500);},reply:'Scrolling to Top Clients! 🏆'},
+  {k:['chart','bar chart','timeline'],action:()=>{showSection('dashboard');setTimeout(()=>document.getElementById('fdBarChart')?.scrollIntoView({behavior:'smooth'}),500);},reply:'Scrolling to the chart! 📊'},
+  {k:['track every deal','filter','status filter'],action:()=>{showSection('dashboard');setTimeout(()=>document.querySelector('.fd-promo-brand')?.scrollIntoView({behavior:'smooth'}),500);},reply:'Scrolling to the filter section! 🎯'},
+  // ─ Monthly Statement ─
+  {k:['monthly','monthly statement','this month','statement'],action:()=>{showSection('monthly');},reply:'Opening Monthly Statement! 📅'},
+  // ─ Export / Import ─
+  {k:['export','download report','export section'],action:()=>{showSection('export');},reply:'Going to Export / Import! 📊'},
+  {k:['import','bulk upload','upload agreements'],action:()=>{showSection('export');setTimeout(()=>document.getElementById('bulkModal')?.classList.add('open')||document.querySelector('.btn-bulk-upload')?.click(),500);aiBot('Use the Bulk Upload button in Export/Import to upload agreements from Excel.');},reply:'Going to Export/Import for bulk upload! 📥'},
+  {k:['download template','excel template'],action:()=>{showSection('export');setTimeout(()=>downloadTemplate&&downloadTemplate(),500);},reply:'Going to Export and downloading template! 📋'},
+  // ─ Notifications ─
+  {k:['notification','notifications','alert settings','reminder settings'],action:()=>{showSection('notifications');},reply:'Opening Notification Settings! 🔔'},
+  {k:['email settings','configure email','smtp'],action:()=>{showSection('notifications');aiBot('Scroll down to Email Settings to configure your email provider.');},reply:'Opening Notifications to configure email! ✉️'},
+  // ─ Admin ─
+  {k:['admin settings','admin panel'],action:()=>{const s=getSession();if(s&&s.role==='admin')showSection('admin');else aiBot('Admin access is required for this section.');},reply:'Opening Admin Settings! ⚙️'},
+  {k:['user management','manage users','add user'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('usersAdminPanel')?.scrollIntoView({behavior:'smooth'}),500);}else aiBot('Admin access required.');},reply:'Going to User Management! 👤'},
+  {k:['pending users','approve user','user request'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('pendingSection')?.scrollIntoView({behavior:'smooth'}),500);}else aiBot('Admin access required.');},reply:'Going to Pending User Requests! ⏳'},
+  {k:['change password','reset password','update password'],action:()=>{openChangePw&&openChangePw();},reply:'Opening Change Password! 🔑'},
+  {k:['category access','approve category','category requests'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('catAccessAdminPanel')?.scrollIntoView({behavior:'smooth'}),500);}else aiBot('Admin access required.');},reply:'Going to Category Access Requests! 🔐'},
+  {k:['sub service request','sub category request'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('subReqAdminPanel')?.scrollIntoView({behavior:'smooth'}),500);}else aiBot('Admin access required.');},reply:'Going to Sub-Service Requests! 📂'},
+  {k:['onedrive','one drive','cloud backup'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('odAdminPanel')?.scrollIntoView({behavior:'smooth'}),500);}else aiBot('Admin access required.');},reply:'Going to OneDrive settings! ☁️'},
+  {k:['zoho','zoho books','zoho sync'],action:()=>{const s=getSession();if(s&&s.role==='admin'){showSection('admin');setTimeout(()=>document.getElementById('zohoAdminPanel')?.scrollIntoView({behavior:'smooth'}),500);}else aiBot('Admin access required.');},reply:'Going to Zoho Books settings! 📒'},
+  // ─ Help ─
+  {k:['help','what can you do','guide','commands'],action:()=>{aiBot('Navigation: dashboard, agreements, billing, monthly, notifications, export, admin, search, add agreement, add bill, parent companies, top clients, user management, change password, onedrive, zoho. Actions: Excel for [status], Mail [status] to email@x.com, Download bills Excel, Send bills to email@x.com');},reply:''},
+  {k:['sign out','logout','log out'],action:()=>{aiBot('Click the Sign Out button at the bottom of the sidebar to log out.');},reply:''},
 ];
 
 let _aiOpen=false;
