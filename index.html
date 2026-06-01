@@ -1004,7 +1004,8 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
       </div>
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
-        <button class="filter-btn" onclick="toggleAgrEmailPanel()" id="filter-email-agr" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
+        <button class="filter-btn" onclick="setFilter('email');document.getElementById('agrEmailPanel').style.display='none'" id="filter-email-agr-view" style="border-color:#93c5fd;color:#1d4ed8">📧 Email Records</button>
+        <button class="filter-btn" onclick="toggleAgrEmailPanel()" id="filter-email-agr" style="background:#eff6ff;border-color:#93c5fd;color:#1d4ed8">✉️ Compose</button>
       </div>
       <div id="agrEmailPanel" style="display:none;margin:0 16px 10px;background:#eff6ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
         <div style="font-size:.78rem;font-weight:800;color:#1d4ed8;margin-bottom:8px">📧 Send Agreement Invitation</div>
@@ -1358,6 +1359,7 @@ We would like to discuss an agreement for our services..." style="padding:8px 12
             <option value="Advisory Services Agreement">Advisory Services Agreement</option>
             <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
             <option value="Tax Services Agreement">Tax Services Agreement</option>
+            <option value="__email__" style="color:#1d4ed8;font-weight:700">📧 Email (No Agreement)</option>
           </select>
           <input type="hidden" id="agrName"/>
         </div>
@@ -1864,16 +1866,30 @@ const SUB_SERVICES = {
 function onAgrNameSelect(){
   const sel=document.getElementById('agrNameSelect');
   const val=sel.value;
-  document.getElementById('agrName').value=val||'';
-  const typeMap={
-    'Accounting Retainer Services Agreement':'Accounting Retainer Services',
-    'CS Retainer Services Agreement':'CS Retainer Services',
-    'Advisory Services Agreement':'Advisory Services',
-    'Auditing & Assurance Services Agreement':'Auditing & Assurance Services',
-    'Tax Services Agreement':'Tax Services'
-  };
-  const type=typeMap[val]||'';
-  if(type){document.getElementById('agrType').value=type;onTypeChange();}
+  const isEmail=val==='__email__';
+  document.getElementById('agrName').value=isEmail?'Email (No Agreement)':val||'';
+  // Show/hide service fields based on selection
+  const sf=document.getElementById('agrServiceFields');
+  const typeGrp=document.getElementById('agrType').parentElement;
+  if(isEmail){
+    if(sf)sf.style.display='none';
+    document.getElementById('agrType').value='__email__';
+    // Show a note
+    let note=document.getElementById('emailAgrNote');
+    if(!note){note=document.createElement('div');note.id='emailAgrNote';note.style.cssText='background:#eff6ff;border:1.5px solid #93c5fd;border-radius:10px;padding:10px 12px;font-size:.76rem;color:#1d4ed8;margin-bottom:8px';note.innerHTML='📧 <strong>Email mode:</strong> No formal agreement. Fill in client details and attach any relevant documents. This will be saved and shown under All and Email filters.';}
+    if(typeGrp&&!document.getElementById('emailAgrNote'))typeGrp.parentElement.insertBefore(note,typeGrp);
+  }else{
+    const note=document.getElementById('emailAgrNote');if(note)note.remove();
+    const typeMap={
+      'Accounting Retainer Services Agreement':'Accounting Retainer Services',
+      'CS Retainer Services Agreement':'CS Retainer Services',
+      'Advisory Services Agreement':'Advisory Services',
+      'Auditing & Assurance Services Agreement':'Auditing & Assurance Services',
+      'Tax Services Agreement':'Tax Services'
+    };
+    const type=typeMap[val]||'';
+    if(type){document.getElementById('agrType').value=type;onTypeChange();}
+  }
 }
 function onAgrNameInput(){}
 
@@ -3044,9 +3060,10 @@ async function renderAgreements(){
     const ms=!search||a.name.toLowerCase().includes(search)||a.client.toLowerCase().includes(search)||
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
-    const cf=!_catFilter||(a.type===_catFilter);
-    const af=isAdmin||!allowedCats||(a.type&&allowedCats.includes(a.type));
-    return mf&&ms&&cf&&af;
+    const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
+    const af=isAdmin||!allowedCats||(a.type&&allowedCats.includes(a.type))||a.isEmail;
+    const ef=currentFilter==='email'?a.isEmail:true;
+    return mf&&ms&&cf&&af&&ef;
   });
   filtered.sort((a,b)=>{
     const o={expiring:0,active:1,expired:2,renewed:3};
@@ -3190,6 +3207,11 @@ function setFilter(f){
   const ep=document.getElementById('noAgrEmailPanel');
   if(ep)ep.style.display=f==='email'?'block':'none';
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  // Also sync the inline agreement filter buttons
+  const agr_all=document.getElementById('filter-all-agr');
+  const agr_email=document.getElementById('filter-email-agr-view');
+  if(agr_all)agr_all.classList.toggle('active',f==='all');
+  if(agr_email)agr_email.classList.toggle('active',f==='email');
   document.getElementById('filter-'+f).classList.add('active');
   renderAgreements();
 }
@@ -3252,10 +3274,12 @@ function quickAddFile(agrId){
 async function saveAgreement(){
   const name=document.getElementById('agrName').value.trim();
   const client=document.getElementById('agrClient').value.trim();
+  const isEmailType=document.getElementById('agrType').value==='__email__';
   const startDate=document.getElementById('agrStart').value;
   const endDate=document.getElementById('agrEnd').value;
-  if(!name||!client||!startDate||!endDate){showToast('⚠️ Please fill all required fields');return}
-  if(new Date(endDate)<=new Date(startDate)){showToast('⚠️ End date must be after start date');return}
+  if(!name||!client){showToast('⚠️ Please fill all required fields');return}
+  if(!isEmailType&&(!startDate||!endDate)){showToast('⚠️ Please set start and end dates');return}
+  if(!isEmailType&&startDate&&endDate&&new Date(endDate)<=new Date(startDate)){showToast('⚠️ End date must be after start date');return}
   const pan=document.getElementById('agrPan').value.trim().toUpperCase();
   if(pan&&!validatePAN(pan)){showToast('⚠️ Invalid PAN format (e.g. ABCDE1234F)');return}
   const gstRegistered=document.getElementById('gstToggle').checked;
@@ -3266,7 +3290,8 @@ async function saveAgreement(){
   const existing=editId?agreements.find(a=>a.id===editId):null;
   const agr={
     id:editId||Date.now().toString(),name,client,startDate,endDate,
-    type:document.getElementById('agrType').value,
+    type:document.getElementById('agrType').value==='__email__'?'':document.getElementById('agrType').value,
+    isEmail:document.getElementById('agrType').value==='__email__',
     subType:document.getElementById('agrSubType').value,
     amount:document.getElementById('agrAmount').value,
     specialService:document.getElementById('agrSpecialService').value.trim(),
@@ -3325,6 +3350,7 @@ function resetForm(){
   document.getElementById('agrNameSelect').value='';
   document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
+  const _en=document.getElementById('emailAgrNote');if(_en)_en.remove();
   document.getElementById('agrType').value='';
   document.getElementById('agrType').disabled=false;
   document.getElementById('agrSubType').value='';
