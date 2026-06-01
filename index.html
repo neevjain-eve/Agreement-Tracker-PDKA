@@ -3262,6 +3262,22 @@ function saveAiApiKey(){
   document.getElementById('aiApiKeyInput').value='';
   showToast('AI API key saved!');
 }
+function saveAiInlineKey(){
+  const key=document.getElementById('aiInlineKey').value.trim();
+  const provider=document.getElementById('aiInlineProvider').value;
+  if(!key){showToast('Paste your API key first');return;}
+  saveAiConfig({key,provider});
+  document.getElementById('aiInlineKey').value='';
+  document.getElementById('aiInlineSetup').style.display='none';
+  updateAiApiStatus();
+  showToast('✅ AI connected!');
+  aiBot('AI connected! I am now powered by '+(provider==='claude'?'Claude (Anthropic)':'Gemini (Google)')+'. Ask me anything!');
+}
+function toggleAiInlineSetup(){
+  const el=document.getElementById('aiInlineSetup');
+  el.style.display=el.style.display==='none'?'block':'none';
+  if(el.style.display==='block')document.getElementById('aiInlineKey').focus();
+}
 function clearAiApiKey(){
   if(!confirm('Remove AI API key?'))return;
   localStorage.removeItem('elAiConfig');
@@ -3280,11 +3296,18 @@ function updateAiApiStatus(){
     if(badge)badge.textContent='Powered by '+label;
     const lbl=document.getElementById('aiApiConnectedLabel');if(lbl)lbl.textContent='✅ Connected — '+label;
     const setup=document.getElementById('aiApiSetupForm');if(setup)setup.style.display='none';
+    // Update inline chat chip
+    const kc=document.getElementById('aiKeyChip');if(kc)kc.style.display='none';
+    const krc=document.getElementById('aiKeyRemoveChip');if(krc)krc.style.display='inline-flex';
+    const ils=document.getElementById('aiInlineSetup');if(ils)ils.style.display='none';
   } else {
     if(el)el.textContent='Not configured — paste API key below';
     if(conn)conn.style.display='none';
     if(badge)badge.textContent='Built-in mode';
     const setup=document.getElementById('aiApiSetupForm');if(setup)setup.style.display='block';
+    // Show inline key chip
+    const kc=document.getElementById('aiKeyChip');if(kc)kc.style.display='inline-flex';
+    const krc=document.getElementById('aiKeyRemoveChip');if(krc)krc.style.display='none';
   }
 }
 
@@ -4713,6 +4736,19 @@ openDB().then(async()=>{
   </div>
   <div class="ai-msgs" id="aiMsgs"></div>
   <div id="aiTyping" style="display:none;padding:6px 14px;font-size:.72rem;color:#6366f1;font-style:italic">AI is thinking...</div>
+  <!-- Inline API key setup for users -->
+  <div id="aiInlineSetup" style="display:none;padding:10px 12px;border-bottom:1px solid #e0e7ff;background:#f5f3ff">
+    <div style="font-size:.72rem;font-weight:700;color:#4f46e5;margin-bottom:6px">🔑 Connect AI (optional)</div>
+    <select id="aiInlineProvider" style="width:100%;padding:6px 8px;border:1.5px solid #c4b5fd;border-radius:8px;font-size:.75rem;font-family:inherit;outline:none;margin-bottom:6px">
+      <option value="claude">Anthropic Claude</option>
+      <option value="gemini">Google Gemini</option>
+    </select>
+    <div style="display:flex;gap:5px">
+      <input type="text" id="aiInlineKey" placeholder="Paste API key here..." style="flex:1;padding:7px 10px;border:1.5px solid #c4b5fd;border-radius:8px;font-size:.72rem;font-family:monospace;outline:none;min-width:0" autocomplete="off" spellcheck="false"/>
+      <button type="button" onclick="saveAiInlineKey()" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:700;cursor:pointer;flex-shrink:0">Save</button>
+    </div>
+    <div style="font-size:.65rem;color:#6b7280;margin-top:4px">Key stored locally on your device only.</div>
+  </div>
   <div class="ai-chips" id="aiChips">
     <button class="ai-chip" onclick="aiSend('Add a new agreement')">➕ Agreement</button>
     <button class="ai-chip" onclick="aiSend('Add a one time bill')">🧾 Bill</button>
@@ -4723,6 +4759,8 @@ openDB().then(async()=>{
     <button class="ai-chip" onclick="aiSend('Mail expiring agreements')">📧 Mail Expiring</button>
     <button class="ai-chip" onclick="aiSend('Monthly statement')">📅 Monthly</button>
     <button class="ai-chip" onclick="aiSend('Go to dashboard')">🏠 Dashboard</button>
+    <button class="ai-chip" id="aiKeyChip" onclick="toggleAiInlineSetup()" style="background:#ede9fe;color:#4f46e5">🔑 API Key</button>
+    <button class="ai-chip" id="aiKeyRemoveChip" onclick="clearAiApiKey()" style="display:none;background:#fee2e2;color:#dc2626">❌ Remove Key</button>
   </div>
   <div class="ai-input-row">
     <input class="ai-input" id="aiInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')aiSend()"/>
