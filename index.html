@@ -20,21 +20,18 @@
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --primary:#f97316;--primary-dark:#ea580c;--primary-light:#fff7ed;
-      --primary-50:#fff7ed;--primary-100:#ffedd5;--primary-200:#fed7aa;
-      --primary-300:#fdba74;--primary-400:#fb923c;--primary-500:#f97316;
-      --primary-600:#ea580c;--primary-700:#c2410c;--primary-800:#9a3412;
-      --success:#059669;--success-bg:#ecfdf5;
-      --warning:#d97706;--warning-bg:#fffbeb;
-      --danger:#dc2626;--danger-bg:#fef2f2;
+      --primary:#f97316;--primary-dark:#ea580c;--primary-light:#ffedd5;
+      --success:#16a34a;--success-bg:#dcfce7;
+      --warning:#f97316;--warning-bg:#ffedd5;
+      --danger:#ea580c;--danger-bg:#ffedd5;
       --renewed:#f59e0b;--renewed-bg:#fff7ed;
-      --bg:#fff;--bg-subtle:#fff7ed;--card:#fff;--text:#111111;--muted:#555555;
-      --border:#fed7aa;--border-light:#fff7ed;--radius:14px;
+      --bg:#fff;--bg-subtle:#fff7ed;--card:#fff;--text:#111111;--muted:#111111;
+      --border:#fed7aa;--border-light:#ffedd5;--radius:14px;
       --shadow-sm:0 1px 3px rgba(249,115,22,.1),0 1px 2px rgba(249,115,22,.06);
       --shadow:0 4px 16px rgba(249,115,22,.14),0 2px 6px rgba(249,115,22,.08);
       --shadow-lg:0 10px 32px rgba(249,115,22,.18),0 4px 10px rgba(249,115,22,.1);
     }
-    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:90px}
+    body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#ffffff;color:#111111;min-height:100vh;padding-bottom:90px}
 
     /* HEADER */
     .header{background:linear-gradient(135deg,#f8a006 0%,#c2410c 100%);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(109,40,217,.35)}
@@ -50,23 +47,23 @@
     .summary-card.sc-active{border-top-color:var(--success)}
     .summary-card.sc-expiring{border-top-color:var(--warning)}
     .summary-card.sc-expired{border-top-color:var(--danger)}
-    .summary-card.sc-renewed{border-top-color:var(--renewed)}
+    .summary-card.sc-renewed{border-top-color:#16a34a}
     .summary-card .count{font-size:1.8rem;font-weight:900;line-height:1;letter-spacing:-.02em}
-    .summary-card .label{font-size:0.6rem;color:#333333;margin-top:4px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-    .count.active{color:var(--success)}.count.expiring{color:var(--warning)}.count.expired{color:var(--danger)}.count.renewed{color:var(--renewed)}
+    .summary-card .label{font-size:0.6rem;color:#111111;margin-top:4px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+    .count.active{color:#16a34a}.count.expiring{color:#f97316}.count.expired{color:#ea580c}.count.renewed{color:#16a34a}
 
     /* FILTER */
     .filter-bar{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
     .filter-bar::-webkit-scrollbar{display:none}
-    .filter-btn{border:1.5px solid var(--border);background:#fff;color:#111111;padding:7px 16px;border-radius:24px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:var(--shadow-sm)}
-    .filter-btn:hover{border-color:var(--primary);color:var(--primary)}
-    .filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 2px 8px rgba(249,115,22,.35)}
+    .filter-btn{border:1.5px solid #fed7aa;background:#fff;color:#111111;padding:7px 16px;border-radius:24px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:var(--shadow-sm)}
+    .filter-btn:hover{border-color:#f97316;color:#111111;background:#ffedd5}
+    .filter-btn.active{background:#f97316;border-color:#f97316;color:#ffffff;box-shadow:0 2px 8px rgba(249,115,22,.35)}
 
     /* SEARCH */
     .search-bar{padding:0 16px 12px}
     .search-bar input{width:100%;padding:11px 16px 11px 40px;border:1.5px solid var(--border);border-radius:12px;font-size:.9rem;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E") no-repeat 13px center;outline:none;box-shadow:var(--shadow-sm);color:var(--text);transition:border-color .2s,box-shadow .2s}
     .search-bar input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
-    .search-bar input::placeholder{color:#94a3b8}
+    .search-bar input::placeholder{color:#111111}
 
     /* LIST */
     .agreements-list{padding:0 16px 8px;display:flex;flex-direction:column;gap:10px}
@@ -83,29 +80,29 @@
     .card-title{font-weight:700;font-size:1rem;flex:1;padding-right:8px;letter-spacing:-.01em;color:#111111}
     .badges{display:flex;flex-direction:column;gap:3px;align-items:flex-end}
     .status-badge{font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap;letter-spacing:.04em}
-    .badge-active{background:var(--success-bg);color:var(--success)}
-    .badge-expiring{background:var(--warning-bg);color:var(--warning)}
-    .badge-expired{background:var(--danger-bg);color:var(--danger)}
+    .badge-active{background:#dcfce7;color:#111111}
+    .badge-expiring{background:#ffedd5;color:#111111}
+    .badge-expired{background:#ffedd5;color:#111111}
     .badge-renewed{background:var(--renewed-bg);color:var(--renewed)}
-    .badge-version{background:#e0f2fe;color:#0369a1;font-size:.6rem;padding:2px 8px;border-radius:20px;font-weight:700}
+    .badge-version{background:#ffedd5;color:#111111;font-size:.6rem;padding:2px 8px;border-radius:20px;font-weight:700}
 
-    .card-client{font-size:.82rem;color:#333333;margin-bottom:10px;font-weight:500}
+    .card-client{font-size:.82rem;color:#111111;margin-bottom:10px;font-weight:500}
     .card-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#fff7ed;border-radius:10px;padding:10px}
     .detail-item{font-size:.78rem}
-    .detail-label{color:#333333;font-size:.65rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+    .detail-label{color:#111111;font-size:.65rem;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em;font-weight:600}
     .detail-value{font-weight:700;color:#111111}
 
     .days-left{font-size:.76rem;font-weight:700;margin-top:10px;padding:6px 12px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
-    .days-active{background:var(--success-bg);color:var(--success)}
-    .days-expiring{background:var(--warning-bg);color:var(--warning)}
-    .days-expired{background:var(--danger-bg);color:var(--danger)}
+    .days-active{background:#dcfce7;color:#111111}
+    .days-expiring{background:#ffedd5;color:#111111}
+    .days-expired{background:#ffedd5;color:#111111}
     .days-renewed{background:var(--renewed-bg);color:var(--renewed)}
 
     /* COMPLIANCE TAGS */
     .compliance-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-    .compliance-tag{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#f1f5f9;color:#475569;display:flex;align-items:center;gap:4px}
+    .compliance-tag{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#f1f5f9;color:#111111;display:flex;align-items:center;gap:4px}
     .compliance-tag.verified{background:#d1fae5;color:#065f46}
-    .compliance-tag.missing{background:#fee2e2;color:#991b1b}
+    .compliance-tag.missing{background:#ffedd5;color:#111111}
 
     /* RENEWAL CHAIN */
     .chain-section{margin-top:10px;padding:10px;background:#f8f4ff;border-radius:10px;border:1px solid #e9d5ff}
@@ -115,12 +112,12 @@
     .chain-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
     .dot-old{background:#9ca3af}.dot-current{background:var(--primary)}.dot-new{background:var(--success)}
     .chain-link{flex:1;font-weight:500}
-    .chain-date{color:#333333;font-size:.7rem}
-    .btn-view-ver{background:#fff7ed;color:var(--primary);border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
+    .chain-date{color:#111111;font-size:.7rem}
+    .btn-view-ver{background:#ffedd5;color:#111111;border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
 
     /* ATTACHMENTS */
     .attachments-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-    .section-title{font-size:.72rem;font-weight:700;color:#333333;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
+    .section-title{font-size:.72rem;font-weight:700;color:#111111;text-transform:uppercase;letter-spacing:.04em;margin-bottom:7px}
     .attachment-item{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:7px 10px;margin-bottom:5px}
     .file-icon{font-size:1.1rem;flex-shrink:0}
     .file-info{flex:1;min-width:0}
@@ -128,22 +125,22 @@
     .file-size{font-size:.68rem;color:var(--muted)}
     .file-actions{display:flex;gap:5px;flex-shrink:0}
     .btn-view,.btn-del-file{border:none;border-radius:6px;padding:4px 9px;font-size:.72rem;font-weight:600;cursor:pointer}
-    .btn-view{background:#fff7ed;color:var(--primary)}
-    .btn-del-file{background:#fee2e2;color:var(--danger)}
-    .btn-add-file{margin-top:6px;display:flex;align-items:center;gap:6px;background:#fff7ed;color:var(--primary);border:1.5px dashed var(--primary);border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:600;cursor:pointer;width:100%;justify-content:center}
+    .btn-view{background:#ffedd5;color:#111111}
+    .btn-del-file{background:#ffedd5;color:#111111}
+    .btn-add-file{margin-top:6px;display:flex;align-items:center;gap:6px;background:#ffedd5;color:#111111;border:1.5px dashed #f97316;border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:600;cursor:pointer;width:100%;justify-content:center}
 
     /* CARD ACTIONS */
     .card-actions{display:flex;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light);flex-wrap:wrap}
     .btn-edit,.btn-delete,.btn-renew,.btn-history{flex:1;padding:8px 6px;border-radius:10px;font-size:.76rem;font-weight:700;cursor:pointer;border:none;min-width:60px;text-align:center;transition:opacity .15s,transform .1s;letter-spacing:.01em}
     .btn-edit,.btn-delete,.btn-renew,.btn-history{transform:translateY(0)}
     .btn-edit:active,.btn-delete:active,.btn-renew:active,.btn-history:active{transform:scale(.96)}
-    .btn-edit{background:var(--primary-light);color:var(--primary)}
-    .btn-delete{background:var(--danger-bg);color:var(--danger)}
+    .btn-edit{background:#ffedd5;color:#111111}
+    .btn-delete{background:#ffedd5;color:#111111}
     .btn-renew{background:var(--renewed-bg);color:var(--renewed)}
-    .btn-history{background:var(--success-bg);color:var(--success)}
+    .btn-history{background:#dcfce7;color:#111111}
 
     /* EMPTY STATE */
-    .empty-state{text-align:center;padding:60px 20px;color:#333333}
+    .empty-state{text-align:center;padding:60px 20px;color:#111111}
     .empty-state .icon{font-size:3.5rem;margin-bottom:14px;display:block}
     .empty-state p{font-size:.9rem;line-height:1.7}
 
@@ -162,12 +159,12 @@
 
     /* FORM */
     .form-group{margin-bottom:14px}
-    .form-group label{display:block;font-size:.72rem;font-weight:700;color:#333333;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+    .form-group label{display:block;font-size:.72rem;font-weight:700;color:#111111;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
     .form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:.93rem;color:#111111;background:#fff;outline:none;transition:border-color .2s,box-shadow .2s;font-family:inherit}
     .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
-    .form-group input::placeholder,.form-group textarea::placeholder{color:#94a3b8}
+    .form-group input::placeholder,.form-group textarea::placeholder{color:#111111}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .form-section-title{font-size:.7rem;font-weight:800;color:#111111;text-transform:uppercase;letter-spacing:.08em;padding:12px 0 8px;border-top:1px solid var(--border-light);margin-top:8px;display:flex;align-items:center;gap:6px}
+    .form-section-title{font-size:.7rem;font-weight:800;color:#111111;border-top:2px solid #fed7aa;text-transform:uppercase;letter-spacing:.08em;padding:12px 0 8px;border-top:1px solid var(--border-light);margin-top:8px;display:flex;align-items:center;gap:6px}
 
     /* TOGGLE */
     .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s}
@@ -215,7 +212,7 @@
     .pending-file{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:8px;padding:7px 10px;margin-top:6px}
     .pending-file .pf-name{flex:1;font-size:.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pending-file .pf-size{font-size:.68rem;color:var(--muted)}
-    .pf-remove{background:#fee2e2;color:var(--danger);border:none;border-radius:5px;padding:3px 8px;font-size:.72rem;cursor:pointer}
+    .pf-remove{background:#ffedd5;color:var(--danger);border:none;border-radius:5px;padding:3px 8px;font-size:.72rem;cursor:pointer}
 
     /* BUTTONS */
     .btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;font-size:.95rem;font-weight:700;cursor:pointer;margin-top:8px;transition:all .2s;box-shadow:0 2px 8px rgba(109,40,217,.35);letter-spacing:.01em}
@@ -243,7 +240,7 @@
     .settings-item input[type=number]{width:70px;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.93rem;text-align:center}
 
     /* BANNER */
-    .notif-banner{display:none;background:var(--warning-bg);border-left:4px solid var(--warning);padding:11px 16px;font-size:.82rem;color:#92400e;cursor:pointer;font-weight:500}
+    .notif-banner{display:none;background:var(--warning-bg);border-left:4px solid var(--warning);padding:11px 16px;font-size:.82rem;color:#111111;cursor:pointer;font-weight:500}
     .notif-banner.show{display:flex;align-items:center;gap:8px}
 
     /* TOAST — fixed position, always on top, z-index above everything */
@@ -259,15 +256,15 @@
     .sync-dot.error{background:#f87171}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .sync-bar{display:none;background:#ecfdf5;border-bottom:1px solid #a7f3d0;padding:8px 16px;font-size:.8rem;color:#065f46;align-items:center;gap:8px}
+    .sync-bar{display:none;background:#dcfce7;border-bottom:1px solid #a7f3d0;padding:8px 16px;font-size:.8rem;color:#065f46;align-items:center;gap:8px}
     .sync-bar.show{display:flex}
-    .sync-bar.error{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+    .sync-bar.error{background:#fff1f2;border-color:#fecdd3;color:#111111}
 
     /* SETUP WIZARD */
     .wizard-step{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:10px}
     .wizard-step-num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--primary);color:#fff;border-radius:50%;font-size:.78rem;font-weight:700;margin-right:8px;flex-shrink:0}
     .wizard-step-title{font-weight:700;font-size:.9rem;display:flex;align-items:center;margin-bottom:6px}
-    .wizard-step-body{font-size:.8rem;color:#374151;line-height:1.7;padding-left:32px}
+    .wizard-step-body{font-size:.8rem;color:#111111;line-height:1.7;padding-left:32px}
     .wizard-step-body code{background:#e5e7eb;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:.82rem;color:var(--primary)}
     .wizard-step-body b{color:var(--text)}
     .od-section{border:1.5px solid #fdba74;border-radius:10px;padding:14px;margin-top:4px;background:#faf5ff}
@@ -276,7 +273,7 @@
     .od-status-label{font-weight:600;font-size:.9rem}
     .od-status-val{font-size:.8rem;color:var(--muted)}
     .btn-od-connect{background:var(--primary);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:.88rem;font-weight:700;cursor:pointer;width:100%;margin-top:10px}
-    .btn-od-disconnect{background:#fee2e2;color:var(--danger);border:none;border-radius:8px;padding:8px 18px;font-size:.85rem;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
+    .btn-od-disconnect{background:#ffedd5;color:var(--danger);border:none;border-radius:8px;padding:8px 18px;font-size:.85rem;font-weight:600;cursor:pointer;width:100%;margin-top:8px}
 
     /* PREVIEW */
     #previewFrame{width:100%;height:62vh;border:none;border-radius:8px;background:#f9fafb}
@@ -289,7 +286,7 @@
     .template-btn{display:inline-flex;align-items:center;gap:6px;background:#d1fae5;color:#065f46;border:none;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:14px;width:100%;justify-content:center}
 
     /* IMPORT PREVIEW TABLE */
-    .import-summary{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.83rem;color:#065f46}
+    .import-summary{background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.83rem;color:#065f46}
     .import-summary b{font-size:.95rem}
     .import-table-wrap{overflow-x:auto;max-height:38vh;border:1px solid var(--border);border-radius:10px;margin-bottom:12px}
     .import-table{width:100%;border-collapse:collapse;font-size:.75rem;min-width:700px}
@@ -297,9 +294,9 @@
     .import-table td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
     .import-table tr:last-child td{border-bottom:none}
     .import-table tr.row-error{background:#fff1f2}
-    .import-table tr.row-ok:hover{background:#f0fdf4}
+    .import-table tr.row-ok:hover{background:#dcfce7}
     .row-ok-badge{background:#d1fae5;color:#065f46;border-radius:5px;padding:2px 7px;font-size:.68rem;font-weight:700}
-    .row-err-badge{background:#fee2e2;color:#991b1b;border-radius:5px;padding:2px 7px;font-size:.68rem;font-weight:700}
+    .row-err-badge{background:#ffedd5;color:#111111;border-radius:5px;padding:2px 7px;font-size:.68rem;font-weight:700}
     .import-error-note{font-size:.75rem;color:var(--danger);margin-top:4px}
 
     /* REPORT SECTION */
@@ -312,16 +309,16 @@
 
     /* ── LOGIN SCREEN ────────────── */
     #loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#f97316 0%,#ea580c 60%,#c2410c 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:24px}
-    .login-card{background:#fff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+    .login-card{background:#ffffff;border-radius:20px;padding:32px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
     .login-logo{text-align:center;margin-bottom:24px}
     .login-logo .logo-icon{font-size:3rem;display:block;margin-bottom:8px}
-    .login-logo h2{font-size:1.3rem;font-weight:800;color:var(--primary)}
+    .login-logo h2{font-size:1.3rem;font-weight:800;color:#111111}
     .login-logo p{font-size:.8rem;color:var(--muted);margin-top:2px}
     .login-field{margin-bottom:16px}
-    .login-field label{display:block;font-size:.8rem;font-weight:600;color:#374151;margin-bottom:6px}
+    .login-field label{display:block;font-size:.8rem;font-weight:600;color:#111111;margin-bottom:6px}
     .login-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:.95rem;outline:none;transition:border-color .2s}
     .login-field input:focus{border-color:var(--primary)}
-    .login-error{background:#fee2e2;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;margin-bottom:14px;display:none}
+    .login-error{background:#ffedd5;color:#b91c1c;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;margin-bottom:14px;display:none}
     .btn-login{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s;margin-top:4px}
     .btn-login:hover{background:var(--primary-dark)}
     .login-hint{text-align:center;font-size:.75rem;color:var(--muted);margin-top:14px}
@@ -336,8 +333,8 @@
     .user-role-badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase}
     .role-admin{background:#fff7ed;color:#c2410c}
     .role-user{background:#d1fae5;color:#065f46}
-    .btn-del-user{background:#fee2e2;color:#b91c1c;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:700;cursor:pointer}
-    .add-user-form{background:#f0f9ff;border:1.5px solid #fdba74;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
+    .btn-del-user{background:#ffedd5;color:#b91c1c;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:700;cursor:pointer}
+    .add-user-form{background:#ffedd5;border:1.5px solid #fdba74;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
     .add-user-form .form-group{margin-bottom:10px}
     .add-user-form label{font-size:.78rem;font-weight:600;display:block;margin-bottom:4px}
     .add-user-form input,.add-user-form select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;outline:none}
@@ -400,13 +397,13 @@
     .login-link-btn:hover{text-decoration:underline}
     .login-divider{text-align:center;font-size:.75rem;color:var(--muted);margin:10px 0}
     .approve-btn{background:#d1fae5;color:#065f46;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
-    .reject-btn{background:#fee2e2;color:#b91c1c;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .reject-btn{background:#ffedd5;color:#b91c1c;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .change-pw-btn{background:#fff7ed;color:var(--primary);border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .pending-section{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:14px}
-    .pending-section-title{font-size:.78rem;font-weight:700;color:#92400e;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+    .pending-section-title{font-size:.78rem;font-weight:700;color:#111111;margin-bottom:10px;display:flex;align-items:center;gap:6px}
     .pending-badge{background:#ef4444;color:#fff;border-radius:10px;font-size:.62rem;font-weight:700;padding:2px 7px}
     .user-item.pending{background:#fef9ec;border-color:#fcd34d}
-    .pw-inline-form{background:#f0f9ff;border:1.5px solid #fdba74;border-radius:9px;padding:12px;margin-top:8px;display:none}
+    .pw-inline-form{background:#ffedd5;border:1.5px solid #fdba74;border-radius:9px;padding:12px;margin-top:8px;display:none}
     .pw-inline-form .form-group{margin-bottom:8px}
     /* Change-pw modal */
     #changePwModal{display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:600;align-items:center;justify-content:center;padding:16px}
@@ -415,9 +412,9 @@
     .cpw-title{font-size:1rem;font-weight:800;color:var(--text);margin-bottom:18px}
 
     /* EMAIL ERROR + ADMIN CREDS */
-    .compose-error{background:#fee2e2;color:#b91c1c;border-radius:8px;padding:8px 12px;font-size:.8rem;font-weight:600;margin-bottom:10px;display:none;line-height:1.5}
-    .od-sync-note{display:flex;align-items:center;gap:6px;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:8px;padding:8px 12px;font-size:.75rem;color:#065f46;margin-bottom:10px}
-    .od-sync-note.warn{background:#fffbeb;border-color:#fcd34d;color:#92400e}
+    .compose-error{background:#ffedd5;color:#b91c1c;border-radius:8px;padding:8px 12px;font-size:.8rem;font-weight:600;margin-bottom:10px;display:none;line-height:1.5}
+    .od-sync-note{display:flex;align-items:center;gap:6px;background:#dcfce7;border:1px solid #a7f3d0;border-radius:8px;padding:8px 12px;font-size:.75rem;color:#065f46;margin-bottom:10px}
+    .od-sync-note.warn{background:#fffbeb;border-color:#fcd34d;color:#111111}
 
     /* PDKA LOGO */
     .pdka-logo-block{text-align:center;margin-bottom:22px}
@@ -601,7 +598,7 @@
     .fd-stat-pill.p-expiring .n{color:var(--warning)}
     .fd-stat-pill.p-expired .n{color:var(--danger)}
     .fd-stat-pill.p-renewed .n{color:var(--renewed)}
-    .fd-link-btn{background:none;border:none;color:var(--fd-primary);font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:2px}
+    .fd-link-btn{background:none;border:none;color:#f97316;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:2px}
     .fd-empty{padding:20px;text-align:center;color:var(--fd-muted);font-size:.82rem}
     .sec-dashboard .dash-quick-panel{padding:0 16px 12px}
 
@@ -620,14 +617,14 @@
     .pc-chevron.open{transform:rotate(90deg)}
     .pc-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;flex-shrink:0}
     .pc-name{font-size:.82rem;font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111111}
-    .pc-count{font-size:.68rem;font-weight:700;background:#fff7ed;color:var(--fd-primary);padding:2px 8px;border-radius:20px;flex-shrink:0}
+    .pc-count{font-size:.68rem;font-weight:700;background:#ffedd5;color:#111111;padding:2px 8px;border-radius:20px;flex-shrink:0}
     .pc-del{background:none;border:none;color:#d1d5db;cursor:pointer;font-size:.85rem;flex-shrink:0;padding:2px 4px;border-radius:4px;transition:color .15s}
     .pc-del:hover{color:var(--danger)}
     .pc-subs{display:none;padding:0 12px 10px;background:#fff}
     .pc-subs.open{display:block}
     .pc-sub-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-light)}
     .pc-sub-item:last-child{border-bottom:none}
-    .pc-sub-dot{width:6px;height:6px;border-radius:50%;background:var(--fd-primary);flex-shrink:0}
+    .pc-sub-dot{width:6px;height:6px;border-radius:50%;background:#f97316;flex-shrink:0}
     .pc-sub-name{font-size:.78rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .pc-sub-del{background:none;border:none;color:#d1d5db;cursor:pointer;font-size:.75rem;padding:1px 3px;border-radius:3px;transition:color .15s}
     .pc-sub-del:hover{color:var(--danger)}
@@ -644,16 +641,16 @@
     .tc-item:last-child{border-bottom:none}
     .tc-rank{font-size:.65rem;font-weight:800;color:var(--muted);width:16px;text-align:center;flex-shrink:0}
     .tc-rank.gold{color:#f59e0b}
-    .tc-rank.silver{color:#94a3b8}
-    .tc-rank.bronze{color:#b45309}
+    .tc-rank.silver{color:#111111}
+    .tc-rank.bronze{color:#111111}
     .tc-avatar{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0}
     .tc-info{flex:1;min-width:0}
     .tc-name{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111111}
     .tc-meta{font-size:.63rem;color:var(--muted);margin-top:1px}
     .tc-badge{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
-    .tc-badge.active{background:var(--success-bg);color:var(--success)}
-    .tc-badge.expiring{background:var(--warning-bg);color:var(--warning)}
-    .tc-badge.expired{background:var(--danger-bg);color:var(--danger)}
+    .tc-badge.active{background:#dcfce7;color:#111111}
+    .tc-badge.expiring{background:#ffedd5;color:#111111}
+    .tc-badge.expired{background:#ffedd5;color:#111111}
 
     /* AI ASSISTANT */
     #aiBtn{position:fixed;bottom:90px;right:18px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;font-size:1.4rem;cursor:pointer;box-shadow:0 4px 16px rgba(99,102,241,.5);z-index:1200;display:flex;align-items:center;justify-content:center;transition:transform .2s}
@@ -662,14 +659,14 @@
     #aiPane.open{display:flex}
     .ai-head{background:linear-gradient(135deg,#f97316,#ea580c);padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0}
     .ai-head-title{color:#fff;font-size:.88rem;font-weight:800;flex:1}
-    .ai-close{background:none;border:none;color:rgba(255,255,255,.75);font-size:1.1rem;cursor:pointer;padding:0}
+    .ai-close{background:none;border:none;color:#ffffff;font-size:1.1rem;cursor:pointer;padding:0}
     .ai-msgs{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
     .ai-msg{padding:9px 12px;border-radius:12px;font-size:.78rem;line-height:1.5;max-width:90%}
     .ai-msg.bot{background:#fff7ed;color:#111111;align-self:flex-start;border-bottom-left-radius:4px}
     .ai-msg.user{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
     .ai-chips{padding:8px 12px;display:flex;flex-wrap:wrap;gap:5px;border-top:1px solid #fed7aa;flex-shrink:0}
     .ai-chip{background:#ffedd5;color:#111111;border:none;border-radius:20px;padding:4px 11px;font-size:.7rem;font-weight:700;cursor:pointer;transition:background .15s}
-    .ai-chip:hover{background:#fed7aa}
+    .ai-chip:hover{background:#fed7aa;color:#111111}
     .ai-input-row{display:flex;gap:6px;padding:10px 12px;border-top:1px solid #fed7aa;flex-shrink:0}
     .ai-input{flex:1;padding:8px 12px;border:1.5px solid #fdba74;border-radius:20px;font-size:.78rem;outline:none;font-family:inherit}
     .ai-input:focus{border-color:#f97316}
@@ -679,13 +676,13 @@
     #elTypeChooser{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2100;display:none;align-items:center;justify-content:center;padding:20px}
     #elTypeChooser.open{display:flex}
     .el-chooser-card{background:#fff;border-radius:22px;padding:28px 24px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}
-    .el-chooser-title{font-size:1.05rem;font-weight:800;color:var(--text);margin-bottom:6px}
-    .el-chooser-sub{font-size:.8rem;color:var(--muted);margin-bottom:24px;line-height:1.5}
+    .el-chooser-title{font-size:1.05rem;font-weight:800;color:#111111;margin-bottom:6px}
+    .el-chooser-sub{font-size:.8rem;color:#111111;margin-bottom:24px;line-height:1.5}
     .el-chooser-btns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .el-choice-btn{padding:18px 12px;border-radius:14px;border:2px solid transparent;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:inherit}
     .el-choice-btn .el-icon{font-size:2rem}
-    .el-choice-btn .el-label{font-size:.82rem;font-weight:800;color:var(--text)}
-    .el-choice-btn .el-desc{font-size:.68rem;color:var(--muted);line-height:1.4}
+    .el-choice-btn .el-label{font-size:.82rem;font-weight:800;color:#111111}
+    .el-choice-btn .el-desc{font-size:.68rem;color:#111111;line-height:1.4}
     .el-choice-btn.with-el{background:#fff7ed;border-color:#fb923c}
     .el-choice-btn.with-el:hover{background:#ffedd5;border-color:#f97316}
     .el-choice-btn.without-el{background:#fff7ed;border-color:#fdba74}
@@ -1030,7 +1027,7 @@
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
         <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="border-color:#86efac;color:#16a34a">✅ With EL</button>
         <button class="filter-btn" onclick="setFilter('without_el')" id="filter-without-el" style="border-color:#fdba74;color:#c2410c">📄 Without EL</button>
-        <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="border-color:#93c5fd;color:#1d4ed8">📧 Email</button>
+        <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="border-color:#93c5fd;color:#111111">📧 Email</button>
       </div>
 
       <div class="agreements-list" id="agreementsList" style="padding:0 16px 90px"></div>
@@ -1159,9 +1156,9 @@
                 </div>
               </div>
             </div>
-            <div id="aiApiConnected" style="display:none;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px">
+            <div id="aiApiConnected" style="display:none;margin-top:10px;padding:10px;background:#dcfce7;border-radius:10px">
               <div style="font-size:.8rem;font-weight:700;color:#16a34a;margin-bottom:6px" id="aiApiConnectedLabel">✅ Connected</div>
-              <button type="button" onclick="clearAiApiKey()" style="background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer">🗑 Remove Key</button>
+              <button type="button" onclick="clearAiApiKey()" style="background:#ffedd5;color:#111111;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer">🗑 Remove Key</button>
             </div>
           </div>
         </div>
@@ -1235,7 +1232,7 @@
             </div>
           </div>
           <div id="zohoSetupSection" style="display:none;margin-top:12px">
-            <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.76rem;color:#92400e;line-height:1.6">
+            <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.76rem;color:#111111;line-height:1.6">
               <strong>How to connect:</strong> Go to <b>api-console.zoho.in</b> → Create a Self Client → Scope: <code>ZohoBooks.fullaccess.all</code> → Generate token. Then enter details below.
             </div>
             <div class="form-group">
@@ -1258,7 +1255,7 @@
             </div>
             <button class="btn-primary" onclick="zohoConnect()" style="margin-top:0;max-width:240px">🔗 Connect to Zoho Books</button>
           </div>
-          <div id="zohoSyncLog" style="display:none;margin-top:10px;padding:10px;background:#f0fdf4;border-radius:10px;font-size:.76rem;color:#166534;line-height:1.7"></div>
+          <div id="zohoSyncLog" style="display:none;margin-top:10px;padding:10px;background:#dcfce7;border-radius:10px;font-size:.76rem;color:#111111;line-height:1.7"></div>
         </div>
 
       </div>
@@ -1295,7 +1292,7 @@
             <span id="emailFromDisplay" style="font-size:.8rem;font-weight:600;color:var(--primary)">—</span>
           </div>
           <div style="height:10px"></div>
-          <button onclick="sendTestEmail()" style="width:100%;max-width:300px;padding:10px;background:#f0fdf4;color:var(--success);border:1.5px solid var(--success);border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer">📨 Send Test Email to myself</button>
+          <button onclick="sendTestEmail()" style="width:100%;max-width:300px;padding:10px;background:#dcfce7;color:var(--success);border:1.5px solid var(--success);border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer">📨 Send Test Email to myself</button>
           <div id="emailSettingsStatus" style="margin-top:8px;font-size:.76rem;color:var(--muted)"></div>
         </div>
 
@@ -1310,7 +1307,7 @@
           </div>
           <p style="font-size:.78rem;color:var(--muted);line-height:1.6;margin-bottom:12px">When enabled, emails are automatically sent on your configured alert days to the TO / CC addresses set on each agreement.</p>
           <button onclick="sendAutoRemindersManual()" style="width:100%;max-width:320px;padding:12px 20px;background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;border:none;border-radius:12px;font-size:.83rem;font-weight:700;cursor:pointer;margin-bottom:10px;box-shadow:0 3px 10px rgba(109,40,217,.3);letter-spacing:.01em;transition:box-shadow .2s">Send All Pending Reminders</button>
-          <div style="padding:10px;background:#f0f9ff;border-radius:8px;font-size:.75rem;color:#0369a1">
+          <div style="padding:10px;background:#ffedd5;border-radius:8px;font-size:.75rem;color:#111111">
             📱 <strong>Install on Android:</strong> Open in Chrome → tap ⋮ menu → "Add to Home Screen" → Add
           </div>
         </div>
@@ -1407,7 +1404,7 @@
             <option value="Advisory Services Agreement">Advisory Services Agreement</option>
             <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
             <option value="Tax Services Agreement">Tax Services Agreement</option>
-            <option value="__email__" style="color:#1d4ed8;font-weight:700">📧 Email (No Agreement)</option>
+            <option value="__email__" style="color:#111111;font-weight:700">📧 Email (No Agreement)</option>
           </select>
           <input type="hidden" id="agrName"/>
         </div>
@@ -1500,7 +1497,7 @@
           <label>Attach Email <span style="font-size:.7rem;color:var(--muted)">(optional — .eml, .msg or PDF of email)</span></label>
           <div style="display:flex;align-items:center;gap:8px">
             <input type="file" id="agrEmailAttach" accept=".eml,.msg,.pdf,.txt" style="display:none" onchange="onAgrEmailAttach(event)"/>
-            <button type="button" onclick="document.getElementById('agrEmailAttach').click()" style="background:#eff6ff;border:1.5px solid #93c5fd;color:#1d4ed8;border-radius:9px;padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap">📎 Attach Email</button>
+            <button type="button" onclick="document.getElementById('agrEmailAttach').click()" style="background:#ffedd5;border:1.5px solid #93c5fd;color:#111111;border-radius:9px;padding:8px 14px;font-size:.76rem;font-weight:700;cursor:pointer;white-space:nowrap">📎 Attach Email</button>
             <span id="agrEmailAttachName" style="font-size:.75rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
             <button type="button" id="agrEmailAttachClear" onclick="clearAgrEmailAttach()" style="display:none;background:none;border:none;color:var(--danger);cursor:pointer;font-size:.85rem;flex-shrink:0">✕</button>
           </div>
@@ -1650,10 +1647,10 @@
         <div style="font-size:.75rem;margin-top:5px;color:#f59e0b">Supports .xlsx and .xls files</div>
       </div>
       <input type="file" id="bulkFileInput" accept=".xlsx,.xls" style="display:none" onchange="parseBulkFile(event)"/>
-      <div style="margin-top:14px;padding:12px;background:#fefce8;border-radius:10px;font-size:.78rem;color:#854d0e;line-height:1.6">
+      <div style="margin-top:14px;padding:12px;background:#ffedd5;border-radius:10px;font-size:.78rem;color:#111111;line-height:1.6">
         <strong>📋 Required columns in your Excel:</strong><br/>
         Agreement Name · Client Name · Start Date · End Date<br/>
-        <span style="color:#92400e">Optional: Type · PAN · GST Registered (Yes/No) · GST Number · Contact · Notes</span>
+        <span style="color:#111111">Optional: Type · PAN · GST Registered (Yes/No) · GST Number · Contact · Notes</span>
       </div>
     </div>
     <div id="bulkStep2" style="display:none">
@@ -1711,7 +1708,7 @@
       <div class="wizard-step-title"><span class="wizard-step-num">4</span>Copy your Client ID</div>
       <div class="wizard-step-body">On the app's <b>Overview</b> page, copy the <b>Application (client) ID</b><br/>It looks like: <code>a1b2c3d4-xxxx-xxxx-xxxx-xxxxxxxxxxxx</code></div>
     </div>
-    <div style="background:#fef3c7;border-radius:10px;padding:12px;font-size:.8rem;color:#92400e;margin-bottom:14px;line-height:1.6">
+    <div style="background:#ffedd5;border-radius:10px;padding:12px;font-size:.8rem;color:#111111;margin-bottom:14px;line-height:1.6">
       <strong>⚠️ Important:</strong> The Redirect URI in Azure must exactly match: <code id="redirectUriDisplay2"></code>
     </div>
     <div class="form-group">
@@ -1972,7 +1969,7 @@ function onAgrNameSelect(){
     document.getElementById('agrType').value='__email__';
     // Show a note
     let note=document.getElementById('emailAgrNote');
-    if(!note){note=document.createElement('div');note.id='emailAgrNote';note.style.cssText='background:#eff6ff;border:1.5px solid #93c5fd;border-radius:10px;padding:10px 12px;font-size:.76rem;color:#1d4ed8;margin-bottom:8px';note.innerHTML='📧 <strong>Email mode:</strong> No formal agreement. Fill in client details and attach any relevant documents. This will be saved and shown under All and Email filters.';}
+    if(!note){note=document.createElement('div');note.id='emailAgrNote';note.style.cssText='background:#ffedd5;border:1.5px solid #93c5fd;border-radius:10px;padding:10px 12px;font-size:.76rem;color:#111111;margin-bottom:8px';note.innerHTML='📧 <strong>Email mode:</strong> No formal agreement. Fill in client details and attach any relevant documents. This will be saved and shown under All and Email filters.';}
     if(typeGrp&&!document.getElementById('emailAgrNote'))typeGrp.parentElement.insertBefore(note,typeGrp);
   }else{
     const note=document.getElementById('emailAgrNote');if(note)note.remove();
@@ -2085,7 +2082,7 @@ function renderSubReqAdmin(){
         <div style="font-size:.7rem;color:var(--muted)">${esc(r.type)} · ${dt}</div>
       </div>
       <button onclick="approveSubReq('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
-      <button onclick="rejectSubReq('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
+      <button onclick="rejectSubReq('${r.id}')" style="background:#ffedd5;color:#111111;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
     </div>`;
   }).join('');
 }
@@ -2207,7 +2204,7 @@ function renderUserCatDash(){
           <div style="font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.specialService||b.type||'Bill')}</div>
           <div style="font-size:.68rem;color:var(--muted)">${esc(b.client||'')}</div>
         </div>
-        <span style="font-size:.75rem;font-weight:800;color:#0369a1">${b.amount?fmt(b.amount):'—'}</span>
+        <span style="font-size:.75rem;font-weight:800;color:#111111">${b.amount?fmt(b.amount):'—'}</span>
       </div>`).join('')||'<div style="font-size:.8rem;color:var(--muted);text-align:center;padding:16px">No bills yet</div>';
 
     el.innerHTML=`
@@ -2252,7 +2249,7 @@ function renderUserCatDash(){
       <div style="font-size:.85rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(cat)}</div>
       <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px">${CAT_DESC[cat]||''}</div>
       ${isPending
-        ?`<div style="font-size:.72rem;font-weight:700;color:#d97706;background:#fef9c3;padding:5px 12px;border-radius:20px;display:inline-block">⏳ Awaiting Admin Approval</div>`
+        ?`<div style="font-size:.72rem;font-weight:700;color:#111111;background:#ffedd5;padding:5px 12px;border-radius:20px;display:inline-block">⏳ Awaiting Admin Approval</div>`
         :`<button class="_req_btn_${idx}" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.75rem;font-weight:700;cursor:pointer;width:100%">Request Access</button>`
       }`;
     if(!isPending){
@@ -2300,7 +2297,7 @@ function renderCatAccessAdmin(){
         <div style="font-size:.7rem;color:var(--muted)">${esc(r.cat)} · ${dt}</div>
       </div>
       <button onclick="approveCatAccess('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
-      <button onclick="rejectCatAccess('${r.id}')" style="background:#fee2e2;color:#dc2626;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
+      <button onclick="rejectCatAccess('${r.id}')" style="background:#ffedd5;color:#111111;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
     </div>`;
   }).join('');
 }
@@ -2398,7 +2395,7 @@ function updateZohoStatus(){
     if(lbl)lbl.textContent='Zoho Books ✓';
   }else{
     if(partial){
-      if(st)st.innerHTML='<span style="color:#d97706;font-weight:700">⚠️ Incomplete — please re-enter credentials</span>';
+      if(st)st.innerHTML='<span style="color:#111111;font-weight:700">⚠️ Incomplete — please re-enter credentials</span>';
       // Pre-fill what we have
       const oId=document.getElementById('zohoOrgId');if(oId&&cfg.orgId)oId.value=cfg.orgId;
       if(setupSec)setupSec.style.display='block';
@@ -2690,9 +2687,9 @@ function renderBills(){
           ${sub?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">🏷️ ${esc(sub)}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-          <span style="font-size:.95rem;font-weight:800;color:#0369a1">${amt}</span>
+          <span style="font-size:.95rem;font-weight:800;color:#111111">${amt}</span>
           <span style="font-size:.68rem;color:var(--muted)">${dt}</span>
-          ${b.invoice?`<span style="font-size:.65rem;background:#e0f2fe;color:#0369a1;padding:1px 7px;border-radius:20px;font-weight:700">${esc(b.invoice)}</span>`:''}
+          ${b.invoice?`<span style="font-size:.65rem;background:#ffedd5;color:#111111;padding:1px 7px;border-radius:20px;font-weight:700">${esc(b.invoice)}</span>`:''}
         </div>
       </div>
       ${b.notes?`<div class="card-notes" style="margin-top:6px;font-size:.74rem;color:var(--muted);padding-top:6px;border-top:1px solid var(--border-light)">📝 ${esc(b.notes)}</div>`:''}
@@ -3243,11 +3240,11 @@ async function buildCard(a){
   }
   const renewBtn=(status==='expired')?`<button class="btn-renew" onclick="openRenewModal('${a.id}')">🔄 Renew</button>`:'';
   const histBtn=(a.renewedFrom||a.renewedTo)?`<button class="btn-history" onclick="showHistory('${a.id}')">📜 History</button>`:'';
-  const remindBtn=`<button class="btn-edit" onclick="openEmailModal('${a.id}')" style="background:#e0f2fe;color:#0369a1" title="Compose &amp; Send reminder email">📧</button>`;
+  const remindBtn=`<button class="btn-edit" onclick="openEmailModal('${a.id}')" style="background:#ffedd5;color:#111111" title="Compose &amp; Send reminder email">📧</button>`;
   const editBtn=`<button class="btn-edit" onclick="openEditModal('${a.id}')">✏️ Edit</button>`;
   const delBtn=`<button class="btn-delete" onclick="deleteAgreement('${a.id}')">🗑️ Delete</button>`;
   return`<div class="agreement-card status-${status}" id="card-${a.id}">
-    <div class="card-top"><div class="card-title">${a.name}${a.isEmail||a.emailAttachName?'<span style="font-size:.6rem;background:#eff6ff;color:#1d4ed8;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle">📧</span>':''}</div><div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div></div>
+    <div class="card-top"><div class="card-title">${a.name}${a.isEmail||a.emailAttachName?'<span style="font-size:.6rem;background:#ffedd5;color:#111111;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px;vertical-align:middle">📧</span>':''}</div><div class="badges"><span class="status-badge ${bClass}">${bText}</span>${versionBadge}</div></div>
     <div class="card-client">👤 ${a.client}${a.type?' · '+a.type:''}</div>
     <div class="card-details">
       <div class="detail-item"><div class="detail-label">Start Date</div><div class="detail-value">${fDate(a.startDate)}</div></div>
@@ -3258,7 +3255,7 @@ async function buildCard(a){
     <div class="compliance-row">${panTag}${gstTag}</div>
     <div class="days-left ${daysClass}">${daysText}</div>
     ${a.notes?`<div style="margin-top:8px;font-size:.78rem;color:var(--muted);font-style:italic">📝 ${a.notes}</div>`:''}
-    ${a.emailAttachName?`<div style="margin-top:8px;display:flex;align-items:center;gap:6px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:6px 10px"><span style="font-size:.8rem">📧</span><a href="${a.emailAttachData||'#'}" download="${a.emailAttachName}" style="font-size:.74rem;font-weight:600;color:#1d4ed8;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.emailAttachName}</a></div>`:''}
+    ${a.emailAttachName?`<div style="margin-top:8px;display:flex;align-items:center;gap:6px;background:#ffedd5;border:1px solid #bfdbfe;border-radius:8px;padding:6px 10px"><span style="font-size:.8rem">📧</span><a href="${a.emailAttachData||'#'}" download="${a.emailAttachName}" style="font-size:.74rem;font-weight:600;color:#111111;text-decoration:none;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.emailAttachName}</a></div>`:''}
     ${chainHtml}${filesHtml}
     <button class="btn-add-file" onclick="quickAddFile('${a.id}')">📎 Attach Files</button>
     <div class="card-actions">${editBtn}${renewBtn}${histBtn}${remindBtn}${delBtn}</div>
@@ -3737,17 +3734,17 @@ function aiShowAgrResults(results,query){
       +'<div style="font-weight:700;font-size:.8rem;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(a.name||'Unnamed')+'</div>'
       +(a.amount?'<div style="font-size:.75rem;font-weight:800;color:#c2410c;flex-shrink:0;margin-left:6px">₹'+Number(a.amount).toLocaleString('en-IN')+'</div>':'')
       +'</div>'
-      +'<div style="font-size:.7rem;color:#555;margin-top:2px">👤 '+esc(a.client||'—')+'</div>'
+      +'<div style="font-size:.7rem;color:#111111;margin-top:2px">👤 '+esc(a.client||'—')+'</div>'
       +'<div style="font-size:.68rem;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap">'
       +'<span style="background:'+stc+'22;color:'+stc+';font-weight:700;padding:1px 6px;border-radius:10px">'+stl+'</span>'
-      +(a.endDate?'<span style="color:#888">ends '+fDate(a.endDate)+'</span>':'')
-      +(a.type?'<span style="color:#888">'+esc(a.type.split(' ')[0])+'</span>':'')
+      +(a.endDate?'<span style="color:#111111">ends '+fDate(a.endDate)+'</span>':'')
+      +(a.type?'<span style="color:#111111">'+esc(a.type.split(' ')[0])+'</span>':'')
       +'</div>';
     el.appendChild(card);
   });
   if(results.length>8){
     const more=document.createElement('div');more.className='ai-msg bot';
-    more.style.cssText='font-size:.72rem;color:#6366f1;font-weight:700;';
+    more.style.cssText='font-size:.72rem;color:#111111;font-weight:700;';
     more.textContent='...and '+(results.length-8)+' more agreements.';
     el.appendChild(more);
   }
@@ -3769,25 +3766,25 @@ function aiShowBillResults(results,query){
   const totalAmt=results.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
   results.slice(0,8).forEach(b=>{
     const card=document.createElement('div');card.className='ai-msg bot';
-    card.style.cssText='padding:9px 11px;border-left:3px solid #0369a1;background:#f0f9ff;border-radius:8px;margin:2px 0;';
+    card.style.cssText='padding:9px 11px;border-left:3px solid #0369a1;background:#ffedd5;border-radius:8px;margin:2px 0;';
     card.innerHTML=
       '<div style="display:flex;justify-content:space-between">'
       +'<div style="font-weight:700;font-size:.8rem">'+esc(b.client||'—')+'</div>'
-      +(b.amount?'<div style="font-size:.75rem;font-weight:800;color:#0369a1">₹'+Number(b.amount).toLocaleString('en-IN')+'</div>':'')
+      +(b.amount?'<div style="font-size:.75rem;font-weight:800;color:#111111">₹'+Number(b.amount).toLocaleString('en-IN')+'</div>':'')
       +'</div>'
-      +'<div style="font-size:.7rem;color:#555;margin-top:2px">'+esc(b.type||'')+(b.subType?' › '+esc(b.subType):'')+(b.specialService?' · '+esc(b.specialService):'')+'</div>'
-      +(b.invoice?'<div style="font-size:.67rem;color:#888;margin-top:2px">Inv: '+esc(b.invoice)+'</div>':'');
+      +'<div style="font-size:.7rem;color:#111111;margin-top:2px">'+esc(b.type||'')+(b.subType?' › '+esc(b.subType):'')+(b.specialService?' · '+esc(b.specialService):'')+'</div>'
+      +(b.invoice?'<div style="font-size:.67rem;color:#111111;margin-top:2px">Inv: '+esc(b.invoice)+'</div>':'');
     el.appendChild(card);
   });
   if(results.length>8){
     const more=document.createElement('div');more.className='ai-msg bot';
-    more.style.cssText='font-size:.72rem;color:#6366f1;font-weight:700;';
+    more.style.cssText='font-size:.72rem;color:#111111;font-weight:700;';
     more.textContent='...and '+(results.length-8)+' more bills.';
     el.appendChild(more);
   }
   if(totalAmt>0){
     const tot=document.createElement('div');tot.className='ai-msg bot';
-    tot.style.cssText='font-weight:800;font-size:.8rem;color:#0369a1;border-top:1px solid #eee;padding-top:6px;';
+    tot.style.cssText='font-weight:800;font-size:.8rem;color:#111111;border-top:1px solid #eee;padding-top:6px;';
     tot.textContent='Total: ₹'+totalAmt.toLocaleString('en-IN');
     el.appendChild(tot);
   }
@@ -4413,7 +4410,7 @@ function showImportPreview(){
   const valid=parsedRows.filter(r=>r.errors.length===0);const invalid=parsedRows.filter(r=>r.errors.length>0);
   document.getElementById('importSummary').innerHTML=`<b>📊 ${parsedRows.length} rows found</b> &nbsp;·&nbsp; ✅ <b>${valid.length} valid</b> &nbsp;·&nbsp; ❌ <b>${invalid.length} with errors</b>`;
   const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Type</th><th>EL</th><th>Amount</th><th>Start</th><th>End</th><th>PAN</th><th>Notes</th></tr></thead>`;
-  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;const elBadge=r.elType==='with'?'<span style="font-size:.6rem;background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:8px">✅ EL</span>':r.elType==='without'?'<span style="font-size:.6rem;background:#fff7ed;color:#c2410c;padding:1px 5px;border-radius:8px">📄 No EL</span>':'—';return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#991b1b">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.type||'—'}</td><td>${elBadge}</td><td>${r.amount?'₹'+Number(r.amount).toLocaleString('en-IN'):'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
+  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;const elBadge=r.elType==='with'?'<span style="font-size:.6rem;background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:8px">✅ EL</span>':r.elType==='without'?'<span style="font-size:.6rem;background:#fff7ed;color:#c2410c;padding:1px 5px;border-radius:8px">📄 No EL</span>':'—';return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#111111">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.type||'—'}</td><td>${elBadge}</td><td>${r.amount?'₹'+Number(r.amount).toLocaleString('en-IN'):'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
   document.getElementById('importTable').innerHTML=thead+`<tbody>${tbody}</tbody>`;
   if(invalid.length>0)document.getElementById('importErrorNote').textContent=`⚠️ ${invalid.length} row(s) with errors will be skipped.`;
   else document.getElementById('importErrorNote').textContent='';
@@ -4827,7 +4824,7 @@ function buildEmailBody(a,days){
   const daysMsg=days<0?'Expired '+Math.abs(days)+' day(s) ago':days===0?'Expires TODAY':'Expires in '+days+' day(s)';
   const bgColor=days<0?'#fee2e2':days<=7?'#fef3c7':'#fff7ed';
   const txColor=days<0?'#b91c1c':days<=7?'#92400e':'#c2410c';
-  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#f8a006;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">EL Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#6b7280;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Type</td><td style="padding:8px 0">'+(a.type||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#6b7280">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr></table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#6b7280"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#9ca3af;border-top:1px solid #e5e7eb">This is an automated reminder from EL Tracker. Please do not reply to this email.</div></div>';
+  return '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden"><div style="background:#f8a006;padding:20px 24px;color:#fff"><h2 style="margin:0;font-size:1.2rem">Agreement '+status+'</h2><p style="margin:4px 0 0;opacity:.85;font-size:.85rem">EL Tracker - Automated Reminder</p></div><div style="padding:24px"><table style="width:100%;border-collapse:collapse;font-size:.9rem"><tr><td style="padding:8px 0;color:#111111;width:140px">Agreement Name</td><td style="padding:8px 0;font-weight:700">'+nm+'</td></tr><tr><td style="padding:8px 0;color:#111111">Type</td><td style="padding:8px 0">'+(a.type||'—')+'</td></tr><tr><td style="padding:8px 0;color:#111111">Party / Client</td><td style="padding:8px 0">'+cl+'</td></tr><tr><td style="padding:8px 0;color:#111111">Start Date</td><td style="padding:8px 0">'+(a.startDate||'—')+'</td></tr><tr><td style="padding:8px 0;color:#111111">End Date</td><td style="padding:8px 0"><strong>'+(a.endDate||'—')+'</strong></td></tr></table><div style="margin-top:16px;padding:14px 18px;background:'+bgColor+';border-radius:10px;font-weight:700;font-size:1rem;color:'+txColor+'">'+daysMsg+'</div>'+(nt?'<p style="margin-top:14px;font-size:.85rem;color:#111111"><strong>Notes:</strong> '+nt+'</p>':'')+'</div><div style="background:#f9fafb;padding:14px 24px;font-size:.75rem;color:#111111;border-top:1px solid #e5e7eb">This is an automated reminder from EL Tracker. Please do not reply to this email.</div></div>';
 }
 
 let _composeAgrId=null;
@@ -4863,7 +4860,7 @@ async function submitEmailCompose(){
   const toList=[];
   for(const e of rawTo){if(!isValidEmail(e)){showComposeError('Invalid email address: "'+e+'" — please check and try again.');return;}toList.push(e);}
   const ccList=ccRaw?ccRaw.split(',').map(e=>e.trim()).filter(e=>{if(!e)return false;if(!isValidEmail(e)){showComposeError('Invalid CC email: "'+e+'"');return false;}return true;}):[];
-  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#f8a006;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">EL Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111827;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#6b7280;margin:0">Sent via EL Tracker - Microsoft 365</p></div></div>';
+  const htmlBody='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto"><div style="background:#f8a006;padding:18px 24px;border-radius:10px 10px 0 0"><h2 style="color:#fff;margin:0;font-size:1rem">EL Tracker - Email Reminder</h2></div><div style="background:#fff;padding:24px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px"><pre style="white-space:pre-wrap;font-family:Arial,sans-serif;font-size:.9rem;color:#111111;line-height:1.6;margin:0">'+plainBody.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</pre><hr style="margin:20px 0;border:none;border-top:1px solid #e5e7eb"/><p style="font-size:.75rem;color:#111111;margin:0">Sent via EL Tracker - Microsoft 365</p></div></div>';
   const btn=document.getElementById('composeSendBtn');btn.disabled=true;btn.textContent='Sending...';
   showToast('Sending via Microsoft 365...');
   try{
@@ -4918,7 +4915,7 @@ async function sendTestEmail(){
   if(to.length===0){if(statusEl)statusEl.textContent='Cannot determine your email address.';return;}
   if(statusEl)statusEl.textContent='📨 Sending test email to '+to[0]+'…';
   try{
-    await sendEmailViaGraph(to,[],'[EL Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#f8a006">✅ Email is working!</h2><p>Your EL Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#6b7280;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
+    await sendEmailViaGraph(to,[],'[EL Tracker] Test Email','<div style="font-family:Arial,sans-serif;padding:24px"><h2 style="color:#f8a006">✅ Email is working!</h2><p>Your EL Tracker is successfully sending emails via Microsoft 365.</p><p style="color:#111111;font-size:.85rem">Sent from: '+to[0]+'</p></div>');
     if(statusEl)statusEl.textContent='✅ Test email sent to '+to[0];showToast('✅ Test email sent!');
   }catch(e){if(statusEl)statusEl.textContent='❌ '+e.message;showToast('❌ '+e.message);}
 }
@@ -5021,10 +5018,10 @@ openDB().then(async()=>{
     <button class="ai-close" onclick="toggleAI()">✕</button>
   </div>
   <div class="ai-msgs" id="aiMsgs"></div>
-  <div id="aiTyping" style="display:none;padding:6px 14px;font-size:.72rem;color:#6366f1;font-style:italic">AI is thinking...</div>
+  <div id="aiTyping" style="display:none;padding:6px 14px;font-size:.72rem;color:#111111;font-style:italic">AI is thinking...</div>
   <!-- Inline API key setup for users -->
   <div id="aiInlineSetup" style="display:none;padding:10px 12px;border-bottom:1px solid #fed7aa;background:#fff7ed">
-    <div style="font-size:.72rem;font-weight:700;color:#4f46e5;margin-bottom:6px">🔑 Connect AI (optional)</div>
+    <div style="font-size:.72rem;font-weight:700;color:#111111;margin-bottom:6px">🔑 Connect AI (optional)</div>
     <select id="aiInlineProvider" style="width:100%;padding:6px 8px;border:1.5px solid #fdba74;border-radius:8px;font-size:.75rem;font-family:inherit;outline:none;margin-bottom:6px">
       <option value="claude">Anthropic Claude</option>
       <option value="gemini">Google Gemini</option>
@@ -5033,7 +5030,7 @@ openDB().then(async()=>{
       <input type="text" id="aiInlineKey" placeholder="Paste API key here..." style="flex:1;padding:7px 10px;border:1.5px solid #fdba74;border-radius:8px;font-size:.72rem;font-family:monospace;outline:none;min-width:0" autocomplete="off" spellcheck="false"/>
       <button type="button" onclick="saveAiInlineKey()" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:700;cursor:pointer;flex-shrink:0">Save</button>
     </div>
-    <div style="font-size:.65rem;color:#6b7280;margin-top:4px">Key stored locally on your device only.</div>
+    <div style="font-size:.65rem;color:#111111;margin-top:4px">Key stored locally on your device only.</div>
   </div>
   <div class="ai-chips" id="aiChips">
     <button class="ai-chip" onclick="aiSend('Add a new agreement')">➕ Agreement</button>
@@ -5045,8 +5042,8 @@ openDB().then(async()=>{
     <button class="ai-chip" onclick="aiSend('Mail expiring agreements')">📧 Mail Expiring</button>
     <button class="ai-chip" onclick="aiSend('Monthly statement')">📅 Monthly</button>
     <button class="ai-chip" onclick="aiSend('Go to dashboard')">🏠 Dashboard</button>
-    <button class="ai-chip" id="aiKeyChip" onclick="toggleAiInlineSetup()" style="background:#ede9fe;color:#4f46e5">🔑 API Key</button>
-    <button class="ai-chip" id="aiKeyRemoveChip" onclick="clearAiApiKey()" style="display:none;background:#fee2e2;color:#dc2626">❌ Remove Key</button>
+    <button class="ai-chip" id="aiKeyChip" onclick="toggleAiInlineSetup()" style="background:#ffedd5;color:#111111">🔑 API Key</button>
+    <button class="ai-chip" id="aiKeyRemoveChip" onclick="clearAiApiKey()" style="display:none;background:#ffedd5;color:#111111">❌ Remove Key</button>
   </div>
   <div class="ai-input-row">
     <input class="ai-input" id="aiInput" placeholder="Ask me anything..." onkeydown="if(event.key==='Enter')aiSend()"/>
