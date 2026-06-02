@@ -3397,94 +3397,144 @@ function updateAiApiStatus(){
   }
 }
 
-// ── Build AI system prompt with FULL app data ──
+// ── Build AI system prompt with structured JSON data ──
 function buildAiSystemPrompt(){
   const{isAdmin,allowed}=aiCtx();
   const scopedAgrs=aiScopeAgrs();
   const scopedBills=aiScopeBills();
   const today=new Date();
+  const todayStr=today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
 
-  const byStatus=f=>scopedAgrs.filter(a=>getStatus(a)===f);
-  const active=byStatus('active'),expiring=byStatus('expiring'),expired=byStatus('expired'),renewed=byStatus('renewed');
-
+  // ── Format each agreement as clean object ──
   const fmtAgr=a=>{
-    const st={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[getStatus(a)]||'';
+    const st=getStatus(a);
+    const statusLabel={active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[st]||st;
     const days=a.endDate?Math.ceil((new Date(a.endDate)-today)/86400000):null;
-    const dStr=days!==null?(days<0?Math.abs(days)+'d overdue':days+'d left'):'';
     const pg=a.parentGroup?getParentCompanies().find(p=>p.id===a.parentGroup):null;
-    return '"'+(a.name||'')+'" Client:'+(a.client||'')
-      +' Type:'+(a.type||'')+( a.subType?'>'+a.subType:'')
-      +(a.elType==='with'?' EL:Yes':a.elType==='without'?' EL:No':'')
-      +' Status:'+st+(dStr?' '+dStr:'')
-      +' Amount:Rs.'+(a.amount?Number(a.amount).toLocaleString('en-IN'):'0')
-      +(a.billingFreq?' Freq:'+a.billingFreq:'')
-      +' Dates:'+(a.startDate||'?')+' to '+(a.endDate||'?')
-      +(a.billingMonth?' BillMo:'+a.billingMonth:'')
-      +(a.contact?' Contact:'+a.contact:'')+(a.contactInfo?' '+a.contactInfo:'')
-      +(a.pan?' PAN:'+a.pan:'')+(a.gstRegistered?' GST:'+(a.gst||'Regd'):'')
-      +(pg?' Group:'+pg.name:'')
-      +(a.notes?' Note:'+a.notes.slice(0,80):'');
+    return {
+      name:a.name||'',
+      client:a.client||'',
+      type:a.type||'',
+      subService:a.subType||'',
+      engagementLetter:a.elType==='with'?'Yes':a.elType==='without'?'No':'Not specified',
+      description:a.specialService||'',
+      amount:a.amount?'Rs.'+Number(a.amount).toLocaleString('en-IN'):'Not set',
+      amountNum:parseFloat(a.amount)||0,
+      billingFrequency:a.billingFreq||'',
+      billingMonth:a.billingMonth||'',
+      startDate:a.startDate||'',
+      endDate:a.endDate||'',
+      daysRemaining:days!==null?(days<0?days+' (OVERDUE)':days+' days left'):'N/A',
+      status:statusLabel,
+      contactPerson:a.contact||'',
+      contactInfo:a.contactInfo||'',
+      pan:a.pan||'',
+      gst:a.gstRegistered?(a.gst||'Registered'):'Not Registered',
+      parentGroup:pg?pg.name:'',
+      emailAttached:a.emailAttachName?'Yes ('+a.emailAttachName+')':'No',
+      notes:a.notes||''
+    };
   };
 
+  // ── Format each bill as clean object ──
   const fmtBill=b=>{
     const pg=b.parentGroup?getParentCompanies().find(p=>p.id===b.parentGroup):null;
-    return 'Client:'+(b.client||'?')
-      +' Type:'+(b.type||''+(b.subType?'>'+b.subType:''))
-      +' Amount:Rs.'+(b.amount?Number(b.amount).toLocaleString('en-IN'):'0')
-      +' Period:'+(b.date||'')+(b.invoice?' Inv:'+b.invoice:'')
-      +(b.specialService?' Desc:'+b.specialService:'')
-      +(b.pan?' PAN:'+b.pan:'')+(b.contactInfo?' '+b.contactInfo:'')
-      +(pg?' Group:'+pg.name:'')+(b.notes?' Note:'+b.notes.slice(0,60):'');
+    return {
+      client:b.client||'',
+      serviceType:b.type||'',
+      subService:b.subType||'',
+      description:b.specialService||'',
+      amount:b.amount?'Rs.'+Number(b.amount).toLocaleString('en-IN'):'Not set',
+      amountNum:parseFloat(b.amount)||0,
+      period:b.date||'',
+      invoiceNumber:b.invoice||'',
+      contactPerson:b.contact||'',
+      contactInfo:b.contactInfo||'',
+      pan:b.pan||'',
+      gst:b.gstRegistered?(b.gst||'Registered'):'Not Registered',
+      parentGroup:pg?pg.name:'',
+      notes:b.notes||''
+    };
   };
 
-  const agrBlock=scopedAgrs.map(fmtAgr).join(' || ');
-  const billBlock=scopedBills.map(fmtBill).join(' || ');
+  // ── Build arrays ──
+  const agreementsJSON=scopedAgrs.map(fmtAgr);
+  const billsJSON=scopedBills.map(fmtBill);
 
-  const pcs=getParentCompanies();
-  const pcBlock=pcs.map(p=>p.name+(p.subs&&p.subs.length?' ['+p.subs.join(',')+']':'')).join('; ');
+  // ── Parent companies ──
+  const parentCompanies=getParentCompanies().map(p=>({
+    name:p.name,
+    subCompanies:p.subs||[]
+  }));
 
-  let userBlock='';
+  // ── Users (admin only) ──
+  let usersJSON=[];
   if(isAdmin){
-    try{const users=getUsers();userBlock=users.map(u=>u.name+' @'+u.username+' '+u.role+(u.allowedCats&&u.allowedCats.length?' Cat:'+u.allowedCats.join(','):'')+(u.email?' '+u.email:'')).join('; ');}catch(e){}
+    try{usersJSON=getUsers().map(u=>({name:u.name,username:u.username,role:u.role,email:u.email||'',category:u.allowedCats&&u.allowedCats.length?u.allowedCats.join(', '):'None'}));}catch(e){}
   }
 
+  // ── Monthly summary ──
   const curM=today.getMonth()+1,curY=today.getFullYear();
+  const monthName=today.toLocaleString('en-IN',{month:'long',year:'numeric'});
   const mAgrs=scopedAgrs.filter(a=>{if(!a.startDate||!a.endDate)return false;const s=new Date(a.startDate),e=new Date(a.endDate),f=new Date(curY,curM-1,1),l=new Date(curY,curM,0);return s<=l&&e>=f;});
   const mBills=scopedBills.filter(b=>{if(!b.date)return false;if(b.date.length===7){const[by,bm]=b.date.split('-').map(Number);return by===curY&&bm===curM;}const d=new Date(b.date);return d.getFullYear()===curY&&d.getMonth()+1===curM;});
 
-  const totalAgrVal=scopedAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
-  const totalBillVal=scopedBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
-  const withEL=scopedAgrs.filter(a=>a.elType==='with').length;
-  const withoutEL=scopedAgrs.filter(a=>a.elType==='without').length;
+  // ── Statistics ──
+  const byStatus=f=>scopedAgrs.filter(a=>getStatus(a)===f);
+  const stats={
+    totalAgreements:scopedAgrs.length,
+    active:byStatus('active').length,
+    expiringSoon:byStatus('expiring').length,
+    expired:byStatus('expired').length,
+    renewed:byStatus('renewed').length,
+    withEngagementLetter:scopedAgrs.filter(a=>a.elType==='with').length,
+    withoutEngagementLetter:scopedAgrs.filter(a=>a.elType==='without').length,
+    totalAgreementValue:'Rs.'+scopedAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0).toLocaleString('en-IN'),
+    totalBills:scopedBills.length,
+    totalBillValue:'Rs.'+scopedBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0).toLocaleString('en-IN'),
+    thisMonth:monthName,
+    thisMonthAgreements:mAgrs.length,
+    thisMonthAgreementValue:'Rs.'+mAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0).toLocaleString('en-IN'),
+    thisMonthBills:mBills.length,
+    thisMonthBillValue:'Rs.'+mBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0).toLocaleString('en-IN')
+  };
 
-  let catReqs=0,subReqs=0;
-  try{catReqs=(getCatRequests?getCatRequests():[]).filter(r=>r.status==='pending').length;}catch(e){}
-  try{subReqs=(getSubRequests?getSubRequests():[]).filter(r=>r.status==='pending').length;}catch(e){}
+  // ── Pending requests ──
+  let pendingCatRequests=0,pendingSubRequests=0;
+  try{pendingCatRequests=(getCatRequests?getCatRequests():[]).filter(r=>r.status==='pending').length;}catch(e){}
+  try{pendingSubRequests=(getSubRequests?getSubRequests():[]).filter(r=>r.status==='pending').length;}catch(e){}
+  if(isAdmin){stats.pendingCategoryRequests=pendingCatRequests;stats.pendingSubServiceRequests=pendingSubRequests;}
 
-  const summary='TOTALS: '+scopedAgrs.length+' agreements (Active:'+active.length+' Expiring:'+expiring.length+' Expired:'+expired.length+' Renewed:'+renewed.length
-    +' WithEL:'+withEL+' NoEL:'+withoutEL+')'
-    +' TotalAgrValue:Rs.'+totalAgrVal.toLocaleString('en-IN')
-    +' | '+scopedBills.length+' bills TotalBillValue:Rs.'+totalBillVal.toLocaleString('en-IN')
-    +' | ThisMonth('+today.toLocaleString('en-IN',{month:'short',year:'numeric'})+'): '+mAgrs.length+' agrs Rs.'+mAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0).toLocaleString('en-IN')+' '+mBills.length+' bills Rs.'+mBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0).toLocaleString('en-IN')
-    +(pcs.length?' | ParentGroups:'+pcs.length:'')
-    +(isAdmin&&catReqs?' | PendingCatReq:'+catReqs:'')
-    +(isAdmin&&subReqs?' | PendingSubReq:'+subReqs:'');
+  const dataContext={
+    statistics:stats,
+    agreements:agreementsJSON,
+    bills:billsJSON,
+    parentCompanies:parentCompanies,
+    users:isAdmin?usersJSON:undefined
+  };
 
-  const catRestrict=!isAdmin&&allowed&&allowed.length?'ONLY discuss category: '+allowed.join(', ')+'. ':'';
-  const roleInfo=isAdmin?'ADMIN full access. ':'User category:'+(allowed&&allowed[0]||'unassigned')+'. ';
+  const catRestrict=!isAdmin&&allowed&&allowed.length
+    ?'IMPORTANT: This user only has access to "'+allowed.join(', ')+'" category. Only discuss and reference data from this category.'
+    :'';
+  const roleInfo=isAdmin?'You are talking to an ADMIN who has full access to all data.':'You are talking to a USER with access only to: '+(allowed&&allowed[0]||'unassigned')+' category.';
 
-  let prompt='EL Tracker Assistant — CA firm agreement and billing system, India. '
-    +'Today:'+today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})+'. '
-    +roleInfo+catRestrict
-    +summary+' '
-    +'[ALL AGREEMENTS] '+( agrBlock||'none')
-    +' [ALL BILLS] '+(billBlock||'none')
-    +(pcBlock?' [PARENT COMPANIES] '+pcBlock:'')
-    +(userBlock?' [USERS] '+userBlock:'')
-    +' [RULES] Use exact data above. Calculate totals. List items with full detail. Show days remaining/overdue. Indian number format (lakhs/crores). Be accurate and concise. '+catRestrict;
+  // Serialize JSON (truncate if too large)
+  let jsonStr=JSON.stringify(dataContext,null,1);
+  if(jsonStr.length>50000)jsonStr=JSON.stringify(dataContext);
+  if(jsonStr.length>50000)jsonStr=jsonStr.slice(0,50000)+'...}';
 
-  if(prompt.length>55000)prompt=prompt.slice(0,55000)+'...[truncated]';
-  return prompt;
+  const systemPrompt='You are EL Tracker Assistant, an intelligent AI embedded in EL Tracker — a professional agreement and billing management system for a CA firm in India. '
+    +roleInfo+' Today is '+todayStr+'. '
+    +catRestrict+' '
+    +'You have access to the complete, real-time data from this app provided below as structured JSON. '
+    +'Use this data to answer every question accurately. When asked about amounts, calculate correctly. '
+    +'When asked who is expiring, check daysRemaining. When asked for totals, sum the amountNum fields. '
+    +'Always reference actual client names, amounts, and dates from the data. '
+    +'Format amounts in Indian style (lakhs/crores when appropriate). '
+    +'Be professional, precise and helpful. If something is not in the data, say so clearly. '
+    +'DATA: '+jsonStr;
+
+  return systemPrompt.length>60000?systemPrompt.slice(0,60000)+'...[truncated]':systemPrompt;
 }
 
 // ── Call real AI API ──
