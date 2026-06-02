@@ -3397,50 +3397,94 @@ function updateAiApiStatus(){
   }
 }
 
-// ── Build AI system prompt with app context ──
+// ── Build AI system prompt with FULL app data ──
 function buildAiSystemPrompt(){
-  const session=getSession();
   const{isAdmin,allowed}=aiCtx();
   const scopedAgrs=aiScopeAgrs();
   const scopedBills=aiScopeBills();
-  const expiring=scopedAgrs.filter(a=>getStatus(a)==='expiring');
-  const expired=scopedAgrs.filter(a=>getStatus(a)==='expired');
-  const active=scopedAgrs.filter(a=>getStatus(a)==='active');
-  const catRestrict=!isAdmin&&allowed&&allowed.length
-    ? 'IMPORTANT: This user only has access to: '+allowed.join(', ')+'. Only discuss data from this category. '
-    : '';
-  const roleInfo=isAdmin?'The user is an ADMIN with full access to all data.':'The user is a standard user. Category: '+(allowed&&allowed[0]||'unassigned')+'. ';
+  const today=new Date();
 
-  // Serialize agreements (max 30 most relevant)
-  const agrData=scopedAgrs.slice(0,20).map(a=>{
-    const st=getStatus(a);
-    return (a.name||'?')+' | '+(a.client||'?')+' | '+(a.type||'')+' | '+(a.subType||'')
-      +' | '+(a.elType==='with'?'WithEL':a.elType==='without'?'NoEL':'')
-      +' | Rs.'+(a.amount||'0')+' | '+(a.billingFreq||'')
-      +' | '+(a.startDate||'')+' to '+(a.endDate||'')
-      +' | '+{active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]
-      +' | '+(a.contact||'')+' | PAN:'+(a.pan||'');
-  }).join(' | ');
+  const byStatus=f=>scopedAgrs.filter(a=>getStatus(a)===f);
+  const active=byStatus('active'),expiring=byStatus('expiring'),expired=byStatus('expired'),renewed=byStatus('renewed');
 
-  // Serialize bills (max 20)
-  const billData=scopedBills.slice(0,15).map(b=>{
-    return (b.client||'?')+' | '+(b.type||'')+' | Rs.'+(b.amount||'0')
-      +' | '+(b.date||'')+' | Inv:'+(b.invoice||'')+' | '+(b.specialService||'');
-  }).join(' | ');
+  const fmtAgr=a=>{
+    const st={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[getStatus(a)]||'';
+    const days=a.endDate?Math.ceil((new Date(a.endDate)-today)/86400000):null;
+    const dStr=days!==null?(days<0?Math.abs(days)+'d overdue':days+'d left'):'';
+    const pg=a.parentGroup?getParentCompanies().find(p=>p.id===a.parentGroup):null;
+    return '"'+(a.name||'')+'" Client:'+(a.client||'')
+      +' Type:'+(a.type||'')+( a.subType?'>'+a.subType:'')
+      +(a.elType==='with'?' EL:Yes':a.elType==='without'?' EL:No':'')
+      +' Status:'+st+(dStr?' '+dStr:'')
+      +' Amount:Rs.'+(a.amount?Number(a.amount).toLocaleString('en-IN'):'0')
+      +(a.billingFreq?' Freq:'+a.billingFreq:'')
+      +' Dates:'+(a.startDate||'?')+' to '+(a.endDate||'?')
+      +(a.billingMonth?' BillMo:'+a.billingMonth:'')
+      +(a.contact?' Contact:'+a.contact:'')+(a.contactInfo?' '+a.contactInfo:'')
+      +(a.pan?' PAN:'+a.pan:'')+(a.gstRegistered?' GST:'+(a.gst||'Regd'):'')
+      +(pg?' Group:'+pg.name:'')
+      +(a.notes?' Note:'+a.notes.slice(0,80):'');
+  };
 
-  const summary='SUMMARY: '+scopedAgrs.length+' agreements ('
-    +active.length+' active, '+expiring.length+' expiring, '+expired.length+' expired), '
-    +scopedBills.length+' one-time bills. '
-    +'Total agreement value: Rs.'+scopedAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0).toLocaleString('en-IN')+'. '
-    +'Total bills value: Rs.'+scopedBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0).toLocaleString('en-IN')+'.';
+  const fmtBill=b=>{
+    const pg=b.parentGroup?getParentCompanies().find(p=>p.id===b.parentGroup):null;
+    return 'Client:'+(b.client||'?')
+      +' Type:'+(b.type||''+(b.subType?'>'+b.subType:''))
+      +' Amount:Rs.'+(b.amount?Number(b.amount).toLocaleString('en-IN'):'0')
+      +' Period:'+(b.date||'')+(b.invoice?' Inv:'+b.invoice:'')
+      +(b.specialService?' Desc:'+b.specialService:'')
+      +(b.pan?' PAN:'+b.pan:'')+(b.contactInfo?' '+b.contactInfo:'')
+      +(pg?' Group:'+pg.name:'')+(b.notes?' Note:'+b.notes.slice(0,60):'');
+  };
 
-  return 'You are EL Tracker Assistant — an AI inside EL Tracker, a professional agreement and billing management system for a CA firm in India. '
-    +roleInfo+catRestrict+summary
-    +' === AGREEMENTS: '+agrData
-    +' === BILLS: '+billData
-    +' === INSTRUCTIONS: Answer questions about this data directly and accurately. When asked about specific clients, amounts, dates or statuses — use the exact data. When asked to list expiring agreements, list them with client name, end date. When asked for totals, calculate from the data. '+catRestrict
-    +'App sections: Dashboard, EL Tracker (agreements), One Time Billing, Monthly Statement, Export/Import, Notifications'+(isAdmin?', Admin Settings':'')+'. '
-    +'Be concise, accurate and professional. Use Indian number format for amounts. Reply in 200 words or less unless detail is specifically requested.';
+  const agrBlock=scopedAgrs.map(fmtAgr).join(' || ');
+  const billBlock=scopedBills.map(fmtBill).join(' || ');
+
+  const pcs=getParentCompanies();
+  const pcBlock=pcs.map(p=>p.name+(p.subs&&p.subs.length?' ['+p.subs.join(',')+']':'')).join('; ');
+
+  let userBlock='';
+  if(isAdmin){
+    try{const users=getUsers();userBlock=users.map(u=>u.name+' @'+u.username+' '+u.role+(u.allowedCats&&u.allowedCats.length?' Cat:'+u.allowedCats.join(','):'')+(u.email?' '+u.email:'')).join('; ');}catch(e){}
+  }
+
+  const curM=today.getMonth()+1,curY=today.getFullYear();
+  const mAgrs=scopedAgrs.filter(a=>{if(!a.startDate||!a.endDate)return false;const s=new Date(a.startDate),e=new Date(a.endDate),f=new Date(curY,curM-1,1),l=new Date(curY,curM,0);return s<=l&&e>=f;});
+  const mBills=scopedBills.filter(b=>{if(!b.date)return false;if(b.date.length===7){const[by,bm]=b.date.split('-').map(Number);return by===curY&&bm===curM;}const d=new Date(b.date);return d.getFullYear()===curY&&d.getMonth()+1===curM;});
+
+  const totalAgrVal=scopedAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
+  const totalBillVal=scopedBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  const withEL=scopedAgrs.filter(a=>a.elType==='with').length;
+  const withoutEL=scopedAgrs.filter(a=>a.elType==='without').length;
+
+  let catReqs=0,subReqs=0;
+  try{catReqs=(getCatRequests?getCatRequests():[]).filter(r=>r.status==='pending').length;}catch(e){}
+  try{subReqs=(getSubRequests?getSubRequests():[]).filter(r=>r.status==='pending').length;}catch(e){}
+
+  const summary='TOTALS: '+scopedAgrs.length+' agreements (Active:'+active.length+' Expiring:'+expiring.length+' Expired:'+expired.length+' Renewed:'+renewed.length
+    +' WithEL:'+withEL+' NoEL:'+withoutEL+')'
+    +' TotalAgrValue:Rs.'+totalAgrVal.toLocaleString('en-IN')
+    +' | '+scopedBills.length+' bills TotalBillValue:Rs.'+totalBillVal.toLocaleString('en-IN')
+    +' | ThisMonth('+today.toLocaleString('en-IN',{month:'short',year:'numeric'})+'): '+mAgrs.length+' agrs Rs.'+mAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0).toLocaleString('en-IN')+' '+mBills.length+' bills Rs.'+mBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0).toLocaleString('en-IN')
+    +(pcs.length?' | ParentGroups:'+pcs.length:'')
+    +(isAdmin&&catReqs?' | PendingCatReq:'+catReqs:'')
+    +(isAdmin&&subReqs?' | PendingSubReq:'+subReqs:'');
+
+  const catRestrict=!isAdmin&&allowed&&allowed.length?'ONLY discuss category: '+allowed.join(', ')+'. ':'';
+  const roleInfo=isAdmin?'ADMIN full access. ':'User category:'+(allowed&&allowed[0]||'unassigned')+'. ';
+
+  let prompt='EL Tracker Assistant — CA firm agreement and billing system, India. '
+    +'Today:'+today.toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})+'. '
+    +roleInfo+catRestrict
+    +summary+' '
+    +'[ALL AGREEMENTS] '+( agrBlock||'none')
+    +' [ALL BILLS] '+(billBlock||'none')
+    +(pcBlock?' [PARENT COMPANIES] '+pcBlock:'')
+    +(userBlock?' [USERS] '+userBlock:'')
+    +' [RULES] Use exact data above. Calculate totals. List items with full detail. Show days remaining/overdue. Indian number format (lakhs/crores). Be accurate and concise. '+catRestrict;
+
+  if(prompt.length>55000)prompt=prompt.slice(0,55000)+'...[truncated]';
+  return prompt;
 }
 
 // ── Call real AI API ──
