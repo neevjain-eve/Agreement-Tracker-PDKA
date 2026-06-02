@@ -50,14 +50,14 @@
     .summary-card.sc-renewed{border-top-color:#16a34a}
     .summary-card .count{font-size:1.8rem;font-weight:900;line-height:1;letter-spacing:-.02em}
     .summary-card .label{font-size:0.6rem;color:#111111;margin-top:4px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-    .count.active{color:#16a34a}.count.expiring{color:#f97316}.count.expired{color:#ea580c}.count.renewed{color:#16a34a}
+    .count.active{color:#16a34a;font-weight:800}.count.expiring{color:#f97316;font-weight:800}.count.expired{color:#ea580c;font-weight:800}.count.renewed{color:#16a34a;font-weight:800}
 
     /* FILTER */
     .filter-bar{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
     .filter-bar::-webkit-scrollbar{display:none}
-    .filter-btn{border:1.5px solid #fed7aa;background:#fff;color:#111111;padding:7px 16px;border-radius:24px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:var(--shadow-sm)}
-    .filter-btn:hover{border-color:#f97316;color:#111111;background:#ffedd5}
-    .filter-btn.active{background:#f97316;border-color:#f97316;color:#ffffff;box-shadow:0 2px 8px rgba(249,115,22,.35)}
+    .filter-btn{border:1.5px solid #fed7aa;background:#ffedd5;color:#111111;padding:7px 16px;border-radius:24px;font-size:.78rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;box-shadow:var(--shadow-sm)}
+    .filter-btn:hover{border-color:#f97316;color:#111111;background:#fed7aa}
+    .filter-btn.active{background:#f97316;border-color:#f97316;color:#000000;box-shadow:0 2px 8px rgba(249,115,22,.35)}
 
     /* SEARCH */
     .search-bar{padding:0 16px 12px}
@@ -80,10 +80,10 @@
     .card-title{font-weight:700;font-size:1rem;flex:1;padding-right:8px;letter-spacing:-.01em;color:#111111}
     .badges{display:flex;flex-direction:column;gap:3px;align-items:flex-end}
     .status-badge{font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap;letter-spacing:.04em}
-    .badge-active{background:#dcfce7;color:#111111}
-    .badge-expiring{background:#ffedd5;color:#111111}
-    .badge-expired{background:#ffedd5;color:#111111}
-    .badge-renewed{background:var(--renewed-bg);color:var(--renewed)}
+    .badge-active{background:#dcfce7;color:#111111;font-weight:700}
+    .badge-expiring{background:#ffedd5;color:#111111;font-weight:700}
+    .badge-expired{background:#ffedd5;color:#111111;font-weight:700}
+    .badge-renewed{background:#dcfce7;color:#111111;font-weight:700}
     .badge-version{background:#ffedd5;color:#111111;font-size:.6rem;padding:2px 8px;border-radius:20px;font-weight:700}
 
     .card-client{font-size:.82rem;color:#111111;margin-bottom:10px;font-weight:500}
@@ -93,16 +93,16 @@
     .detail-value{font-weight:700;color:#111111}
 
     .days-left{font-size:.76rem;font-weight:700;margin-top:10px;padding:6px 12px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
-    .days-active{background:#dcfce7;color:#111111}
-    .days-expiring{background:#ffedd5;color:#111111}
-    .days-expired{background:#ffedd5;color:#111111}
+    .days-active{background:#dcfce7;color:#111111;font-weight:700}
+    .days-expiring{background:#ffedd5;color:#111111;font-weight:700}
+    .days-expired{background:#ffedd5;color:#111111;font-weight:700}
     .days-renewed{background:var(--renewed-bg);color:var(--renewed)}
 
     /* COMPLIANCE TAGS */
     .compliance-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-    .compliance-tag{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#f1f5f9;color:#111111;display:flex;align-items:center;gap:4px}
-    .compliance-tag.verified{background:#d1fae5;color:#065f46}
-    .compliance-tag.missing{background:#ffedd5;color:#111111}
+    .compliance-tag{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#ffedd5;color:#111111;display:flex;align-items:center;gap:4px;border:1px solid #fed7aa}
+    .compliance-tag.verified{background:#dcfce7;color:#111111;border-color:#16a34a}
+    .compliance-tag.missing{background:#ffedd5;color:#111111;border-color:#f97316}
 
     /* RENEWAL CHAIN */
     .chain-section{margin-top:10px;padding:10px;background:#f8f4ff;border-radius:10px;border:1px solid #e9d5ff}
@@ -489,9 +489,9 @@
     .template-btn:hover{background:#fff7ed;border-color:#fdba74}
     .search-bar input{border:1.5px solid #fdba74;border-radius:12px;padding:11px 16px 11px 40px;font-size:.88rem;transition:border-color .2s,box-shadow .2s;font-family:inherit}
     .search-bar input:focus{border-color:#f8a006;box-shadow:0 0 0 3px rgba(109,40,217,.12);outline:none}
-    .filter-btn{background:#fff;border:1.5px solid #E9E4F5;color:var(--muted);border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-    .filter-btn:hover{background:#fff7ed;border-color:#fdba74;color:#f8a006}
-    .filter-btn.active{background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(109,40,217,.25)}
+    .filter-btn{background:#ffedd5;border:1.5px solid #fed7aa;color:#111111;border-radius:20px;padding:7px 16px;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+    .filter-btn:hover{background:#fed7aa;border-color:#f97316;color:#111111}
+    .filter-btn.active{background:#f97316;color:#000000;border-color:#f97316;box-shadow:0 2px 8px rgba(249,115,22,.25)}
     .modal-box{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.28)}
     .modal-header{border-radius:22px 22px 0 0}
     .login-card{border-radius:22px;box-shadow:0 24px 72px rgba(0,0,0,.32)}
@@ -942,10 +942,10 @@
                 <!-- Filter buttons -->
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <button class="filter-btn active" onclick="setFilter('all');showSection('agreements')" id="filter-all">All</button>
-                  <button class="filter-btn" onclick="setFilter('active');showSection('agreements')" id="filter-active">✅ Active</button>
-                  <button class="filter-btn" onclick="setFilter('expiring');showSection('agreements')" id="filter-expiring">⚠️ Expiring</button>
-                  <button class="filter-btn" onclick="setFilter('expired');showSection('agreements')" id="filter-expired">❌ Expired</button>
-                  <button class="filter-btn" onclick="setFilter('renewed');showSection('agreements')" id="filter-renewed">🔄 Renewed</button>
+                  <button class="filter-btn" onclick="setFilter('active');showSection('agreements')" id="filter-active" style="background:#dcfce7;border-color:#16a34a">✅ Active</button>
+                  <button class="filter-btn" onclick="setFilter('expiring');showSection('agreements')" id="filter-expiring" style="background:#ffedd5;border-color:#f97316">⚠️ Expiring</button>
+                  <button class="filter-btn" onclick="setFilter('expired');showSection('agreements')" id="filter-expired" style="background:#ffedd5;border-color:#ea580c">❌ Expired</button>
+                  <button class="filter-btn" onclick="setFilter('renewed');showSection('agreements')" id="filter-renewed" style="background:#dcfce7;border-color:#16a34a">🔄 Renewed</button>
                 </div>
 
                 <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);padding-top:10px">
@@ -1025,9 +1025,9 @@
       </div>
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
-        <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="border-color:#86efac;color:#16a34a">✅ With EL</button>
-        <button class="filter-btn" onclick="setFilter('without_el')" id="filter-without-el" style="border-color:#fdba74;color:#c2410c">📄 Without EL</button>
-        <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="border-color:#93c5fd;color:#111111">📧 Email</button>
+        <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="background:#dcfce7;border-color:#16a34a;color:#111111">✅ With EL</button>
+        <button class="filter-btn" onclick="setFilter('without_el')" id="filter-without-el" style="background:#ffedd5;border-color:#f97316;color:#111111">📄 Without EL</button>
+        <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="background:#ffedd5;border-color:#f97316;color:#111111">📧 Email</button>
       </div>
 
       <div class="agreements-list" id="agreementsList" style="padding:0 16px 90px"></div>
@@ -3736,7 +3736,7 @@ function aiShowAgrResults(results,query){
       +'</div>'
       +'<div style="font-size:.7rem;color:#111111;margin-top:2px">👤 '+esc(a.client||'—')+'</div>'
       +'<div style="font-size:.68rem;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap">'
-      +'<span style="background:'+stc+'22;color:'+stc+';font-weight:700;padding:1px 6px;border-radius:10px">'+stl+'</span>'
+      +'<span style="background:'+stc+'22;color:#111111;font-weight:700;padding:1px 6px;border-radius:10px;border:1px solid '+stc+'">'+stl+'</span>'
       +(a.endDate?'<span style="color:#111111">ends '+fDate(a.endDate)+'</span>':'')
       +(a.type?'<span style="color:#111111">'+esc(a.type.split(' ')[0])+'</span>':'')
       +'</div>';
