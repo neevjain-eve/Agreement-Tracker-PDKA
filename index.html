@@ -21,7 +21,7 @@
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
       --primary:#f97316;--primary-dark:#ea580c;--primary-light:#ffedd5;
-      --success:#16a34a;--success-bg:#dcfce7;
+      --success:#f8a006;--success-bg:#fff3d6;
       --warning:#f97316;--warning-bg:#ffedd5;
       --danger:#ea580c;--danger-bg:#ffedd5;
       --renewed:#f59e0b;--renewed-bg:#fff7ed;
@@ -44,13 +44,13 @@
     .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 16px 8px}
     .summary-card{background:#fff;border-radius:var(--radius);padding:14px 8px 12px;text-align:center;box-shadow:var(--shadow-sm);border-top:3px solid var(--border);transition:transform .2s,box-shadow .2s;cursor:default}
     .summary-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-    .summary-card.sc-active{border-top-color:var(--success)}
+    .summary-card.sc-active{border-top-color:#f8a006}
     .summary-card.sc-expiring{border-top-color:var(--warning)}
     .summary-card.sc-expired{border-top-color:var(--danger)}
-    .summary-card.sc-renewed{border-top-color:#16a34a}
+    .summary-card.sc-renewed{border-top-color:#f8a006}
     .summary-card .count{font-size:1.8rem;font-weight:900;line-height:1;letter-spacing:-.02em}
     .summary-card .label{font-size:0.6rem;color:#111111;margin-top:4px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-    .count.active{color:#16a34a;font-weight:800}.count.expiring{color:#f97316;font-weight:800}.count.expired{color:#ea580c;font-weight:800}.count.renewed{color:#16a34a;font-weight:800}
+    .count.active{color:#f8a006;font-weight:800}.count.expiring{color:#f97316;font-weight:800}.count.expired{color:#ea580c;font-weight:800}.count.renewed{color:#f8a006;font-weight:800}
 
     /* FILTER */
     .filter-bar{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none}
@@ -71,7 +71,7 @@
     /* CARD */
     .agreement-card{background:#fff;border-radius:16px;padding:16px;box-shadow:var(--shadow-sm);border-left:4px solid var(--border);transition:box-shadow .2s,transform .2s}
     .agreement-card:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
-    .agreement-card.status-active{border-left-color:var(--success)}
+    .agreement-card.status-active{border-left-color:#f8a006}
     .agreement-card.status-expiring{border-left-color:var(--warning)}
     .agreement-card.status-expired{border-left-color:var(--danger)}
     .agreement-card.status-renewed{border-left-color:var(--renewed);opacity:.88}
@@ -80,10 +80,10 @@
     .card-title{font-weight:700;font-size:1rem;flex:1;padding-right:8px;letter-spacing:-.01em;color:#111111}
     .badges{display:flex;flex-direction:column;gap:3px;align-items:flex-end}
     .status-badge{font-size:.62rem;font-weight:700;padding:3px 9px;border-radius:20px;text-transform:uppercase;white-space:nowrap;letter-spacing:.04em}
-    .badge-active{background:#dcfce7;color:#111111;font-weight:700}
+    .badge-active{background:#fff3d6;color:#111111;font-weight:700}
     .badge-expiring{background:#ffedd5;color:#111111;font-weight:700}
     .badge-expired{background:#ffedd5;color:#111111;font-weight:700}
-    .badge-renewed{background:#dcfce7;color:#111111;font-weight:700}
+    .badge-renewed{background:#fff3d6;color:#111111;font-weight:700}
     .badge-version{background:#ffedd5;color:#111111;font-size:.6rem;padding:2px 8px;border-radius:20px;font-weight:700}
 
     .card-client{font-size:.82rem;color:#111111;margin-bottom:10px;font-weight:500}
@@ -93,7 +93,7 @@
     .detail-value{font-weight:700;color:#111111}
 
     .days-left{font-size:.76rem;font-weight:700;margin-top:10px;padding:6px 12px;border-radius:20px;display:inline-flex;align-items:center;gap:4px}
-    .days-active{background:#dcfce7;color:#111111;font-weight:700}
+    .days-active{background:#fff3d6;color:#111111;font-weight:700}
     .days-expiring{background:#ffedd5;color:#111111;font-weight:700}
     .days-expired{background:#ffedd5;color:#111111;font-weight:700}
     .days-renewed{background:var(--renewed-bg);color:var(--renewed)}
@@ -101,7 +101,7 @@
     /* COMPLIANCE TAGS */
     .compliance-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
     .compliance-tag{font-size:.7rem;font-weight:600;padding:3px 9px;border-radius:10px;background:#ffedd5;color:#111111;display:flex;align-items:center;gap:4px;border:1px solid #fed7aa}
-    .compliance-tag.verified{background:#dcfce7;color:#111111;border-color:#16a34a}
+    .compliance-tag.verified{background:#fff3d6;color:#111111;border-color:#f8a006}
     .compliance-tag.missing{background:#ffedd5;color:#111111;border-color:#f97316}
 
     /* RENEWAL CHAIN */
@@ -110,7 +110,7 @@
     .chain-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #e9d5ff;font-size:.78rem}
     .chain-item:last-child{border-bottom:none;padding-bottom:0}
     .chain-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    .dot-old{background:#9ca3af}.dot-current{background:var(--primary)}.dot-new{background:var(--success)}
+    .dot-old{background:#9ca3af}.dot-current{background:var(--primary)}.dot-new{background:#f8a006}
     .chain-link{flex:1;font-weight:500}
     .chain-date{color:#111111;font-size:.7rem}
     .btn-view-ver{background:#ffedd5;color:#111111;border:none;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:600;cursor:pointer}
@@ -137,7 +137,7 @@
     .btn-edit{background:#ffedd5;color:#111111}
     .btn-delete{background:#ffedd5;color:#111111}
     .btn-renew{background:var(--renewed-bg);color:var(--renewed)}
-    .btn-history{background:#dcfce7;color:#111111}
+    .btn-history{background:#fff3d6;color:#111111}
 
     /* EMPTY STATE */
     .empty-state{text-align:center;padding:60px 20px;color:#111111}
@@ -251,12 +251,12 @@
     .sync-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:5px 10px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
     .sync-chip:hover{background:rgba(255,255,255,.28)}
     .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0}
-    .sync-dot.connected{background:#34d399;animation:pulse 2s infinite}
+    .sync-dot.connected{background:#f8a006;animation:pulse 2s infinite}
     .sync-dot.syncing{background:#fbbf24;animation:spin .8s linear infinite}
     .sync-dot.error{background:#f87171}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
     @keyframes spin{to{transform:rotate(360deg)}}
-    .sync-bar{display:none;background:#dcfce7;border-bottom:1px solid #a7f3d0;padding:8px 16px;font-size:.8rem;color:#065f46;align-items:center;gap:8px}
+    .sync-bar{display:none;background:#fff3d6;border-bottom:1px solid #fff3d6;padding:8px 16px;font-size:.8rem;color:#f8a006;align-items:center;gap:8px}
     .sync-bar.show{display:flex}
     .sync-bar.error{background:#fff1f2;border-color:#fecdd3;color:#111111}
 
@@ -283,10 +283,10 @@
     .bulk-drop{border:2px dashed #fdba74;border-radius:12px;padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;background:#fff7ed;color:#c2410c}
     .bulk-drop:hover,.bulk-drop.drag-over{border-color:var(--primary);background:#fff7ed;color:var(--primary)}
     .bulk-drop .bd-icon{font-size:2.4rem;margin-bottom:8px}
-    .template-btn{display:inline-flex;align-items:center;gap:6px;background:#d1fae5;color:#065f46;border:none;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:14px;width:100%;justify-content:center}
+    .template-btn{display:inline-flex;align-items:center;gap:6px;background:#fff3d6;color:#f8a006;border:none;border-radius:8px;padding:8px 16px;font-size:.82rem;font-weight:700;cursor:pointer;margin-bottom:14px;width:100%;justify-content:center}
 
     /* IMPORT PREVIEW TABLE */
-    .import-summary{background:#dcfce7;border:1px solid #bbf7d0;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.83rem;color:#065f46}
+    .import-summary{background:#fff3d6;border:1px solid #fff3d6;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.83rem;color:#f8a006}
     .import-summary b{font-size:.95rem}
     .import-table-wrap{overflow-x:auto;max-height:38vh;border:1px solid var(--border);border-radius:10px;margin-bottom:12px}
     .import-table{width:100%;border-collapse:collapse;font-size:.75rem;min-width:700px}
@@ -294,8 +294,8 @@
     .import-table td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
     .import-table tr:last-child td{border-bottom:none}
     .import-table tr.row-error{background:#fff1f2}
-    .import-table tr.row-ok:hover{background:#dcfce7}
-    .row-ok-badge{background:#d1fae5;color:#065f46;border-radius:5px;padding:2px 7px;font-size:.68rem;font-weight:700}
+    .import-table tr.row-ok:hover{background:#fff3d6}
+    .row-ok-badge{background:#fff3d6;color:#f8a006;border-radius:5px;padding:2px 7px;font-size:.68rem;font-weight:700}
     .row-err-badge{background:#ffedd5;color:#111111;border-radius:5px;padding:2px 7px;font-size:.68rem;font-weight:700}
     .import-error-note{font-size:.75rem;color:var(--danger);margin-top:4px}
 
@@ -304,7 +304,7 @@
     .report-btn{flex:1;min-width:140px;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 14px;border:none;border-radius:11px;font-size:.8rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:var(--shadow-sm)}
     .report-btn:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
     .report-btn:active{transform:scale(.97)}
-    .btn-excel{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff}
+    .btn-excel{background:linear-gradient(135deg,#f8a006,#f8a006);color:#fff}
     .btn-upload{background:linear-gradient(135deg,#f59e0b,#f8a006);color:#fff}
 
     /* ── LOGIN SCREEN ────────────── */
@@ -332,7 +332,7 @@
     .user-meta{font-size:.73rem;color:var(--muted)}
     .user-role-badge{font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:10px;text-transform:uppercase}
     .role-admin{background:#fff7ed;color:#c2410c}
-    .role-user{background:#d1fae5;color:#065f46}
+    .role-user{background:#fff3d6;color:#f8a006}
     .btn-del-user{background:#ffedd5;color:#b91c1c;border:none;border-radius:8px;padding:5px 10px;font-size:.75rem;font-weight:700;cursor:pointer}
     .add-user-form{background:#ffedd5;border:1.5px solid #fdba74;border-radius:12px;padding:14px;margin-bottom:14px;display:none}
     .add-user-form .form-group{margin-bottom:10px}
@@ -392,11 +392,11 @@
     }
 
     /* AUTH / SIGNUP / CHANGE PW */
-    .login-success{background:#d1fae5;color:#065f46;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;margin-bottom:14px}
+    .login-success{background:#fff3d6;color:#f8a006;border-radius:8px;padding:10px 14px;font-size:.82rem;font-weight:600;margin-bottom:14px}
     .login-link-btn{background:none;border:none;color:var(--primary);font-size:.78rem;font-weight:700;cursor:pointer;padding:0;text-decoration:none;letter-spacing:.01em}
     .login-link-btn:hover{text-decoration:underline}
     .login-divider{text-align:center;font-size:.75rem;color:var(--muted);margin:10px 0}
-    .approve-btn{background:#d1fae5;color:#065f46;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
+    .approve-btn{background:#fff3d6;color:#f8a006;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .reject-btn{background:#ffedd5;color:#b91c1c;border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .change-pw-btn{background:#fff7ed;color:var(--primary);border:none;border-radius:7px;padding:4px 10px;font-size:.73rem;font-weight:700;cursor:pointer}
     .pending-section{background:#fffbeb;border:1.5px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:14px}
@@ -413,7 +413,7 @@
 
     /* EMAIL ERROR + ADMIN CREDS */
     .compose-error{background:#ffedd5;color:#b91c1c;border-radius:8px;padding:8px 12px;font-size:.8rem;font-weight:600;margin-bottom:10px;display:none;line-height:1.5}
-    .od-sync-note{display:flex;align-items:center;gap:6px;background:#dcfce7;border:1px solid #a7f3d0;border-radius:8px;padding:8px 12px;font-size:.75rem;color:#065f46;margin-bottom:10px}
+    .od-sync-note{display:flex;align-items:center;gap:6px;background:#fff3d6;border:1px solid #fff3d6;border-radius:8px;padding:8px 12px;font-size:.75rem;color:#f8a006;margin-bottom:10px}
     .od-sync-note.warn{background:#fffbeb;border-color:#fcd34d;color:#111111}
 
     /* PDKA LOGO */
@@ -473,7 +473,7 @@
     .summary-card .label{font-size:.62rem;font-weight:700;margin-top:5px;letter-spacing:.08em}
     .agreement-card{background:#fff;border-radius:16px;box-shadow:var(--shadow-sm);border-left:4px solid transparent;transition:box-shadow .2s,transform .15s;overflow:hidden}
     .agreement-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
-    .agreement-card.status-active{border-left-color:var(--success)}
+    .agreement-card.status-active{border-left-color:#f8a006}
     .agreement-card.status-expiring{border-left-color:var(--warning)}
     .agreement-card.status-expired{border-left-color:var(--danger)}
     .agreement-card.status-renewed{border-left-color:var(--renewed)}
@@ -507,7 +507,7 @@
     .sync-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;color:rgba(255,255,255,.9);font-size:.72rem;font-weight:600;padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
     .sync-chip:hover{background:rgba(255,255,255,.25)}
     .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0;transition:background .3s}
-    .sync-dot.connected{background:#34d399}
+    .sync-dot.connected{background:#f8a006}
     .sync-dot.error{background:#f87171}
     .fab{background:linear-gradient(135deg,#f8a006,#f59e0b);box-shadow:0 6px 20px rgba(109,40,217,.45);border-radius:18px;width:52px;height:52px}
     .fab:hover{box-shadow:0 8px 26px rgba(109,40,217,.55);transform:translateY(-2px) scale(1.05)}
@@ -594,7 +594,7 @@
     .fd-stat-pill.selected{border-color:var(--fd-primary);background:#fff7ed}
     .fd-stat-pill .n{font-size:1.4rem;font-weight:900;line-height:1}
     .fd-stat-pill .l{font-size:.58rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fd-muted);font-weight:700;margin-top:4px}
-    .fd-stat-pill.p-active .n{color:var(--success)}
+    .fd-stat-pill.p-active .n{color:#f8a006}
     .fd-stat-pill.p-expiring .n{color:var(--warning)}
     .fd-stat-pill.p-expired .n{color:var(--danger)}
     .fd-stat-pill.p-renewed .n{color:var(--renewed)}
@@ -648,7 +648,7 @@
     .tc-name{font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#111111}
     .tc-meta{font-size:.63rem;color:var(--muted);margin-top:1px}
     .tc-badge{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
-    .tc-badge.active{background:#dcfce7;color:#111111}
+    .tc-badge.active{background:#fff3d6;color:#111111}
     .tc-badge.expiring{background:#ffedd5;color:#111111}
     .tc-badge.expired{background:#ffedd5;color:#111111}
 
@@ -942,10 +942,10 @@
                 <!-- Filter buttons -->
                 <div style="display:flex;flex-wrap:wrap;gap:7px">
                   <button class="filter-btn active" onclick="setFilter('all');showSection('agreements')" id="filter-all">All</button>
-                  <button class="filter-btn" onclick="setFilter('active');showSection('agreements')" id="filter-active" style="background:#dcfce7;border-color:#16a34a">✅ Active</button>
+                  <button class="filter-btn" onclick="setFilter('active');showSection('agreements')" id="filter-active" style="background:#fff3d6;border-color:#f8a006">✅ Active</button>
                   <button class="filter-btn" onclick="setFilter('expiring');showSection('agreements')" id="filter-expiring" style="background:#ffedd5;border-color:#f97316">⚠️ Expiring</button>
                   <button class="filter-btn" onclick="setFilter('expired');showSection('agreements')" id="filter-expired" style="background:#ffedd5;border-color:#ea580c">❌ Expired</button>
-                  <button class="filter-btn" onclick="setFilter('renewed');showSection('agreements')" id="filter-renewed" style="background:#dcfce7;border-color:#16a34a">🔄 Renewed</button>
+                  <button class="filter-btn" onclick="setFilter('renewed');showSection('agreements')" id="filter-renewed" style="background:#fff3d6;border-color:#f8a006">🔄 Renewed</button>
                 </div>
 
                 <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);padding-top:10px">
@@ -1025,7 +1025,7 @@
       </div>
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
-        <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="background:#dcfce7;border-color:#16a34a;color:#111111">✅ With EL</button>
+        <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="background:#fff3d6;border-color:#f8a006;color:#111111">✅ With EL</button>
         <button class="filter-btn" onclick="setFilter('without_el')" id="filter-without-el" style="background:#ffedd5;border-color:#f97316;color:#111111">📄 Without EL</button>
         <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="background:#ffedd5;border-color:#f97316;color:#111111">📧 Email</button>
       </div>
@@ -1062,7 +1062,7 @@
               <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
             </select>
             <div style="flex:1"></div>
-            <button onclick="downloadMonthlyExcel()" style="background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">📥 Export Excel</button>
+            <button onclick="downloadMonthlyExcel()" style="background:linear-gradient(135deg,#f8a006,#f8a006);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">📥 Export Excel</button>
             <button onclick="zohoMonthlyPush()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">☁️ Push to Zoho</button>
           </div>
         </div>
@@ -1091,7 +1091,7 @@
         <div class="admin-panel">
           <div class="admin-panel-title">📥 Export Agreements to Excel</div>
           <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px;line-height:1.6">Download all agreements as a colour-coded multi-sheet Excel file — Summary, All Agreements, Expiring Soon, and Expired tabs.</p>
-          <button class="btn-primary" onclick="downloadReport()" style="background:linear-gradient(135deg,#16a34a,#15803d);max-width:280px">📥 Download Excel Report</button>
+          <button class="btn-primary" onclick="downloadReport()" style="background:linear-gradient(135deg,#f8a006,#f8a006);max-width:280px">📥 Download Excel Report</button>
         </div>
         <div class="admin-panel">
           <div class="admin-panel-title">📤 Bulk Import from Excel</div>
@@ -1156,8 +1156,8 @@
                 </div>
               </div>
             </div>
-            <div id="aiApiConnected" style="display:none;margin-top:10px;padding:10px;background:#dcfce7;border-radius:10px">
-              <div style="font-size:.8rem;font-weight:700;color:#16a34a;margin-bottom:6px" id="aiApiConnectedLabel">✅ Connected</div>
+            <div id="aiApiConnected" style="display:none;margin-top:10px;padding:10px;background:#fff3d6;border-radius:10px">
+              <div style="font-size:.8rem;font-weight:700;color:#f8a006;margin-bottom:6px" id="aiApiConnectedLabel">✅ Connected</div>
               <button type="button" onclick="clearAiApiKey()" style="background:#ffedd5;color:#111111;border:none;border-radius:8px;padding:6px 14px;font-size:.75rem;font-weight:700;cursor:pointer">🗑 Remove Key</button>
             </div>
           </div>
@@ -1255,7 +1255,7 @@
             </div>
             <button class="btn-primary" onclick="zohoConnect()" style="margin-top:0;max-width:240px">🔗 Connect to Zoho Books</button>
           </div>
-          <div id="zohoSyncLog" style="display:none;margin-top:10px;padding:10px;background:#dcfce7;border-radius:10px;font-size:.76rem;color:#111111;line-height:1.7"></div>
+          <div id="zohoSyncLog" style="display:none;margin-top:10px;padding:10px;background:#fff3d6;border-radius:10px;font-size:.76rem;color:#111111;line-height:1.7"></div>
         </div>
 
       </div>
@@ -1292,7 +1292,7 @@
             <span id="emailFromDisplay" style="font-size:.8rem;font-weight:600;color:var(--primary)">—</span>
           </div>
           <div style="height:10px"></div>
-          <button onclick="sendTestEmail()" style="width:100%;max-width:300px;padding:10px;background:#dcfce7;color:var(--success);border:1.5px solid var(--success);border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer">📨 Send Test Email to myself</button>
+          <button onclick="sendTestEmail()" style="width:100%;max-width:300px;padding:10px;background:#fff3d6;color:#f8a006;border:1.5px solid var(--success);border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer">📨 Send Test Email to myself</button>
           <div id="emailSettingsStatus" style="margin-top:8px;font-size:.76rem;color:var(--muted)"></div>
         </div>
 
@@ -1818,7 +1818,7 @@ function renderFinanceDashboard(){
   const total=agreements.length;
   const labels=['Active','Expiring','Expired','Renewed'];
   const data=[active,expiring,expired,renewed];
-  const colors=['#059669','#d97706','#dc2626','#f59e0b'];
+  const colors=['#f8a006','#d97706','#dc2626','#f59e0b'];
 
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   set('fdTotalCount',total);
@@ -2081,7 +2081,7 @@ function renderSubReqAdmin(){
         <div style="font-size:.8rem;font-weight:700">${esc(r.name)}</div>
         <div style="font-size:.7rem;color:var(--muted)">${esc(r.type)} · ${dt}</div>
       </div>
-      <button onclick="approveSubReq('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
+      <button onclick="approveSubReq('${r.id}')" style="background:#fff3d6;color:#f8a006;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
       <button onclick="rejectSubReq('${r.id}')" style="background:#ffedd5;color:#111111;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
     </div>`;
   }).join('');
@@ -2187,7 +2187,7 @@ function renderUserCatDash(){
     </div>`;
     const recentAgr=agrList.slice(0,3).map(a=>{
       const st=getStatus(a);
-      const sc={active:'#16a34a',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
+      const sc={active:'#f8a006',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
       const sl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
       return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)">
         <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0">${(a.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
@@ -2218,7 +2218,7 @@ function renderUserCatDash(){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;grid-column:1/-1">
         ${card('📋','Agreements',totalAgr,null,'#3b82f6','#eff6ff')}
         ${card('🧾','One Time Bills',totalBill,null,'#f59e0b','#fffbeb')}
-        ${card('✅','Active',active,null,'#16a34a','#f0fdf4')}
+        ${card('✅','Active',active,null,'#f8a006','#fff3d6')}
         ${card('⚠️','Expiring',expiring,null,'#d97706','#fffbeb')}
         ${card('❌','Expired',expired,null,'#dc2626','#fff1f2')}
         ${card('💰','Total Amount',fmt(totalAmt),null,'#7c3aed','#f5f3ff')}
@@ -2296,7 +2296,7 @@ function renderCatAccessAdmin(){
         <div style="font-size:.8rem;font-weight:700">${esc(r.userName)}</div>
         <div style="font-size:.7rem;color:var(--muted)">${esc(r.cat)} · ${dt}</div>
       </div>
-      <button onclick="approveCatAccess('${r.id}')" style="background:#dcfce7;color:#16a34a;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
+      <button onclick="approveCatAccess('${r.id}')" style="background:#fff3d6;color:#f8a006;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
       <button onclick="rejectCatAccess('${r.id}')" style="background:#ffedd5;color:#111111;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
     </div>`;
   }).join('');
@@ -2385,13 +2385,13 @@ function updateZohoStatus(){
   // Partial config (orgId only from old version) — force re-setup
   const partial=cfg.orgId&&(!cfg.clientId||!cfg.clientSecret||!cfg.refreshToken);
   if(connected){
-    if(st)st.innerHTML='<span style="color:var(--success);font-weight:700">✅ Connected</span>';
+    if(st)st.innerHTML='<span style="color:#f8a006;font-weight:700">✅ Connected</span>';
     if(orgRow)orgRow.style.display='flex';
     if(orgTxt)orgTxt.textContent='Org: '+cfg.orgId+' · Client: '+cfg.clientId.slice(0,14)+'…';
     if(connAct)connAct.style.display='block';
     if(setupAct)setupAct.style.display='none';
     if(setupSec)setupSec.style.display='none';
-    if(dot){dot.style.background='#22c55e';dot.style.boxShadow='0 0 6px #22c55e';}
+    if(dot){dot.style.background='#f8a006';dot.style.boxShadow='0 0 6px #f8a006';}
     if(lbl)lbl.textContent='Zoho Books ✓';
   }else{
     if(partial){
@@ -3081,7 +3081,7 @@ function renderUserList(){
     return`<div class="user-item">
       <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
       <div class="user-info">
-        <div class="user-name">${u.name}${session&&session.userId===u.id?' <span style="color:var(--success);font-size:.65rem">(you)</span>':''}</div>
+        <div class="user-name">${u.name}${session&&session.userId===u.id?' <span style="color:#f8a006;font-size:.65rem">(you)</span>':''}</div>
         <div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>${catBadge}${u.email?' &nbsp;·&nbsp; '+u.email:''}</div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
@@ -3378,7 +3378,7 @@ function updateAiApiStatus(){
   const badge=document.getElementById('aiModelBadge');
   if(c.key&&c.provider){
     const label={'claude':'Claude (Anthropic)','gemini':'Gemini (Google)'}[c.provider]||c.provider;
-    if(el)el.innerHTML='<span style="color:#16a34a;font-weight:700">✅ Connected — '+label+'</span>';
+    if(el)el.innerHTML='<span style="color:#f8a006;font-weight:700">✅ Connected — '+label+'</span>';
     if(conn)conn.style.display='block';
     if(badge)badge.textContent='Powered by '+label;
     const lbl=document.getElementById('aiApiConnectedLabel');if(lbl)lbl.textContent='✅ Connected — '+label;
@@ -3724,7 +3724,7 @@ function aiShowAgrResults(results,query){
   const totalAmt=results.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
   results.slice(0,8).forEach(a=>{
     const st=getStatus(a);
-    const stc={active:'#16a34a',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
+    const stc={active:'#f8a006',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
     const stl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
     const card=document.createElement('div');
     card.className='ai-msg bot';
@@ -4410,7 +4410,7 @@ function showImportPreview(){
   const valid=parsedRows.filter(r=>r.errors.length===0);const invalid=parsedRows.filter(r=>r.errors.length>0);
   document.getElementById('importSummary').innerHTML=`<b>📊 ${parsedRows.length} rows found</b> &nbsp;·&nbsp; ✅ <b>${valid.length} valid</b> &nbsp;·&nbsp; ❌ <b>${invalid.length} with errors</b>`;
   const thead=`<thead><tr><th>Row</th><th>Status</th><th>Agreement Name</th><th>Client</th><th>Type</th><th>EL</th><th>Amount</th><th>Start</th><th>End</th><th>PAN</th><th>Notes</th></tr></thead>`;
-  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;const elBadge=r.elType==='with'?'<span style="font-size:.6rem;background:#dcfce7;color:#16a34a;padding:1px 5px;border-radius:8px">✅ EL</span>':r.elType==='without'?'<span style="font-size:.6rem;background:#fff7ed;color:#c2410c;padding:1px 5px;border-radius:8px">📄 No EL</span>':'—';return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#111111">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.type||'—'}</td><td>${elBadge}</td><td>${r.amount?'₹'+Number(r.amount).toLocaleString('en-IN'):'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
+  const tbody=parsedRows.map(r=>{const ok=r.errors.length===0;const elBadge=r.elType==='with'?'<span style="font-size:.6rem;background:#fff3d6;color:#f8a006;padding:1px 5px;border-radius:8px">✅ EL</span>':r.elType==='without'?'<span style="font-size:.6rem;background:#fff7ed;color:#c2410c;padding:1px 5px;border-radius:8px">📄 No EL</span>':'—';return`<tr class="${ok?'row-ok':'row-error'}"><td>${r.rowNum}</td><td>${ok?`<span class="row-ok-badge">✅ OK</span>`:`<span class="row-err-badge">❌ Error</span><br/><span style="font-size:.65rem;color:#111111">${r.errors.join(', ')}</span>`}</td><td>${r.name||'—'}</td><td>${r.client||'—'}</td><td>${r.type||'—'}</td><td>${elBadge}</td><td>${r.amount?'₹'+Number(r.amount).toLocaleString('en-IN'):'—'}</td><td>${r.startDate?fDate(r.startDate):'—'}</td><td>${r.endDate?fDate(r.endDate):'—'}</td><td>${r.pan||'—'}</td><td>${r.notes||'—'}</td></tr>`;}).join('');
   document.getElementById('importTable').innerHTML=thead+`<tbody>${tbody}</tbody>`;
   if(invalid.length>0)document.getElementById('importErrorNote').textContent=`⚠️ ${invalid.length} row(s) with errors will be skipped.`;
   else document.getElementById('importErrorNote').textContent='';
@@ -4491,7 +4491,7 @@ function renderMonthly(){
   if(cards) cards.innerHTML=[
     {label:'Agreements',val:agrData.length,sub:fmt(totalAgrAmt),color:'#3b82f6',bg:'#eff6ff'},
     {label:'One Time Bills',val:billData.length,sub:fmt(totalBillAmt),color:'#f59e0b',bg:'#fffbeb'},
-    {label:'Grand Total',val:agrData.length+billData.length,sub:fmt(grandTotal),color:'#16a34a',bg:'#f0fdf4'}
+    {label:'Grand Total',val:agrData.length+billData.length,sub:fmt(grandTotal),color:'#f8a006',bg:'#fff3d6'}
   ].map(c=>`<div style="background:${c.bg};border-radius:14px;padding:16px 18px;border:1.5px solid ${c.color}22">
     <div style="font-size:.68rem;font-weight:700;color:${c.color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${c.label}</div>
     <div style="font-size:1.6rem;font-weight:900;color:${c.color};line-height:1">${c.val}</div>
@@ -4502,7 +4502,7 @@ function renderMonthly(){
   const th=(t,w)=>`<th style="padding:8px 10px;text-align:left;font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap;${w?'width:'+w:''}">` + t + '</th>';
   const td=(t,s='')=>`<td style="padding:8px 10px;border-bottom:1px solid var(--border-light);${s}">${t??'—'}</td>`;
   const badge=(s,c,b)=>`<span style="background:${b};color:${c};font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px">${s}</span>`;
-  const statusColor={active:['#16a34a','#dcfce7'],expiring:['#d97706','#fef9c3'],expired:['#dc2626','#fee2e2'],renewed:['#7c3aed','#ede9fe']};
+  const statusColor={active:['#f8a006','#fff3d6'],expiring:['#d97706','#fef9c3'],expired:['#dc2626','#fee2e2'],renewed:['#7c3aed','#ede9fe']};
 
   const agrTable=document.getElementById('monthlyAgrTable');
   if(agrTable){
@@ -4522,7 +4522,7 @@ function renderMonthly(){
       }).join('');
       agrTable.innerHTML=hdr+'<tbody>'+rows+'</tbody>'+
         '<tfoot><tr><td colspan="7" style="padding:10px;font-weight:800;font-size:.82rem">Total</td>'+
-        '<td style="padding:10px;font-weight:800;color:#16a34a">'+fmt(totalAgrAmt)+'</td><td></td></tr></tfoot>';
+        '<td style="padding:10px;font-weight:800;color:#f8a006">'+fmt(totalAgrAmt)+'</td><td></td></tr></tfoot>';
     }
   }
 
