@@ -3412,27 +3412,20 @@ function buildAiSystemPrompt(){
   const roleInfo=isAdmin?'The user is an ADMIN with full access to all data.':'The user is a standard user. Category: '+(allowed&&allowed[0]||'unassigned')+'. ';
 
   // Serialize agreements (max 30 most relevant)
-  const agrData=scopedAgrs.slice(0,30).map(a=>{
+  const agrData=scopedAgrs.slice(0,20).map(a=>{
     const st=getStatus(a);
-    return '[AGR] Name: "'+( a.name||'')+'" | Client: "'+(a.client||'')+'" | Type: '+(a.type||'')+' | Sub: '+(a.subType||'')
-      +' | EL: '+(a.elType==='with'?'With EL':a.elType==='without'?'Without EL':'Not set')
-      +' | Amount: '+(a.amount?'Rs.'+a.amount:'N/A')
-      +' | Billing: '+(a.billingFreq||'N/A')
-      +' | Start: '+(a.startDate||'')
-      +' | End: '+(a.endDate||'')
-      +' | Status: '+{active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[st]
-      +' | Contact: '+(a.contact||'')+' '+(a.contactInfo||'')
-      +' | PAN: '+(a.pan||'')+' | GST: '+(a.gstRegistered?a.gst||'Registered':'Not Registered')
-      +' | Notes: '+(a.notes||'');
+    return (a.name||'?')+' | '+(a.client||'?')+' | '+(a.type||'')+' | '+(a.subType||'')
+      +' | '+(a.elType==='with'?'WithEL':a.elType==='without'?'NoEL':'')
+      +' | Rs.'+(a.amount||'0')+' | '+(a.billingFreq||'')
+      +' | '+(a.startDate||'')+' to '+(a.endDate||'')
+      +' | '+{active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]
+      +' | '+(a.contact||'')+' | PAN:'+(a.pan||'');
   }).join(' | ');
 
   // Serialize bills (max 20)
-  const billData=scopedBills.slice(0,20).map(b=>{
-    return '[BILL] Client: "'+(b.client||'')+'" | Type: '+(b.type||'')+' | Sub: '+(b.subType||'')
-      +' | Amount: '+(b.amount?'Rs.'+b.amount:'N/A')
-      +' | Period: '+(b.date||'')+' | Invoice: '+(b.invoice||'')
-      +' | Desc: '+(b.specialService||'')
-      +' | Contact: '+(b.contactInfo||'');
+  const billData=scopedBills.slice(0,15).map(b=>{
+    return (b.client||'?')+' | '+(b.type||'')+' | Rs.'+(b.amount||'0')
+      +' | '+(b.date||'')+' | Inv:'+(b.invoice||'')+' | '+(b.specialService||'');
   }).join(' | ');
 
   const summary='SUMMARY: '+scopedAgrs.length+' agreements ('
@@ -3456,12 +3449,20 @@ async function callRealAI(messages){
   if(!c.key||!c.provider)return null;
 
   if(c.provider==='claude'){
+    let sysPrompt;
+    try{sysPrompt=buildAiSystemPrompt();}catch(e){sysPrompt='You are EL Tracker Assistant for a CA firm. Help with agreements and billing queries.';}
+    // Trim system prompt if too long (Claude haiku has ~200k token context but we keep it safe)
+    if(sysPrompt.length>40000)sysPrompt=sysPrompt.slice(0,40000)+'...[data truncated]';
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,system:buildAiSystemPrompt(),messages})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,system:sysPrompt,messages})
     });
-    if(!resp.ok)throw new Error('Claude API error: '+resp.status);
+    if(!resp.ok){
+      const errBody=await resp.json().catch(()=>({}));
+      const errMsg=errBody&&errBody.error&&errBody.error.message?errBody.error.message:'HTTP '+resp.status;
+      throw new Error(errMsg);
+    }
     const d=await resp.json();
     return d.content&&d.content[0]&&d.content[0].text;
   }
