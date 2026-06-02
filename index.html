@@ -3401,27 +3401,53 @@ function updateAiApiStatus(){
 function buildAiSystemPrompt(){
   const session=getSession();
   const{isAdmin,allowed}=aiCtx();
-  const agrCount=aiScopeAgrs().length;
-  const billCount=aiScopeBills().length;
-  const expiring=aiScopeAgrs().filter(a=>getStatus(a)==='expiring').length;
-  const expired=aiScopeAgrs().filter(a=>getStatus(a)==='expired').length;
-  const catInfo=allowed&&allowed.length?'User category: '+allowed.join(', ')+'. ':'';
-  const roleInfo=isAdmin?'The user is an admin with full access.':'The user is a standard user. '+catInfo;
-  // Build scoped client list for context (max 8)
   const scopedAgrs=aiScopeAgrs();
-  const clientList=[...new Set(scopedAgrs.map(a=>a.client).filter(Boolean))].slice(0,8).join(', ');
+  const scopedBills=aiScopeBills();
+  const expiring=scopedAgrs.filter(a=>getStatus(a)==='expiring');
+  const expired=scopedAgrs.filter(a=>getStatus(a)==='expired');
+  const active=scopedAgrs.filter(a=>getStatus(a)==='active');
   const catRestrict=!isAdmin&&allowed&&allowed.length
-    ? 'IMPORTANT: This user only has access to the following service category: '+allowed.join(', ')+'. You must ONLY discuss, reference, or show data related to this category. Refuse to share or discuss any other category. '
+    ? 'IMPORTANT: This user only has access to: '+allowed.join(', ')+'. Only discuss data from this category. '
     : '';
-  return 'You are EL Tracker Assistant, an AI embedded inside EL Tracker — a professional agreement and billing management system for a CA/legal firm. '
-    +roleInfo
-    +catRestrict
-    +' Current scoped data: '+agrCount+' agreements ('+expiring+' expiring, '+expired+' expired), '+billCount+' one-time bills. '
-    +(clientList?'Known clients in scope: '+clientList+'. ':'')
-    +'The app sections available to this user: Dashboard, EL Tracker, One Time Billing, Monthly Statement, Export/Import, Notifications'+(isAdmin?', Admin Settings':'')+'.'
-    +'Services: Accounting Retainer, CS Retainer, Advisory, Auditing & Assurance, Tax Services. '
-    +'Answer only about the users scoped data. Do not reveal or discuss data from other categories. '
-    +'Be concise and professional. Reply in under 120 words unless detail is requested.';
+  const roleInfo=isAdmin?'The user is an ADMIN with full access to all data.':'The user is a standard user. Category: '+(allowed&&allowed[0]||'unassigned')+'. ';
+
+  // Serialize agreements (max 30 most relevant)
+  const agrData=scopedAgrs.slice(0,30).map(a=>{
+    const st=getStatus(a);
+    return '[AGR] Name: "'+( a.name||'')+'" | Client: "'+(a.client||'')+'" | Type: '+(a.type||'')+' | Sub: '+(a.subType||'')
+      +' | EL: '+(a.elType==='with'?'With EL':a.elType==='without'?'Without EL':'Not set')
+      +' | Amount: '+(a.amount?'Rs.'+a.amount:'N/A')
+      +' | Billing: '+(a.billingFreq||'N/A')
+      +' | Start: '+(a.startDate||'')
+      +' | End: '+(a.endDate||'')
+      +' | Status: '+{active:'Active',expiring:'Expiring Soon',expired:'Expired',renewed:'Renewed'}[st]
+      +' | Contact: '+(a.contact||'')+' '+(a.contactInfo||'')
+      +' | PAN: '+(a.pan||'')+' | GST: '+(a.gstRegistered?a.gst||'Registered':'Not Registered')
+      +' | Notes: '+(a.notes||'');
+  }).join(' | ');
+
+  // Serialize bills (max 20)
+  const billData=scopedBills.slice(0,20).map(b=>{
+    return '[BILL] Client: "'+(b.client||'')+'" | Type: '+(b.type||'')+' | Sub: '+(b.subType||'')
+      +' | Amount: '+(b.amount?'Rs.'+b.amount:'N/A')
+      +' | Period: '+(b.date||'')+' | Invoice: '+(b.invoice||'')
+      +' | Desc: '+(b.specialService||'')
+      +' | Contact: '+(b.contactInfo||'');
+  }).join(' | ');
+
+  const summary='SUMMARY: '+scopedAgrs.length+' agreements ('
+    +active.length+' active, '+expiring.length+' expiring, '+expired.length+' expired), '
+    +scopedBills.length+' one-time bills. '
+    +'Total agreement value: Rs.'+scopedAgrs.reduce((s,a)=>s+(parseFloat(a.amount)||0),0).toLocaleString('en-IN')+'. '
+    +'Total bills value: Rs.'+scopedBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0).toLocaleString('en-IN')+'.';
+
+  return 'You are EL Tracker Assistant — an AI inside EL Tracker, a professional agreement and billing management system for a CA firm in India. '
+    +roleInfo+catRestrict+summary
+    +' === AGREEMENTS: '+agrData
+    +' === BILLS: '+billData
+    +' === INSTRUCTIONS: Answer questions about this data directly and accurately. When asked about specific clients, amounts, dates or statuses — use the exact data. When asked to list expiring agreements, list them with client name, end date. When asked for totals, calculate from the data. '+catRestrict
+    +'App sections: Dashboard, EL Tracker (agreements), One Time Billing, Monthly Statement, Export/Import, Notifications'+(isAdmin?', Admin Settings':'')+'. '
+    +'Be concise, accurate and professional. Use Indian number format for amounts. Reply in 200 words or less unless detail is specifically requested.';
 }
 
 // ── Call real AI API ──
@@ -3433,7 +3459,7 @@ async function callRealAI(messages){
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:300,system:buildAiSystemPrompt(),messages})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,system:buildAiSystemPrompt(),messages})
     });
     if(!resp.ok)throw new Error('Claude API error: '+resp.status);
     const d=await resp.json();
@@ -3446,7 +3472,7 @@ async function callRealAI(messages){
     const resp=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+encodeURIComponent(c.key),{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({systemInstruction:{parts:[{text:sysPrompt}]},contents:geminiMsgs,generationConfig:{maxOutputTokens:300}})
+      body:JSON.stringify({systemInstruction:{parts:[{text:sysPrompt}]},contents:geminiMsgs,generationConfig:{maxOutputTokens:600}})
     });
     if(!resp.ok)throw new Error('Gemini API error: '+resp.status);
     const d=await resp.json();
