@@ -3849,12 +3849,36 @@ const AI_KNOWLEDGE = [
 
 let _aiOpen=false;
 let _aiPendingCtx=null;
-let _aiConvHistory=[]; // context for multi-step (e.g. waiting for email)
+
+// Per-user isolated AI state — keyed by user ID so admin and users never share history
+const _aiSessions={};
+function _getAiSession(){
+  const s=getSession();
+  const uid=(s&&(s.id||s.userId||s.username))||'__guest__';
+  if(!_aiSessions[uid])_aiSessions[uid]={history:[],pendingCtx:null};
+  return _aiSessions[uid];
+}
+function _aiHistory(){return _getAiSession().history;}
+function _clearAiChat(){
+  const s=getSession();
+  const uid=(s&&(s.id||s.userId||s.username))||'__guest__';
+  _aiSessions[uid]={history:[],pendingCtx:null};
+  const el=document.getElementById('aiMsgs');if(el)el.innerHTML='';
+}
 
 function toggleAI(){
   _aiOpen=!_aiOpen;
   const pane=document.getElementById('aiPane');
   pane.classList.toggle('open',_aiOpen);
+  // Reset chat if opened by a different user than last time
+  const _curUid=(()=>{const s=getSession();return s&&(s.id||s.userId||s.username)||'__guest__';})();
+  if(_aiOpen&&(_aiBtn._lastUid!==_curUid||document.getElementById('aiMsgs').children.length===0)){
+    if(_aiBtn._lastUid&&_aiBtn._lastUid!==_curUid){
+      const el=document.getElementById('aiMsgs');if(el)el.innerHTML='';
+    }
+    _aiBtn._lastUid=_curUid;
+  }
+  const _aiBtn_el=document.getElementById('aiBtn');if(_aiBtn_el)_aiBtn_el._lastUid=_curUid;
   if(_aiOpen&&document.getElementById('aiMsgs').children.length===0){
     updateAiApiStatus();
     const{isAdmin,allowed}=aiCtx();
@@ -3907,15 +3931,16 @@ function aiSend(text){
   }
 
   // ── Handle pending context (waiting for email address) ──
-  if(_aiPendingCtx){
+  if(_getAiSession().pendingCtx){
+  const _aiPendingCtx=_getAiSession().pendingCtx;
     const email=aiExtractEmail(msg)||aiExtractEmail(lower);
     if(email){
-      const ctx=_aiPendingCtx;_aiPendingCtx=null;
+      const ctx=_aiPendingCtx;_getAiSession().pendingCtx=null;
       if(ctx.type==='mail_agreements')aiComposeMail(email,ctx.filter,ctx.label);
       else if(ctx.type==='mail_bills')aiComposeBillsMail(email);
       return;
     } else if(/cancel|no|stop/i.test(lower)){
-      _aiPendingCtx=null;aiBot('Cancelled.');return;
+      _getAiSession().pendingCtx=null;aiBot('Cancelled.');return;
     } else {
       aiBot('Please enter a valid email address, or say "cancel".');return;
     }
@@ -3937,14 +3962,14 @@ function aiSend(text){
     const email=aiExtractEmail(msg);
     if(wantBills){
       if(email){aiComposeBillsMail(email);}
-      else{_aiPendingCtx={type:'mail_bills'};aiBot('Who should I send the bills email to? Enter the email address:');}
+      else{_getAiSession().pendingCtx={type:'mail_bills'};aiBot('Who should I send the bills email to? Enter the email address:');}
       return;
     }
     const filter=aiExtractFilter(lower);
     const labels={all:'All',active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed',email:'Email'};
     const label=labels[filter]||'All';
     if(email){aiComposeMail(email,filter,label);}
-    else{_aiPendingCtx={type:'mail_agreements',filter,label};aiBot('Who should I send the '+label+' agreements email to? Enter the email address:');}
+    else{_getAiSession().pendingCtx={type:'mail_agreements',filter,label};aiBot('Who should I send the '+label+' agreements email to? Enter the email address:');}
     return;
   }
 
@@ -3972,15 +3997,15 @@ function aiSend(text){
   }
   // ── Try real AI if no built-in match ──
   if(isAiApiConfigured()){
-    _aiConvHistory.push({role:'user',content:msg});
+    _aiHistory().push({role:'user',content:msg});
     const typing=document.getElementById('aiTyping');
     if(typing)typing.style.display='block';
-    callRealAI(_aiConvHistory.slice(-10))
+    callRealAI(_aiHistory().slice(-10))
       .then(reply=>{
         if(typing)typing.style.display='none';
         if(reply){
           aiBot(reply);
-          _aiConvHistory.push({role:'assistant',content:reply});
+          _aiHistory().push({role:'assistant',content:reply});
         } else {
           aiBot('Could not get a response. Check your API key in Admin Settings.');
         }
