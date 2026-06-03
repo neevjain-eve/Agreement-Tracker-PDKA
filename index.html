@@ -1041,6 +1041,11 @@
       <div class="search-bar" style="padding:14px 16px 10px">
         <input type="text" id="billSearchInput" placeholder="Search client, service, notes..." oninput="renderBills()"/>
       </div>
+      <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
+        <button class="filter-btn active" onclick="setBillFilter('all')" id="bill-filter-all">All</button>
+        <button class="filter-btn" onclick="setBillFilter('billed')" id="bill-filter-billed" style="background:#fff3d6;border-color:#f8a006">🧾 Billed</button>
+        <button class="filter-btn" onclick="setBillFilter('unbilled')" id="bill-filter-unbilled" style="background:#ffedd5;border-color:#f97316">📋 Pending</button>
+      </div>
       <div class="agreements-list" id="billList" style="padding:0 16px 90px"></div>
       <button class="fab" onclick="openAddBillModal()">＋</button>
     </div>
@@ -1607,7 +1612,13 @@
         </div>
         <div class="form-row">
           <div class="form-group"><label>Amount (₹) *</label><input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/></div>
-          <div class="form-group"><label>Invoice / Ref No.</label><input type="text" id="billInvoice" placeholder="e.g. INV-2024-001"/></div>
+          <div class="form-group"><label>Invoice / Ref No.</label><input type="text" id="billInvoice" placeholder="e.g. INV-2024-001" oninput="onBillInvoiceInput()"/></div>
+        </div>
+        <div class="form-group">
+          <label>Assigned Manager</label>
+          <select id="billManagerSel" onchange="onBillManagerSel()" style="font-family:inherit">
+            <option value="">— Select Manager —</option>
+          </select>
         </div>
       </div>
 
@@ -1622,13 +1633,7 @@
           </select>
         </div>
         <div class="form-group"><label>PAN Number</label><input type="text" id="billPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
-        <div class="form-group">
-          <label>Manager / Contact Person</label>
-          <select id="billManagerSel" onchange="onBillManagerSel()" style="font-family:inherit;margin-bottom:5px">
-            <option value="">— Select Manager —</option>
-          </select>
-          <input type="text" id="billContact" placeholder="Or type name manually"/>
-        </div>
+        <div class="form-group"><label>Contact Person</label><input type="text" id="billContact" placeholder="Name"/></div>
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="billContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
         <div class="form-group"><label>GST Registration</label>
           <label class="toggle-row" for="billGstToggle">
@@ -1773,22 +1778,47 @@ function showToast(msg){
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
 // ══ MANAGER DROPDOWN ══════════════════════════════
-function getManagers(){
-  // All active non-admin users are managers
-  return getUsers().filter(u=>u.status==='active'&&u.id!=='admin');
+// Static category → manager usernames map
+const CATEGORY_MANAGERS = {
+  'Accounting Retainer Services': ['naveen','srikrishna','manju','bindu','kavya','ramya'],
+  'CS Retainer Services': ['rinkal'],
+  'Advisory Services': ['richa'],
+  'Auditing & Assurance Services': ['shalini','divya'],
+  'Tax Services': ['sandeep','rakesh']
+};
+
+function getManagers(category){
+  const allUsers=getUsers().filter(u=>u.status==='active'&&u.id!=='admin');
+  if(!category)return allUsers;
+  const catUsernames=CATEGORY_MANAGERS[category]||[];
+  if(!catUsernames.length)return allUsers;
+  // Match by username (case-insensitive) OR by allowedCats
+  return allUsers.filter(u=>
+    catUsernames.includes((u.username||'').toLowerCase())||
+    (u.allowedCats&&u.allowedCats.includes(category))
+  );
 }
 
-function populateManagerDropdown(selId){
+function populateManagerDropdown(selId, category){
   const sel=document.getElementById(selId);if(!sel)return;
   const cur=sel.value;
   sel.innerHTML='<option value="">— Select Manager —</option>';
-  getManagers().forEach(u=>{
+  getManagers(category).forEach(u=>{
     const opt=document.createElement('option');
     opt.value=u.name;
     opt.dataset.email=u.email||'';
-    opt.textContent=u.name+(u.allowedCats&&u.allowedCats.length?' ('+u.allowedCats[0].split(' ')[0]+')':'');
+    opt.dataset.username=u.username||'';
+    opt.textContent=u.name;
     sel.appendChild(opt);
   });
+  // If no users found for category, show all
+  if(sel.options.length===1){
+    getManagers().forEach(u=>{
+      const opt=document.createElement('option');
+      opt.value=u.name;opt.dataset.email=u.email||'';
+      opt.textContent=u.name+' *';sel.appendChild(opt);
+    });
+  }
   if(cur)sel.value=cur;
 }
 
@@ -2187,6 +2217,18 @@ function hideBillAddSub(){
   const sel=document.getElementById('billSubType');
   if(sel.value==='__add_new__')sel.value='';
 }
+function setBillFilter(f){
+  window._billFilter=f;
+  document.querySelectorAll('[id^="bill-filter-"]').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById('bill-filter-'+f);if(el)el.classList.add('active');
+  renderBills();
+}
+function onBillInvoiceInput(){
+  // When invoice number is added, auto-tag as billed
+  const inv=document.getElementById('billInvoice').value.trim();
+  // No action needed at form level — filtering happens in renderBills
+}
+
 function saveBillSubCategory(){
   const type=document.getElementById('billType').value;
   const n=document.getElementById('billNewSubInput').value.trim();
@@ -2257,6 +2299,7 @@ function onTypeChange(){
     subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
     '<option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>';
   fields.style.display = type ? 'block' : 'none';
+  populateManagerDropdown('agrManagerSel', type);
 }
 
 // ══════════════════════════════════════════════════
@@ -2638,6 +2681,7 @@ function onBillTypeChange(){
     subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
     '<option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>';
   grp.style.display = type ? 'block' : 'none';
+  populateManagerDropdown('billManagerSel', type);
 }
 
 function onBillGstToggle(){
@@ -2796,10 +2840,13 @@ function renderBills(){
   const _bSession=getSession();
   const _bAdmin=_bSession&&_bSession.role==='admin';
   const _bAllowed=(!_bAdmin&&_bSession)?getUserAllowedCats(_bSession.userId):null;
+  const _billFilterMode=window._billFilter||'all';
   let list=bills;
   if(q) list=list.filter(b=>(b.name+b.client+b.notes+b.type+b.subType+b.invoice).toLowerCase().includes(q));
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bAllowed) list=list.filter(b=>_bAllowed.includes(b.type));
+  if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
+  else if(_billFilterMode==='unbilled') list=list.filter(b=>!b.invoice||!b.invoice.trim());
   if(!list.length){
     el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:12px">🧾</div><div style="font-weight:700;font-size:1rem;margin-bottom:6px">No one-time bills yet</div><div style="font-size:.82rem">Tap + to add your first bill</div></div>';
     return;
