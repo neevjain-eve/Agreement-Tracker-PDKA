@@ -1565,54 +1565,24 @@
           <input type="text" id="billSpecialService" placeholder="e.g. Describe the service or billing details..."/>
         </div>
         <div class="form-group">
-          <label>Period *</label>
-          <div style="margin-top:4px">
-            <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Month &amp; Year</div>
-            <div style="display:flex;gap:6px;margin-bottom:8px">
-              <select id="billPeriodMonth" style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:.78rem;font-family:inherit;outline:none" onchange="syncBillPeriod()">
-                <option value="">Month</option>
-                <option value="01">January</option>
-                <option value="02">February</option>
-                <option value="03">March</option>
-                <option value="04">April</option>
-                <option value="05">May</option>
-                <option value="06">June</option>
-                <option value="07">July</option>
-                <option value="08">August</option>
-                <option value="09">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
-              </select>
-              <select id="billPeriodYear" style="flex:1;padding:9px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:.78rem;font-family:inherit;outline:none" onchange="syncBillPeriod()">
-                <option value="">Year</option>
-                <option value="2020">2020</option>
-                <option value="2021">2021</option>
-                <option value="2022">2022</option>
-                <option value="2023">2023</option>
-                <option value="2024">2024</option>
-                <option value="2025">2025</option>
-                <option value="2026">2026</option>
-                <option value="2027">2027</option>
-              </select>
-            </div>
-            <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Custom</div>
-            <div style="display:flex;gap:6px">
-              <div style="flex:1;min-width:0">
-                <div style="font-size:.62rem;color:var(--muted);font-weight:600;margin-bottom:3px">Start Date</div>
-                <input type="date" id="billDateCustomStart" style="width:100%;padding:8px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:.73rem;font-family:inherit;outline:none;box-sizing:border-box" onchange="syncBillPeriodFromCustom()"/>
-              </div>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:.62rem;color:var(--muted);font-weight:600;margin-bottom:3px">End Date</div>
-                <input type="date" id="billDateCustomEnd" style="width:100%;padding:8px 6px;border:1.5px solid var(--border);border-radius:10px;font-size:.73rem;font-family:inherit;outline:none;box-sizing:border-box" onchange="syncBillPeriodFromCustom()"/>
-              </div>
-            </div>
-            <input type="hidden" id="billDate"/>
-          </div>
+          <label>Billed Date *</label>
+          <input type="date" id="billDate" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.85rem;font-family:inherit;outline:none"/>
         </div>
         <div class="form-row">
-          <div class="form-group"><label>Amount (₹) *</label><input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/></div>
-          <div class="form-group"><label>Invoice / Ref No.</label><input type="text" id="billInvoice" placeholder="e.g. INV-2024-001" oninput="onBillInvoiceInput()"/></div>
+          <div class="form-group">
+            <label>Quote Amount (₹)</label>
+            <input type="number" id="billQuoteAmount" placeholder="e.g. 30000" min="0" step="0.01"/>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Amount quoted to client</div>
+          </div>
+          <div class="form-group">
+            <label>Billed Amount (₹) *</label>
+            <input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/>
+            <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Actual amount billed</div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Invoice / Ref No.</label>
+          <input type="text" id="billInvoice" placeholder="e.g. INV-2024-001" oninput="onBillInvoiceInput()"/>
         </div>
         <div class="form-group">
           <label>Assigned Manager</label>
@@ -2711,7 +2681,7 @@ function syncBillPeriodFromCustom(){
   }
 }
 function resetBillForm(){
-  ['billAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
+  ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
     .forEach(id=>document.getElementById(id).value='');
   document.getElementById('billDate').value='';
   document.getElementById('billPeriodMonth').value='';
@@ -2746,6 +2716,7 @@ function openAddBillModal(){
     }
   }
   populateManagerDropdown('billManagerSel');
+  if(!document.getElementById('billDate').value)document.getElementById('billDate').value=new Date().toISOString().split('T')[0];
   document.getElementById('billModal').classList.add('open');
 }
 
@@ -2806,6 +2777,7 @@ function saveBill(){
   const bill={
     id: editId||Date.now().toString(),
     name: desc, client, date, amount,
+    quoteAmount: document.getElementById('billQuoteAmount').value||'',
     parentGroup:document.getElementById('billParentGroup').value||'',
     type: document.getElementById('billType').value,
     subType: document.getElementById('billSubType').value,
