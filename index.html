@@ -251,7 +251,7 @@
     .sync-chip{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;padding:5px 10px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
     .sync-chip:hover{background:rgba(255,255,255,.28)}
     .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0}
-    .sync-dot.connected{background:#f8a006;animation:pulse 2s infinite}
+    .sync-dot.connected{background:#22c55e;animation:pulse 2s infinite}
     .sync-dot.syncing{background:#fbbf24;animation:spin .8s linear infinite}
     .sync-dot.error{background:#f87171}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
@@ -452,10 +452,10 @@
 
     /* ── PROFESSIONAL UI POLISH ────────────────────────────── */
     :root {
-      --bg:#F4F2FA;
+      --bg:#ffffff;
       --card:#fff;
       --radius:14px;
-      --shadow-sm:0 1px 4px rgba(109,40,217,.07),0 1px 2px rgba(0,0,0,.04);
+      --shadow-sm:0 1px 4px rgba(249,115,22,.1),0 1px 2px rgba(0,0,0,.04);
       --shadow:0 4px 16px rgba(109,40,217,.10),0 2px 4px rgba(0,0,0,.04);
       --shadow-lg:0 10px 32px rgba(109,40,217,.14),0 4px 8px rgba(0,0,0,.06);
     }
@@ -478,7 +478,7 @@
     .agreement-card.status-expired{border-left-color:var(--danger)}
     .agreement-card.status-renewed{border-left-color:var(--renewed)}
     .status-badge{font-size:.62rem;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
-    .admin-panel{border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid rgba(109,40,217,.07)}
+    .admin-panel{border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid #fed7aa}
     .admin-panel-title{font-size:.72rem;font-weight:800;letter-spacing:.07em;border-bottom:1px solid rgba(109,40,217,.08)}
     .btn-primary{background:linear-gradient(135deg,#f8a006,#f59e0b);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(109,40,217,.28);letter-spacing:.01em;display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%}
     .btn-primary:hover{box-shadow:0 6px 18px rgba(109,40,217,.38);transform:translateY(-1px)}
@@ -507,7 +507,7 @@
     .sync-chip{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:10px;color:rgba(255,255,255,.9);font-size:.72rem;font-weight:600;padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .2s}
     .sync-chip:hover{background:rgba(255,255,255,.25)}
     .sync-dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0;transition:background .3s}
-    .sync-dot.connected{background:#f8a006}
+    .sync-dot.connected{background:#22c55e}
     .sync-dot.error{background:#f87171}
     .fab{background:linear-gradient(135deg,#f8a006,#f59e0b);box-shadow:0 6px 20px rgba(109,40,217,.45);border-radius:18px;width:52px;height:52px}
     .fab:hover{box-shadow:0 8px 26px rgba(109,40,217,.55);transform:translateY(-2px) scale(1.05)}
@@ -2187,7 +2187,7 @@ function renderUserCatDash(){
     </div>`;
     const recentAgr=agrList.slice(0,3).map(a=>{
       const st=getStatus(a);
-      const sc={active:'#f8a006',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
+      const sc={active:'#f8a006',expiring:'#d97706',expired:'#dc2626',renewed:'#f97316'}[st]||'#6b7280';
       const sl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
       return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border-light)">
         <div style="width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;flex-shrink:0">${(a.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
@@ -2221,7 +2221,7 @@ function renderUserCatDash(){
         ${card('✅','Active',active,null,'#f8a006','#fff3d6')}
         ${card('⚠️','Expiring',expiring,null,'#d97706','#fffbeb')}
         ${card('❌','Expired',expired,null,'#dc2626','#fff1f2')}
-        ${card('💰','Total Amount',fmt(totalAmt),null,'#7c3aed','#f5f3ff')}
+        ${card('💰','Total Amount',fmt(totalAmt),null,'#f97316','#fff7ed')}
       </div>
       <div style="background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);grid-column:1/-1">
         <div style="font-size:.82rem;font-weight:800;margin-bottom:10px">📋 Recent Agreements</div>
@@ -2240,8 +2240,8 @@ function renderUserCatDash(){
   const tiles=ALL_CATEGORIES.map((cat,idx)=>{
     const req=reqs.find(r=>r.userId===session.userId&&r.cat===cat);
     const isPending=req&&req.status==='pending';
-    const bg=isPending?'#fffbeb':'#f5f3ff';
-    const border=isPending?'#fcd34d':'#c4b5fd';
+    const bg=isPending?'#fffbeb':'#fff7ed';
+    const border=isPending?'#fcd34d':'#fdba74';
     const div=document.createElement('div');
     div.style.cssText=`background:${bg};border:2px solid ${border};border-radius:16px;padding:18px;`;
     div.innerHTML=`
@@ -2391,7 +2391,7 @@ function updateZohoStatus(){
     if(connAct)connAct.style.display='block';
     if(setupAct)setupAct.style.display='none';
     if(setupSec)setupSec.style.display='none';
-    if(dot){dot.style.background='#f8a006';dot.style.boxShadow='0 0 6px #f8a006';}
+    if(dot){dot.style.background='#22c55e';dot.style.boxShadow='0 0 6px #22c55e';}
     if(lbl)lbl.textContent='Zoho Books ✓';
   }else{
     if(partial){
@@ -3724,7 +3724,7 @@ function aiShowAgrResults(results,query){
   const totalAmt=results.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
   results.slice(0,8).forEach(a=>{
     const st=getStatus(a);
-    const stc={active:'#f8a006',expiring:'#d97706',expired:'#dc2626',renewed:'#7c3aed'}[st]||'#6b7280';
+    const stc={active:'#f8a006',expiring:'#d97706',expired:'#dc2626',renewed:'#f97316'}[st]||'#6b7280';
     const stl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st]||st;
     const card=document.createElement('div');
     card.className='ai-msg bot';
@@ -4502,7 +4502,7 @@ function renderMonthly(){
   const th=(t,w)=>`<th style="padding:8px 10px;text-align:left;font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap;${w?'width:'+w:''}">` + t + '</th>';
   const td=(t,s='')=>`<td style="padding:8px 10px;border-bottom:1px solid var(--border-light);${s}">${t??'—'}</td>`;
   const badge=(s,c,b)=>`<span style="background:${b};color:${c};font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px">${s}</span>`;
-  const statusColor={active:['#f8a006','#fff3d6'],expiring:['#d97706','#fef9c3'],expired:['#dc2626','#fee2e2'],renewed:['#7c3aed','#ede9fe']};
+  const statusColor={active:['#f8a006','#fff3d6'],expiring:['#d97706','#fef9c3'],expired:['#dc2626','#fee2e2'],renewed:['#f97316','#ffedd5']};
 
   const agrTable=document.getElementById('monthlyAgrTable');
   if(agrTable){
@@ -5028,7 +5028,7 @@ openDB().then(async()=>{
     </select>
     <div style="display:flex;gap:5px">
       <input type="text" id="aiInlineKey" placeholder="Paste API key here..." style="flex:1;padding:7px 10px;border:1.5px solid #fdba74;border-radius:8px;font-size:.72rem;font-family:monospace;outline:none;min-width:0" autocomplete="off" spellcheck="false"/>
-      <button type="button" onclick="saveAiInlineKey()" style="background:#6366f1;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:700;cursor:pointer;flex-shrink:0">Save</button>
+      <button type="button" onclick="saveAiInlineKey()" style="background:#f97316;color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.72rem;font-weight:700;cursor:pointer;flex-shrink:0">Save</button>
     </div>
     <div style="font-size:.65rem;color:#111111;margin-top:4px">Key stored locally on your device only.</div>
   </div>
