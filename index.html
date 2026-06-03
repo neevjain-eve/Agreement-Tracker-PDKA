@@ -828,6 +828,7 @@
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <button id="refreshBtn" onclick="refreshCurrentSection()" title="Refresh" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:10px;font-size:1.1rem;color:#f97316;transition:transform .3s;flex-shrink:0" onmouseenter="this.style.background='#ffedd5'" onmouseleave="this.style.background='none'">🔄</button>
       <button class="user-chip" id="userChip" onclick="showSection('admin')">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
@@ -1758,6 +1759,22 @@ function showToast(msg){
 // ══════════════════════════════════════════════
 // SIDEBAR NAVIGATION
 // ══════════════════════════════════════════════
+function refreshCurrentSection(){
+  const btn=document.getElementById('refreshBtn');
+  if(btn){btn.style.transform='rotate(360deg)';setTimeout(()=>btn.style.transform='',400);}
+  const active=document.querySelector('.section.active');
+  const id=active?active.id.replace('sec-',''):'dashboard';
+  if(id==='dashboard'||id==='userdash'){
+    updateDashboard();
+    const s=getSession();
+    if(s&&s.role!=='admin'){renderUserCatDash();}
+  } else if(id==='agreements'){renderAgreements();}
+  else if(id==='billing'){renderBills();}
+  else if(id==='monthly'){renderMonthly();}
+  else if(id==='admin'){renderUserList();renderSubReqAdmin();renderCatAccessAdmin();updateZohoStatus();updateAiApiStatus();}
+  showToast('Refreshed ✓');
+}
+
 function showSection(name){
   ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
