@@ -1460,6 +1460,12 @@
             </div>
           </div>
         </div>
+        <div class="form-group">
+          <label>Assigned Manager</label>
+          <select id="agrManagerSel" onchange="onAgrManagerSel()" style="font-family:inherit">
+            <option value="">— Select Manager —</option>
+          </select>
+        </div>
         <div class="form-section-title">📎 Attach Documents</div>
         <div class="form-group">
           <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
@@ -1485,13 +1491,7 @@
           <div style="font-size:.7rem;color:var(--muted);margin-top:3px">Manage parent companies on the <button type="button" onclick="closeModal('addModal');showSection('dashboard');setTimeout(()=>document.getElementById('pcList')?.scrollIntoView({behavior:'smooth'}),400)" style="background:none;border:none;color:var(--fd-primary);font-size:.7rem;font-weight:700;cursor:pointer;padding:0">Dashboard →</button></div>
         </div>
         <div class="form-group"><label>PAN Number</label><input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
-        <div class="form-group">
-          <label>Manager / Contact Person</label>
-          <select id="agrManagerSel" onchange="onAgrManagerSel()" style="font-family:inherit;margin-bottom:5px">
-            <option value="">— Select Manager —</option>
-          </select>
-          <input type="text" id="agrContact" placeholder="Or type name manually"/>
-        </div>
+        <div class="form-group"><label>Contact Person</label><input type="text" id="agrContact" placeholder="Name"/></div>
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
         <div class="form-group"><label>GST Registration</label>
           <label class="toggle-row" for="gstToggle">
