@@ -1566,24 +1566,25 @@
           <input type="text" id="billSpecialService" placeholder="e.g. Describe the service or billing details..."/>
         </div>
         <div class="form-group">
-          <label>Billed Date *</label>
-          <input type="date" id="billDate" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.85rem;font-family:inherit;outline:none"/>
+          <label>Quote Amount (₹)</label>
+          <input type="number" id="billQuoteAmount" placeholder="e.g. 30000" min="0" step="0.01"/>
+          <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Amount quoted to client</div>
         </div>
-        <div class="form-row">
+        <div id="billAdminFields">
           <div class="form-group">
-            <label>Quote Amount (₹)</label>
-            <input type="number" id="billQuoteAmount" placeholder="e.g. 30000" min="0" step="0.01"/>
-            <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Amount quoted to client</div>
+            <label>Billed Date</label>
+            <input type="date" id="billDate" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:.85rem;font-family:inherit;outline:none"/>
           </div>
-          <div class="form-group">
-            <label>Billed Amount (₹) *</label>
-            <input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/>
-            <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Actual amount billed</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Billed Amount (₹)</label>
+              <input type="number" id="billAmount" placeholder="e.g. 25000" min="0" step="0.01"/>
+            </div>
+            <div class="form-group">
+              <label>Invoice / Ref No.</label>
+              <input type="text" id="billInvoice" placeholder="e.g. INV-2024-001" oninput="onBillInvoiceInput()"/>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label>Invoice / Ref No.</label>
-          <input type="text" id="billInvoice" placeholder="e.g. INV-2024-001" oninput="onBillInvoiceInput()"/>
         </div>
         <div class="form-group">
           <label>Assigned Manager</label>
@@ -3233,7 +3234,7 @@ function updateUserChip(u){
     if(isAdmin){el.style.display='flex';}
     else{
       // Users see: notifications, monthly, export (after category approval); agreements/billing shown dynamically
-      const userVisible=['nav-notifications','nav-monthly','nav-export'];
+      const userVisible=['nav-notifications','nav-monthly','nav-export','nav-agreements','nav-billing'];
       el.style.display=userVisible.includes(id)?'flex':'none';
     }
   });
@@ -3249,7 +3250,7 @@ function updateUserChip(u){
       const cat=getUserAllowedCats(u.id||u.userId||'')[0]||null;
       const catShort=cat?catDisplayName(cat):'No Category';
       spr.style.color='#111111';
-  spr.innerHTML='👤 User'+(cat?` &nbsp;<span style="opacity:.7;font-size:.6rem">· ${catShort}</span>`:'');
+  spr.innerHTML='👤 Manager'+(cat?` &nbsp;<span style="opacity:.7;font-size:.6rem">· ${catShort}</span>`:'');
       spr.className='sidebar-profile-role role-user';
     }
   }
@@ -3283,7 +3284,7 @@ function renderUserList(){
       <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
       <div class="user-info">
         <div class="user-name">${u.name}${session&&session.userId===u.id?' <span style="color:#f8a006;font-size:.65rem">(you)</span>':''}</div>
-        <div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role}</span>${catBadge}${u.email?' &nbsp;·&nbsp; '+u.email:''}</div>
+        <div class="user-meta">@${u.username} &nbsp;·&nbsp; <span class="user-role-badge ${u.role==='admin'?'role-admin':'role-user'}">${u.role==='admin'?'Admin':'Manager'}</span>${catBadge}${u.email?' &nbsp;·&nbsp; '+u.email:''}</div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0;align-items:center">
         <button class="change-pw-btn" onclick="openChangePw('${u.id}')">🔑 Pwd</button>
