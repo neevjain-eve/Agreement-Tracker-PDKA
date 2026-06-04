@@ -1718,8 +1718,24 @@ async function renderAgreements(){
     list.innerHTML=`<div class="empty-state"><div class="icon">📂</div><p>${agreements.length===0?'No agreements yet.<br/>Tap <b>+</b> to add your first.':'No matches found.'}</p></div>`;
     return;
   }
-  const parts=await Promise.all(filtered.map(a=>buildCard(a)));
-  list.innerHTML=parts.join('');
+  const grouped = {};
+  filtered.forEach(a => {
+    const t = a.type || 'Uncategorized';
+    if(!grouped[t]) grouped[t] = [];
+    grouped[t].push(a);
+  });
+  const sortedTypes = Object.keys(grouped).sort((a,b)=> {
+    if(a==='Uncategorized') return 1;
+    if(b==='Uncategorized') return -1;
+    return a.localeCompare(b);
+  });
+  let html = '';
+  for(const t of sortedTypes){
+    const parts = await Promise.all(grouped[t].map(a=>buildCard(a)));
+    html += '<div style="margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--border); color: var(--text); font-weight: 700; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;"><span>📁 ' + t + '</span><span style="font-size: 0.85rem; font-weight: 600; color: var(--primary); background: var(--primary-light); padding: 2px 8px; border-radius: 12px;">' + grouped[t].length + '</span></div>';
+    html += parts.join('');
+  }
+  list.innerHTML=html;
 }
 
 async function buildCard(a){
