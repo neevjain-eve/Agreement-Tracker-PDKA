@@ -2829,8 +2829,12 @@ function renderBills(){
         const [_s,_e]=b.date.split('|');
         const fmt=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';
         dt=[fmt(_s),fmt(_e)].filter(Boolean).join(' – ');
-      } else {
-        dt=new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+      } else if(b.date.length===7){
+        // Legacy MM-YYYY format
+        dt=new Date(b.date+'-01T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+      } else if(b.date.length>=8){
+        // New full date YYYY-MM-DD
+        dt=new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
       }
     }
     const ini=b.client.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
