@@ -1047,7 +1047,7 @@
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setBillFilter('all')" id="bill-filter-all">All</button>
         <button class="filter-btn" onclick="setBillFilter('billed')" id="bill-filter-billed" style="background:#fff3d6;border-color:#f8a006">🧾 Billed</button>
-        <button class="filter-btn" onclick="setBillFilter('unbilled')" id="bill-filter-unbilled" style="background:#ffedd5;border-color:#f97316">📋 Pending</button>
+        <button class="filter-btn" onclick="setBillFilter('unbilled')" id="bill-filter-unbilled" style="background:#ffedd5;border-color:#f97316">📋 Unbilled</button>
         <button class="filter-btn" onclick="setBillFilter('in_progress')" id="bill-filter-inprogress" style="background:#ffedd5;border-color:#f97316">🔄 In Progress</button>
         <button class="filter-btn" onclick="setBillFilter('completed')" id="bill-filter-completed" style="background:#fff3d6;border-color:#f8a006">✅ Completed</button>
         <button class="filter-btn" onclick="setBillFilter('approved')" id="bill-filter-approved" style="background:#fff3d6;border-color:#f8a006">👍 Approved</button>
@@ -3202,11 +3202,15 @@ function renderBills(){
           <div class="card-client">👤 ${esc(b.client)}</div>
           ${sub?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">🏷️ ${esc(sub)}</div>`:''}
           ${b.manager?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">👤 Mgr: ${esc(b.manager)}</div>`:''}
+          ${b.taskStatus?`<span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${b.taskStatus==='completed'?'#fff3d6':'#ffedd5'};color:#111111;border:1px solid #fed7aa">${b.taskStatus==='completed'?'✅ Completed':'🔄 In Progress'}</span>`:''}
+          ${b.clientApproval==='yes'?'<span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:#fff3d6;color:#111111;border:1px solid #f8a006">👍 Approved</span>':''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           <span style="font-size:.95rem;font-weight:800;color:#111111">${amt}</span>
           <span style="font-size:.68rem;color:var(--muted)">${dt}</span>
-          ${b.invoice?`<span style="font-size:.65rem;background:#ffedd5;color:#111111;padding:1px 7px;border-radius:20px;font-weight:700">${esc(b.invoice)}</span>`:''}
+          ${b.invoice?`<span style="font-size:.65rem;background:#ffedd5;color:#111111;padding:1px 7px;border-radius:20px;font-weight:700">🧾 ${esc(b.invoice)}</span>`
+        :b.taskStatus==='completed'?`<span style="font-size:.65rem;background:#fff3d6;color:#111111;padding:1px 7px;border-radius:20px;font-weight:700;border:1px solid #f8a006">⏳ Awaiting Invoice</span>`:''
+      }
         </div>
       </div>
       ${b.notes?`<div class="card-notes" style="margin-top:6px;font-size:.74rem;color:var(--muted);padding-top:6px;border-top:1px solid var(--border-light)">📝 ${esc(b.notes)}</div>`:''}
