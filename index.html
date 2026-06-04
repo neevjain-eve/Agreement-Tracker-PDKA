@@ -1503,16 +1503,21 @@
           <label>Address</label>
           <input type="text" id="agrAddrLine1" placeholder="Building / Flat No. / Street" style="margin-bottom:5px"/>
           <input type="text" id="agrAddrArea"  placeholder="Area / Locality" style="margin-bottom:5px"/>
-          <select id="agrAddrCountry" onchange="onAddrCountryChange('agr')" style="margin-bottom:5px;font-family:inherit">
-            <option value="">Select Country</option>
-          </select>
+          <div style="position:relative;margin-bottom:5px">
+            <input type="text" id="agrAddrCountry" list="agrCountryList" placeholder="Search Country..." autocomplete="off"
+              oninput="onAddrCountryInput('agr')" onchange="onAddrCountryChange('agr')" style="width:100%"/>
+            <datalist id="agrCountryList"></datalist>
+          </div>
           <div style="display:flex;gap:6px;margin-bottom:5px">
-            <select id="agrAddrState" onchange="onAddrStateChange('agr')" style="flex:1;font-family:inherit">
-              <option value="">Select State</option>
-            </select>
-            <select id="agrAddrCity" style="flex:1;font-family:inherit">
-              <option value="">Select City</option>
-            </select>
+            <div style="flex:1;position:relative">
+              <input type="text" id="agrAddrState" list="agrStateList" placeholder="Search State..." autocomplete="off"
+                oninput="onAddrStateInput('agr')" onchange="onAddrStateChange('agr')" style="width:100%"/>
+              <datalist id="agrStateList"></datalist>
+            </div>
+            <div style="flex:1;position:relative">
+              <input type="text" id="agrAddrCity" list="agrCityList" placeholder="Search City..." autocomplete="off" style="width:100%"/>
+              <datalist id="agrCityList"></datalist>
+            </div>
           </div>
           <input type="text" id="agrAddrPin" placeholder="PIN / ZIP Code" maxlength="10" style="width:150px"/>
         </div>
@@ -1629,16 +1634,21 @@
           <label>Address</label>
           <input type="text" id="billAddrLine1" placeholder="Building / Flat No. / Street" style="margin-bottom:5px"/>
           <input type="text" id="billAddrArea"  placeholder="Area / Locality" style="margin-bottom:5px"/>
-          <select id="billAddrCountry" onchange="onAddrCountryChange('bill')" style="margin-bottom:5px;font-family:inherit">
-            <option value="">Select Country</option>
-          </select>
+          <div style="position:relative;margin-bottom:5px">
+            <input type="text" id="billAddrCountry" list="billCountryList" placeholder="Search Country..." autocomplete="off"
+              oninput="onAddrCountryInput('bill')" onchange="onAddrCountryChange('bill')" style="width:100%"/>
+            <datalist id="billCountryList"></datalist>
+          </div>
           <div style="display:flex;gap:6px;margin-bottom:5px">
-            <select id="billAddrState" onchange="onAddrStateChange('bill')" style="flex:1;font-family:inherit">
-              <option value="">Select State</option>
-            </select>
-            <select id="billAddrCity" style="flex:1;font-family:inherit">
-              <option value="">Select City</option>
-            </select>
+            <div style="flex:1;position:relative">
+              <input type="text" id="billAddrState" list="billStateList" placeholder="Search State..." autocomplete="off"
+                oninput="onAddrStateInput('bill')" onchange="onAddrStateChange('bill')" style="width:100%"/>
+              <datalist id="billStateList"></datalist>
+            </div>
+            <div style="flex:1;position:relative">
+              <input type="text" id="billAddrCity" list="billCityList" placeholder="Search City..." autocomplete="off" style="width:100%"/>
+              <datalist id="billCityList"></datalist>
+            </div>
           </div>
           <input type="text" id="billAddrPin" placeholder="PIN / ZIP Code" maxlength="10" style="width:150px"/>
         </div>
@@ -2729,7 +2739,7 @@ function syncBillPeriodFromCustomLEGACY_DISABLED(){
 function resetBillForm(){
   ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService','billAddrLine1','billAddrArea','billAddrPin']
     .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); 
-  ['billAddrCountry','billAddrState','billAddrCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  ['billAddrCountry','billAddrState','billAddrCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const bd=document.getElementById('billDate');if(bd)bd.value='';
   const bt=document.getElementById('billType');if(bt){bt.value='';bt.disabled=false;}
   populateParentGroupDropdown('billParentGroup');
@@ -4513,36 +4523,56 @@ const WORLD_DATA={
 "Other":{"Other":["Other"]}
 };
 
-function populateAddrCountries(prefix){
-  const sel=document.getElementById(prefix+'AddrCountry');
-  if(!sel)return;
-  sel.innerHTML='<option value="">Select Country</option>';
-  const countries=Object.keys(WORLD_DATA).sort((a,b)=>a==='India'?-1:b==='India'?1:a.localeCompare(b));
-  countries.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+function _fillDatalist(dlId, items){
+  const dl=document.getElementById(dlId);if(!dl)return;
+  dl.innerHTML='';
+  items.forEach(v=>{const o=document.createElement('option');o.value=v;dl.appendChild(o);});
+  // Always add Other at end
+  if(!items.includes('Other')){const o=document.createElement('option');o.value='Other';dl.appendChild(o);}
 }
+
+function populateAddrCountries(prefix){
+  const countries=Object.keys(WORLD_DATA).filter(c=>c!=='Other').sort((a,b)=>a==='India'?-1:b==='India'?1:a.localeCompare(b));
+  countries.push('Other');
+  _fillDatalist(prefix+'CountryList', countries);
+}
+
+function onAddrCountryInput(prefix){
+  // Clear state/city when country is being typed
+  const stEl=document.getElementById(prefix+'AddrState');
+  const cEl=document.getElementById(prefix+'AddrCity');
+  if(stEl)stEl.value='';if(cEl)cEl.value='';
+  _fillDatalist(prefix+'StateList',[]);
+  _fillDatalist(prefix+'CityList',[]);
+}
+
 function onAddrCountryChange(prefix,presetState,presetCity){
   const country=document.getElementById(prefix+'AddrCountry').value;
-  const stSel=document.getElementById(prefix+'AddrState');
-  const cSel=document.getElementById(prefix+'AddrCity');
-  stSel.innerHTML='<option value="">Select State / Province</option>';
-  cSel.innerHTML='<option value="">Select City</option>';
   if(!country||!WORLD_DATA[country])return;
-  Object.keys(WORLD_DATA[country]).sort().forEach(st=>{const o=document.createElement('option');o.value=st;o.textContent=st;stSel.appendChild(o);});
-  if(presetState){stSel.value=presetState;onAddrStateChange(prefix,presetCity);}
+  const states=Object.keys(WORLD_DATA[country]).sort();
+  _fillDatalist(prefix+'StateList', states);
+  if(presetState){
+    const stEl=document.getElementById(prefix+'AddrState');if(stEl)stEl.value=presetState;
+    onAddrStateChange(prefix,presetCity);
+  }
 }
+
+function onAddrStateInput(prefix){
+  const cEl=document.getElementById(prefix+'AddrCity');if(cEl)cEl.value='';
+  _fillDatalist(prefix+'CityList',[]);
+}
+
 function onAddrStateChange(prefix,presetCity){
   const country=document.getElementById(prefix+'AddrCountry').value;
   const state=document.getElementById(prefix+'AddrState').value;
-  const cSel=document.getElementById(prefix+'AddrCity');
-  cSel.innerHTML='<option value="">Select City</option>';
   if(!country||!state||!WORLD_DATA[country]||!WORLD_DATA[country][state])return;
-  WORLD_DATA[country][state].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cSel.appendChild(o);});
-  if(presetCity)cSel.value=presetCity;
+  _fillDatalist(prefix+'CityList', WORLD_DATA[country][state]);
+  if(presetCity){const cEl=document.getElementById(prefix+'AddrCity');if(cEl)cEl.value=presetCity;}
 }
 
 function resetForm(){
   ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails','agrAddrLine1','agrAddrArea','agrAddrPin'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  ['agrAddrCountry','agrAddrState','agrAddrCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
+  ['agrAddrCountry','agrAddrState','agrAddrCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('agrNameSelect').value='';
   document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
