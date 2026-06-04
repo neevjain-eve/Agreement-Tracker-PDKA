@@ -1409,7 +1409,7 @@
             <option value="Accounting Retainer Services Agreement">Accounting Retainer Services Agreement</option>
             <option value="CS Retainer Services Agreement">CS Retainer Services Agreement</option>
             <option value="Advisory Services Agreement">Advisory Services Agreement</option>
-            <option value="Auditing &amp; Assurance Services Agreement">Auditing &amp; Assurance Services Agreement</option>
+            <option value="Audit &amp; Assurance Services Agreement">Audit &amp; Assurance Services Agreement</option>
             <option value="Tax Services Agreement">Tax Services Agreement</option>
             <option value="__email__" style="color:#111111;font-weight:700">📧 Email (No Agreement)</option>
           </select>
@@ -1421,7 +1421,7 @@
             <option>Accounting Retainer Services</option>
             <option>CS Retainer Services</option>
             <option>Advisory Services</option>
-            <option>Auditing &amp; Assurance Services</option>
+            <option>Audit &amp; Assurance Services</option>
             <option>Tax Services</option>
           </select>
         </div>
@@ -1499,6 +1499,10 @@
         <div class="form-group"><label>PAN Number</label><input type="text" id="agrPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
         <div class="form-group"><label>Contact Person</label><input type="text" id="agrContact" placeholder="Name"/></div>
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="agrAddress" rows="3" placeholder="Building / Flat No., Street&#10;Area / Locality&#10;City, State – PIN Code"></textarea>
+        </div>
         <div class="form-group"><label>GST Registration</label>
           <label class="toggle-row" for="gstToggle">
             <span class="toggle-label" id="gstToggleLabel">Not Registered under GST</span>
@@ -1545,7 +1549,7 @@
             <option>Accounting Retainer Services</option>
             <option>CS Retainer Services</option>
             <option>Advisory Services</option>
-            <option>Auditing &amp; Assurance Services</option>
+            <option>Audit &amp; Assurance Services</option>
             <option>Tax Services</option>
           </select>
         </div>
@@ -1608,6 +1612,10 @@
         <div class="form-group"><label>PAN Number</label><input type="text" id="billPan" placeholder="e.g. ABCDE1234F" maxlength="10" style="text-transform:uppercase"/></div>
         <div class="form-group"><label>Contact Person</label><input type="text" id="billContact" placeholder="Name"/></div>
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="billContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
+        <div class="form-group">
+          <label>Address</label>
+          <textarea id="billAddress" rows="3" placeholder="Building / Flat No., Street&#10;Area / Locality&#10;City, State – PIN Code"></textarea>
+        </div>
         <div class="form-group"><label>GST Registration</label>
           <label class="toggle-row" for="billGstToggle">
             <span class="toggle-label" id="billGstToggleLabel">Not Registered under GST</span>
@@ -1756,7 +1764,7 @@ const CAT_DISPLAY_NAME = {
   'Accounting Retainer Services': 'FinOPS',
   'CS Retainer Services': 'CS Retainer',
   'Advisory Services': 'Advisory',
-  'Auditing & Assurance Services': 'Auditing & Assurance',
+  'Audit & Assurance Services': 'Audit & Assurance',
   'Tax Services': 'Tax'
 };
 function catDisplayName(cat){
@@ -1767,7 +1775,7 @@ const CATEGORY_MANAGERS = {
   'Accounting Retainer Services': ['naveen','srikrishna','manju','bindu','kavya','ramya'],
   'CS Retainer Services': ['rinkal'],
   'Advisory Services': ['richa'],
-  'Auditing & Assurance Services': ['shalini','divya'],
+  'Audit & Assurance Services': ['shalini','divya'],
   'Tax Services': ['sandeep','rakesh']
 };
 
@@ -2073,7 +2081,7 @@ const SUB_SERVICES = {
   'Accounting Retainer Services': ['One Time Services','Change in Address'],
   'CS Retainer Services': ['Secretarial CA Act 2013','FEMA'],
   'Advisory Services': [],
-  'Auditing & Assurance Services': ['Statutory Audit','Internal Audit','One Time Task'],
+  'Audit & Assurance Services': ['Statutory Audit','Internal Audit','One Time Task'],
   'Tax Services': ['Income Tax Return and Compliance','Income Tax Assessments and Advising','Retainership and GST Filing','GST Audits and Assessments']
 };
 // Merge any user-added sub-categories from localStorage
@@ -2126,7 +2134,7 @@ function onAgrNameSelect(){
       'Accounting Retainer Services Agreement':'Accounting Retainer Services',
       'CS Retainer Services Agreement':'CS Retainer Services',
       'Advisory Services Agreement':'Advisory Services',
-      'Auditing & Assurance Services Agreement':'Auditing & Assurance Services',
+      'Audit & Assurance Services Agreement':'Audit & Assurance Services',
       'Tax Services Agreement':'Tax Services'
     };
     const type=typeMap[val]||'';
@@ -2291,21 +2299,21 @@ const ALL_CATEGORIES = [
   'Accounting Retainer Services',
   'CS Retainer Services',
   'Advisory Services',
-  'Auditing & Assurance Services',
+  'Audit & Assurance Services',
   'Tax Services'
 ];
 const CAT_ICONS = {
   'Accounting Retainer Services':'📒',
   'CS Retainer Services':'⚖️',
   'Advisory Services':'💡',
-  'Auditing & Assurance Services':'🔍',
+  'Audit & Assurance Services':'🔍',
   'Tax Services':'🧾'
 };
 const CAT_DESC = {
   'Accounting Retainer Services':'Bookkeeping, accounts & retainer',
   'CS Retainer Services':'Secretarial, FEMA & compliance',
   'Advisory Services':'Business & strategic advisory',
-  'Auditing & Assurance Services':'Audits, assurance & review',
+  'Audit & Assurance Services':'Audits, assurance & review',
   'Tax Services':'GST, income tax & assessments'
 };
 
@@ -2693,8 +2701,8 @@ function syncBillPeriodFromCustomLEGACY_DISABLED(){
   }
 }
 function resetBillForm(){
-  ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService']
-    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService','billAddress']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); 
   const bd=document.getElementById('billDate');if(bd)bd.value='';
   const bt=document.getElementById('billType');if(bt){bt.value='';bt.disabled=false;}
   populateParentGroupDropdown('billParentGroup');
@@ -2759,6 +2767,7 @@ function openEditBillModal(id){
   document.getElementById('billAmount').value=b.amount||'';
   document.getElementById('billInvoice').value=b.invoice||'';
   document.getElementById('billClient').value=b.client||'';
+  const _billAddr=document.getElementById('billAddress');if(_billAddr)_billAddr.value=b.address||'';
   document.getElementById('billPan').value=b.pan||'';
   populateManagerDropdown('billManagerSel');
   document.getElementById('billContact').value=b.contact||'';
@@ -3186,9 +3195,9 @@ function getDefaultUsers(){
     {id:'u_rinkal',username:'rinkal',name:'Rinkal',role:'user',pwHash:hashPw('rinkal123'),status:'active',allowedCats:['CS Retainer Services']},
     // Advisory Services
     {id:'u_richa',username:'richa',name:'Richa',role:'user',pwHash:hashPw('richa123'),status:'active',allowedCats:['Advisory Services']},
-    // Auditing & Assurance Services
-    {id:'u_shalini',username:'shalini',name:'Shalini',role:'user',pwHash:hashPw('shalini123'),status:'active',allowedCats:['Auditing & Assurance Services']},
-    {id:'u_divya',username:'divya',name:'Divya',role:'user',pwHash:hashPw('divya123'),status:'active',allowedCats:['Auditing & Assurance Services']},
+    // Audit & Assurance Services
+    {id:'u_shalini',username:'shalini',name:'Shalini',role:'user',pwHash:hashPw('shalini123'),status:'active',allowedCats:['Audit & Assurance Services']},
+    {id:'u_divya',username:'divya',name:'Divya',role:'user',pwHash:hashPw('divya123'),status:'active',allowedCats:['Audit & Assurance Services']},
     // Tax Services
     {id:'u_sandeep',username:'sandeep',name:'Sandeep',role:'user',pwHash:hashPw('sandeep123'),status:'active',allowedCats:['Tax Services']},
     {id:'u_rakesh',username:'rakesh',name:'Rakesh',role:'user',pwHash:hashPw('rakesh123'),status:'active',allowedCats:['Tax Services']},
@@ -4436,7 +4445,7 @@ async function deleteFile(agrId,fileId){
 // MODALS
 // ══════════════════════════════════════════════════
 function resetForm(){
-  ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails'].forEach(id=>document.getElementById(id).value='');
+  ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails','agrAddress'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('agrNameSelect').value='';
   document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
@@ -4499,6 +4508,7 @@ function openEditModal(id){
   const _ns=document.getElementById('agrNameSelect');
   if(_ns){const _m=[..._ns.options].find(o=>o.value===a.name);_ns.value=_m?a.name:'';}
   document.getElementById('agrClient').value=a.client||'';document.getElementById('agrStart').value=a.startDate||'';
+  const _agrAddr=document.getElementById('agrAddress');if(_agrAddr)_agrAddr.value=a.address||'';
   document.getElementById('agrEnd').value=a.endDate||'';
   document.getElementById('agrType').value=a.type||'';
   onTypeChange();
@@ -4589,7 +4599,7 @@ function downloadTemplate(){
   if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded.');return}
   const headers=[['Agreement Name*','Client/Vendor Name*','Type/Category','Sub-Service','Engagement Letter (With/Without)','Description','Amount (Rs.)','Billing Frequency','Start Date* (DD/MM/YYYY)','End Date* (DD/MM/YYYY)','Billing Month (MM/YYYY)','PAN Number','GST Registered (Yes/No)','GST Number','Contact Person','Contact Email/Phone','Notes']];
   const sample=[
-    ['Auditing & Assurance Services Agreement','TechCorp Pvt. Ltd.','Auditing & Assurance Services','Statutory Audit','With','Annual statutory audit engagement','150000','Yearly','01/04/2026','31/03/2027','','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
+    ['Audit & Assurance Services Agreement','TechCorp Pvt. Ltd.','Audit & Assurance Services','Statutory Audit','With','Annual statutory audit engagement','150000','Yearly','01/04/2026','31/03/2027','','ABCDE1234F','Yes','29ABCDE1234F1Z5','Ravi Kumar','ravi@techcorp.com','Annual renewal'],
     ['Accounting Retainer Services Agreement','Property Holdings Ltd.','Accounting Retainer Services','One Time Services','Without','Monthly bookkeeping and accounts','25000','Monthly','01/01/2026','31/12/2026','01/2026','FGHIJ5678K','No','','Sunita Sharma','+91 9876543210','Monthly retainer'],
     ['Tax Services Agreement','Alpha Enterprises','Tax Services','Income Tax Return and Compliance','With','ITR filing and compliance','50000','Yearly','01/04/2026','31/03/2027','','KLMNO9012P','Yes','27KLMNO9012P1Z3','Amit Shah','amit@alpha.com','FY 2026-27'],
     ['CS Retainer Services Agreement','Beta Solutions Pvt. Ltd.','CS Retainer Services','Secretarial CA Act 2013','With','Secretarial compliance services','30000','Quarterly','01/01/2026','31/12/2026','','PQRST3456U','No','','Priya Mehta','priya@beta.com','Quarterly compliance']
@@ -4599,7 +4609,7 @@ function downloadTemplate(){
     ['Column','Required','Allowed Values / Format'],
     ['Agreement Name*','Yes','Any text — e.g. "Tax Services Agreement"'],
     ['Client/Vendor Name*','Yes','Any text — company or individual name'],
-    ['Type/Category','Recommended','Accounting Retainer Services | CS Retainer Services | Advisory Services | Auditing & Assurance Services | Tax Services'],
+    ['Type/Category','Recommended','Accounting Retainer Services | CS Retainer Services | Advisory Services | Audit & Assurance Services | Tax Services'],
     ['Sub-Service','Optional','Must match a sub-service for the selected Type (e.g. Statutory Audit, FEMA, Income Tax Return and Compliance)'],
     ['Engagement Letter','Recommended','With | Without (leave blank for unspecified)'],
     ['Description','Optional','Free text description of the specific service'],
