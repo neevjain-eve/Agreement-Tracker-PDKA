@@ -1752,6 +1752,17 @@ function showToast(msg){
 // ══════════════════════════════════════════════
 // ══ MANAGER DROPDOWN ══════════════════════════════
 // Static category → manager usernames map
+const CAT_DISPLAY_NAME = {
+  'Accounting Retainer Services': 'FinOPS',
+  'CS Retainer Services': 'CS Retainer',
+  'Advisory Services': 'Advisory',
+  'Auditing & Assurance Services': 'Auditing & Assurance',
+  'Tax Services': 'Tax'
+};
+function catDisplayName(cat){
+  return CAT_DISPLAY_NAME[cat] || cat;
+}
+
 const CATEGORY_MANAGERS = {
   'Accounting Retainer Services': ['naveen','srikrishna','manju','bindu','kavya','ramya'],
   'CS Retainer Services': ['rinkal'],
