@@ -1501,7 +1501,13 @@
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="agrContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
         <div class="form-group">
           <label>Address</label>
-          <textarea id="agrAddress" rows="3" placeholder="Building / Flat No., Street&#10;Area / Locality&#10;City, State – PIN Code"></textarea>
+          <input type="text" id="agrAddrLine1" placeholder="Building / Flat No. / Street" style="margin-bottom:5px"/>
+          <input type="text" id="agrAddrArea"  placeholder="Area / Locality" style="margin-bottom:5px"/>
+          <div style="display:flex;gap:6px;margin-bottom:5px">
+            <input type="text" id="agrAddrCity"  placeholder="City" style="flex:1"/>
+            <input type="text" id="agrAddrState" placeholder="State" style="flex:1"/>
+          </div>
+          <input type="text" id="agrAddrPin" placeholder="PIN Code" maxlength="6" style="width:140px"/>
         </div>
         <div class="form-group"><label>GST Registration</label>
           <label class="toggle-row" for="gstToggle">
@@ -1614,7 +1620,13 @@
         <div class="form-group"><label>Contact Email / Phone</label><input type="text" id="billContactInfo" placeholder="email@example.com / +91 9876543210"/></div>
         <div class="form-group">
           <label>Address</label>
-          <textarea id="billAddress" rows="3" placeholder="Building / Flat No., Street&#10;Area / Locality&#10;City, State – PIN Code"></textarea>
+          <input type="text" id="billAddrLine1" placeholder="Building / Flat No. / Street" style="margin-bottom:5px"/>
+          <input type="text" id="billAddrArea"  placeholder="Area / Locality" style="margin-bottom:5px"/>
+          <div style="display:flex;gap:6px;margin-bottom:5px">
+            <input type="text" id="billAddrCity"  placeholder="City" style="flex:1"/>
+            <input type="text" id="billAddrState" placeholder="State" style="flex:1"/>
+          </div>
+          <input type="text" id="billAddrPin" placeholder="PIN Code" maxlength="6" style="width:140px"/>
         </div>
         <div class="form-group"><label>GST Registration</label>
           <label class="toggle-row" for="billGstToggle">
@@ -2701,8 +2713,8 @@ function syncBillPeriodFromCustomLEGACY_DISABLED(){
   }
 }
 function resetBillForm(){
-  ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService','billAddress']
-    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); 
+  ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService','billAddrLine1','billAddrArea','billAddrCity','billAddrState','billAddrPin']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const bd=document.getElementById('billDate');if(bd)bd.value='';
   const bt=document.getElementById('billType');if(bt){bt.value='';bt.disabled=false;}
   populateParentGroupDropdown('billParentGroup');
@@ -2767,7 +2779,11 @@ function openEditBillModal(id){
   document.getElementById('billAmount').value=b.amount||'';
   document.getElementById('billInvoice').value=b.invoice||'';
   document.getElementById('billClient').value=b.client||'';
-  const _billAddr=document.getElementById('billAddress');if(_billAddr)_billAddr.value=b.address||'';
+  if(b.address&&typeof b.address==='object'){
+    ['Line1','Area','City','State','Pin'].forEach(f=>{const el=document.getElementById('billAddr'+f);if(el)el.value=b.address[f.toLowerCase()]||'';});
+  } else if(typeof b.address==='string'){
+    const el=document.getElementById('billAddrLine1');if(el)el.value=b.address||'';
+  }
   document.getElementById('billPan').value=b.pan||'';
   populateManagerDropdown('billManagerSel');
   document.getElementById('billContact').value=b.contact||'';
@@ -4445,7 +4461,7 @@ async function deleteFile(agrId,fileId){
 // MODALS
 // ══════════════════════════════════════════════════
 function resetForm(){
-  ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails','agrAddress'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails','agrAddrLine1','agrAddrArea','agrAddrCity','agrAddrState','agrAddrPin'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('agrNameSelect').value='';
   document.getElementById('agrNameSelect').disabled=false;
   document.getElementById('agrName').value='';
@@ -4508,7 +4524,11 @@ function openEditModal(id){
   const _ns=document.getElementById('agrNameSelect');
   if(_ns){const _m=[..._ns.options].find(o=>o.value===a.name);_ns.value=_m?a.name:'';}
   document.getElementById('agrClient').value=a.client||'';document.getElementById('agrStart').value=a.startDate||'';
-  const _agrAddr=document.getElementById('agrAddress');if(_agrAddr)_agrAddr.value=a.address||'';
+  if(a.address&&typeof a.address==='object'){
+    ['Line1','Area','City','State','Pin'].forEach(f=>{const el=document.getElementById('agrAddr'+f);if(el)el.value=a.address[f.toLowerCase()]||'';});
+  } else if(typeof a.address==='string'){
+    const el=document.getElementById('agrAddrLine1');if(el)el.value=a.address||'';
+  }
   document.getElementById('agrEnd').value=a.endDate||'';
   document.getElementById('agrType').value=a.type||'';
   onTypeChange();
