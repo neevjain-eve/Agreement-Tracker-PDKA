@@ -3279,7 +3279,7 @@ function renderUserList(){
   </div>`).join('');}
   document.getElementById('userList').innerHTML=active.map(u=>{
     const uCat=(u.allowedCats&&u.allowedCats[0])||null;
-    const catBadge=uCat?`<span style="font-size:.62rem;font-weight:700;background:#fff7ed;color:#c2410c;padding:1px 7px;border-radius:20px;margin-left:4px">${uCat.replace(' Services','')}</span>`:'';
+    const catBadge=uCat?`<span style="font-size:.62rem;font-weight:700;background:#fff7ed;color:#c2410c;padding:1px 7px;border-radius:20px;margin-left:4px">${catDisplayName(uCat)}</span>`:'';
     return`<div class="user-item">
       <div class="user-avatar-lg">${u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}</div>
       <div class="user-info">
@@ -3673,7 +3673,7 @@ function buildAiSystemPrompt(){
   // ── Users (admin only) ──
   let usersJSON=[];
   if(isAdmin){
-    try{usersJSON=getUsers().map(u=>({name:u.name,username:u.username,role:u.role,email:u.email||'',category:u.allowedCats&&u.allowedCats.length?u.allowedCats.join(', '):'None'}));}catch(e){}
+    try{usersJSON=getUsers().map(u=>({name:u.name,username:u.username,role:u.role,email:u.email||'',category:u.allowedCats&&u.allowedCats.length?u.allowedCats.map(catDisplayName).join(', '):'None'}));}catch(e){}
   }
 
   // ── Monthly summary ──
