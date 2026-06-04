@@ -3126,8 +3126,8 @@ function saveBill(){
       pin:(document.getElementById('billAddrPin')?document.getElementById('billAddrPin').value||'':'')
     },
     clientApproval:(document.querySelector('input[name="billApproval"]:checked')||{value:''}).value,
-    approvalFileName:document.getElementById('billApprovalFile').dataset.fname||'',
-    approvalFileData:document.getElementById('billApprovalFile').dataset.b64||'',
+    approvalFileName:(document.getElementById('billApprovalFile')||{dataset:{}}).dataset.fname||'',
+    approvalFileData:(document.getElementById('billApprovalFile')||{dataset:{}}).dataset.b64||'',
     taskStatus:document.getElementById('billTaskStatus').value||'',
     notes: document.getElementById('billNotes').value.trim(),
     createdAt: editId?(bills.find(b=>b.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString()
@@ -3185,7 +3185,7 @@ function renderBills(){
         dt=new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
       }
     }
-    const ini=b.client.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const ini=(b.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
     const sub=[b.type,b.subType,b.specialService].filter(Boolean).join(' › ');
     return`<div class="agr-card" style="margin-bottom:12px">
       <div class="card-top">
@@ -3194,7 +3194,7 @@ function renderBills(){
           <div class="card-name">${esc(b.name)}</div>
           <div class="card-client">👤 ${esc(b.client)}</div>
           ${sub?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">🏷️ ${esc(sub)}</div>`:''}
-          ${a.manager?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">👤 Mgr: ${esc(a.manager)}</div>`:''}
+          ${b.manager?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">👤 Mgr: ${esc(b.manager)}</div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           <span style="font-size:.95rem;font-weight:800;color:#111111">${amt}</span>
