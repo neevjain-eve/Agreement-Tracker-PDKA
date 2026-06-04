@@ -2396,7 +2396,7 @@ function renderUserCatDash(){
     div.style.cssText=`background:${bg};border:2px solid ${border};border-radius:16px;padding:18px;`;
     div.innerHTML=`
       <div style="font-size:1.8rem;margin-bottom:8px">${CAT_ICONS[cat]||'📁'}</div>
-      <div style="font-size:.85rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(cat)}</div>
+      <div style="font-size:.85rem;font-weight:800;color:var(--text);line-height:1.3;margin-bottom:4px">${esc(catDisplayName(cat))}</div>
       <div style="font-size:.7rem;color:var(--muted);margin-bottom:12px">${CAT_DESC[cat]||''}</div>
       ${isPending
         ?`<div style="font-size:.72rem;font-weight:700;color:#111111;background:#ffedd5;padding:5px 12px;border-radius:20px;display:inline-block">⏳ Awaiting Admin Approval</div>`
@@ -2444,7 +2444,7 @@ function renderCatAccessAdmin(){
       <div style="font-size:1.3rem">${CAT_ICONS[r.cat]||'📁'}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:.8rem;font-weight:700">${esc(r.userName)}</div>
-        <div style="font-size:.7rem;color:var(--muted)">${esc(r.cat)} · ${dt}</div>
+        <div style="font-size:.7rem;color:var(--muted)">${esc(catDisplayName(r.cat))} · ${dt}</div>
       </div>
       <button onclick="approveCatAccess('${r.id}')" style="background:#fff3d6;color:#111111;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">✅ Approve</button>
       <button onclick="rejectCatAccess('${r.id}')" style="background:#ffedd5;color:#111111;border:none;border-radius:7px;padding:5px 10px;font-size:.72rem;font-weight:700;cursor:pointer">❌ Reject</button>
@@ -3247,7 +3247,7 @@ function updateUserChip(u){
       spr.textContent='⚙️ Admin';spr.className='sidebar-profile-role role-admin';
     } else {
       const cat=getUserAllowedCats(u.id||u.userId||'')[0]||null;
-      const catShort=cat?cat.replace(' Services','').replace(' &','&'):'No Category';
+      const catShort=cat?catDisplayName(cat):'No Category';
       spr.style.color='#111111';
   spr.innerHTML='👤 User'+(cat?` &nbsp;<span style="opacity:.7;font-size:.6rem">· ${catShort}</span>`:'');
       spr.className='sidebar-profile-role role-user';
