@@ -2714,9 +2714,13 @@ function openAddBillModal(){
   resetBillForm();
   document.getElementById('billModalTitle').textContent='Add One Time Bill';
   document.getElementById('billSaveBtn').textContent='💾 Save Bill';
-  // For non-admin: lock type to approved category
   const session=getSession();
-  if(session&&session.role!=='admin'){
+  const isAdmin=session&&session.role==='admin';
+  // Show/hide admin-only fields
+  const af=document.getElementById('billAdminFields');
+  if(af)af.style.display=isAdmin?'block':'none';
+  // For non-admin: lock type to approved category
+  if(!isAdmin){
     const cat=window._activeCat||(getUserAllowedCats(session.userId)[0]||'');
     if(cat){
       const typeEl=document.getElementById('billType');
@@ -2725,13 +2729,16 @@ function openAddBillModal(){
     }
   }
   populateManagerDropdown('billManagerSel');
-  if(!document.getElementById('billDate').value)document.getElementById('billDate').value=new Date().toISOString().split('T')[0];
+  if(isAdmin)document.getElementById('billDate').value=new Date().toISOString().split('T')[0];
   document.getElementById('billModal').classList.add('open');
 }
 
 function openEditBillModal(id){
   const b=bills.find(x=>x.id===id); if(!b)return;
   resetBillForm();
+  const _editSess=getSession();const _editAdmin=_editSess&&_editSess.role==='admin';
+  const _af=document.getElementById('billAdminFields');
+  if(_af)_af.style.display=_editAdmin?'block':'none';
   document.getElementById('billModalTitle').textContent='✏️ Edit Bill';
   document.getElementById('billSaveBtn').textContent='💾 Save Changes';
   document.getElementById('billEditId').value=b.id;
