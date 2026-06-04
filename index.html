@@ -786,6 +786,9 @@
       <button class="nav-item" onclick="showSection('monthly')" id="nav-monthly">
         <span class="nav-icon">📅</span><span class="nav-label">Monthly Statement</span>
       </button>
+      <button class="nav-item" onclick="showSection('clientmgmt')" id="nav-clientmgmt">
+        <span class="nav-icon">🏢</span><span class="nav-label">Client Management</span>
+      </button>
       <button class="nav-item" onclick="showSection('notifications')" id="nav-notifications">
         <span class="nav-icon">🔔</span><span class="nav-label">Notifications</span>
       </button>
@@ -1045,6 +1048,9 @@
         <button class="filter-btn active" onclick="setBillFilter('all')" id="bill-filter-all">All</button>
         <button class="filter-btn" onclick="setBillFilter('billed')" id="bill-filter-billed" style="background:#fff3d6;border-color:#f8a006">🧾 Billed</button>
         <button class="filter-btn" onclick="setBillFilter('unbilled')" id="bill-filter-unbilled" style="background:#ffedd5;border-color:#f97316">📋 Pending</button>
+        <button class="filter-btn" onclick="setBillFilter('in_progress')" id="bill-filter-inprogress" style="background:#ffedd5;border-color:#f97316">🔄 In Progress</button>
+        <button class="filter-btn" onclick="setBillFilter('completed')" id="bill-filter-completed" style="background:#fff3d6;border-color:#f8a006">✅ Completed</button>
+        <button class="filter-btn" onclick="setBillFilter('approved')" id="bill-filter-approved" style="background:#fff3d6;border-color:#f8a006">👍 Approved</button>
       </div>
       <div class="agreements-list" id="billList" style="padding:0 16px 90px"></div>
       <button class="fab" onclick="openAddBillModal()">＋</button>
@@ -1089,6 +1095,78 @@
           <div style="overflow-x:auto"><table id="monthlyBillTable" style="width:100%;border-collapse:collapse;font-size:.78rem"></table></div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- ════ SECTION: CLIENT MANAGEMENT ══════════════════════ -->
+    <div class="section" id="sec-clientmgmt">
+      <div style="padding:16px 16px 0;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <div style="font-size:1rem;font-weight:800">🏢 Client Management</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Recurring tasks for clients — tick to mark for billing</div>
+        </div>
+        <button onclick="openAddClientTask()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:10px 18px;font-size:.82rem;font-weight:700;cursor:pointer">+ Add Task</button>
+      </div>
+      <div style="padding:0 16px">
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
+          <button class="filter-btn active" onclick="setClientTaskFilter('all')" id="ct-filter-all">All</button>
+          <button class="filter-btn" onclick="setClientTaskFilter('pending')" id="ct-filter-pending" style="background:#ffedd5;border-color:#f97316">⏳ Pending</button>
+          <button class="filter-btn" onclick="setClientTaskFilter('billed')" id="ct-filter-billed" style="background:#fff3d6;border-color:#f8a006">💰 Mark for Billing</button>
+          <button class="filter-btn" onclick="setClientTaskFilter('in_progress')" id="ct-filter-inprogress" style="background:#ffedd5;border-color:#f97316">🔄 In Progress</button>
+          <button class="filter-btn" onclick="setClientTaskFilter('completed')" id="ct-filter-completed" style="background:#fff3d6;border-color:#f8a006">✅ Completed</button>
+        </div>
+        <div id="clientTaskList" style="padding-bottom:90px"></div>
+      </div>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div class="modal-overlay" id="clientTaskModal">
+      <div class="modal-card" style="max-width:520px">
+        <div class="modal-title">Add Client Task</div>
+        <div class="form-group"><label>Client Name *</label><input type="text" id="ctClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
+        <div class="form-group"><label>Task Description *</label><textarea id="ctDesc" rows="2" placeholder="e.g. Monthly GST Filing, Quarterly TDS Return..."></textarea></div>
+        <div class="form-group"><label>Service Category</label>
+          <select id="ctCategory" style="font-family:inherit">
+            <option value="">— Select Category —</option>
+            <option>FinOPS</option>
+            <option>CS Retainer</option>
+            <option>Advisory</option>
+            <option>Audit &amp; Assurance</option>
+            <option>Taxation</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Frequency</label>
+            <select id="ctFrequency" style="font-family:inherit">
+              <option value="">— Select —</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="half_yearly">Half Yearly</option>
+              <option value="yearly">Yearly</option>
+              <option value="one_time">One Time</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Due Date</label><input type="date" id="ctDueDate"/></div>
+        </div>
+        <div class="form-group"><label>Task Status</label>
+          <select id="ctStatus" style="font-family:inherit">
+            <option value="pending">⏳ Pending</option>
+            <option value="in_progress">🔄 In Progress</option>
+            <option value="completed">✅ Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="ctMarkBilling" style="accent-color:#f97316;width:16px;height:16px"/>
+            <span>Mark for Billing <span style="font-size:.7rem;color:var(--muted)">(task will appear in pending bills)</span></span>
+          </label>
+        </div>
+        <div class="form-group"><label>Notes</label><textarea id="ctNotes" rows="2" placeholder="Any additional notes..."></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-primary" type="button" onclick="saveClientTask()" style="flex:1">💾 Save Task</button>
+          <button class="btn-secondary" type="button" onclick="closeModal('clientTaskModal')">Cancel</button>
+        </div>
+        <input type="hidden" id="ctEditId"/>
       </div>
     </div>
 
@@ -1588,6 +1666,14 @@
           <input type="text" id="billSpecialService" placeholder="e.g. Describe the service or billing details..."/>
         </div>
         <div class="form-group">
+          <label>Task Status</label>
+          <select id="billTaskStatus" style="font-family:inherit">
+            <option value="">— Select Status —</option>
+            <option value="in_progress">🔄 In Progress</option>
+            <option value="completed">✅ Completed</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label>Quote Amount (₹)</label>
           <input type="number" id="billQuoteAmount" placeholder="e.g. 30000" min="0" step="0.01"/>
           <div style="font-size:.68rem;color:var(--muted);margin-top:3px">Amount quoted to client</div>
@@ -1614,6 +1700,29 @@
             <option value="">— Select Manager —</option>
           </select>
           <input type="hidden" id="billManager"/>
+        </div>
+        <div class="form-group">
+          <label>Client Approval</label>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.85rem;font-weight:600">
+              <input type="radio" name="billApproval" id="billApprovalYes" value="yes" onchange="onBillApprovalChange()" style="accent-color:#f97316"/> Yes
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.85rem;font-weight:600">
+              <input type="radio" name="billApproval" id="billApprovalNo" value="no" onchange="onBillApprovalChange()" style="accent-color:#f97316"/> No
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:.85rem;font-weight:600">
+              <input type="radio" name="billApproval" id="billApprovalPending" value="" checked onchange="onBillApprovalChange()" style="accent-color:#f97316"/> Pending
+            </label>
+          </div>
+        </div>
+        <div id="billApprovalAttach" style="display:none" class="form-group">
+          <label>Approval Attachment <span style="font-size:.7rem;color:var(--muted)">(email/doc from client)</span></label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <input type="file" id="billApprovalFile" accept=".pdf,.doc,.docx,.eml,.msg,.jpg,.png" style="display:none" onchange="onBillApprovalFile(event)"/>
+            <button type="button" onclick="document.getElementById('billApprovalFile').click()" style="background:#ffedd5;border:1.5px solid #fed7aa;color:#111111;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">📎 Attach</button>
+            <span id="billApprovalFileName" style="font-size:.74rem;color:var(--muted)"></span>
+            <button type="button" id="billApprovalClear" style="display:none;background:none;border:none;color:#ea580c;cursor:pointer" onclick="clearBillApproval()">✕</button>
+          </div>
         </div>
       </div>
 
@@ -1952,13 +2061,13 @@ function refreshCurrentSection(){
 }
 
 function showSection(name){
-  ['userdash','dashboard','agreements','billing','monthly','notifications','export','admin'].forEach(s=>{
+  ['userdash','dashboard','agreements','billing','monthly','clientmgmt','notifications','export','admin'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
     const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===name);
   });
-  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
+  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',clientmgmt:'Client Management',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
   if(name==='admin'){renderSubReqAdmin();renderCatAccessAdmin();updateZohoStatus();updateAiApiStatus();}
@@ -1977,6 +2086,7 @@ function showSection(name){
   if(name==='agreements'){renderAgreements();}
   if(name==='billing'){renderBills();}
   if(name==='monthly'){initMonthly();}
+  if(name==='clientmgmt'){renderClientTasks();}
   closeSidebar();
 }
 
@@ -2246,9 +2356,149 @@ function hideBillAddSub(){
 function setBillFilter(f){
   window._billFilter=f;
   document.querySelectorAll('[id^="bill-filter-"]').forEach(b=>b.classList.remove('active'));
-  const el=document.getElementById('bill-filter-'+f);if(el)el.classList.add('active');
+  const idMap={all:'all',billed:'billed',unbilled:'unbilled',in_progress:'inprogress',completed:'completed',approved:'approved'};
+  const el=document.getElementById('bill-filter-'+(idMap[f]||f));if(el)el.classList.add('active');
   renderBills();
 }
+// ══ BILL APPROVAL ══════════════════════════════════
+function onBillApprovalChange(){
+  const val=(document.querySelector('input[name="billApproval"]:checked')||{value:''}).value;
+  const box=document.getElementById('billApprovalAttach');
+  if(box)box.style.display=val==='yes'?'block':'none';
+}
+function onBillApprovalFile(e){
+  const file=e.target.files[0];if(!file)return;
+  document.getElementById('billApprovalFileName').textContent=file.name;
+  document.getElementById('billApprovalClear').style.display='inline';
+  e.target.dataset.fname=file.name;
+  const r=new FileReader();r.onload=ev=>{e.target.dataset.b64=ev.target.result;};r.readAsDataURL(file);
+}
+function clearBillApproval(){
+  const fi=document.getElementById('billApprovalFile');if(fi){fi.value='';delete fi.dataset.fname;delete fi.dataset.b64;}
+  const fn=document.getElementById('billApprovalFileName');if(fn)fn.textContent='';
+  const cl=document.getElementById('billApprovalClear');if(cl)cl.style.display='none';
+}
+
+// ══ CLIENT MANAGEMENT ══════════════════════════════
+let clientTasks=JSON.parse(localStorage.getItem('elClientTasks')||'[]');
+function saveClientTasksToStorage(){localStorage.setItem('elClientTasks',JSON.stringify(clientTasks));}
+
+let _ctFilter='all';
+function setClientTaskFilter(f){
+  _ctFilter=f;
+  document.querySelectorAll('[id^="ct-filter-"]').forEach(b=>b.classList.remove('active'));
+  const idMap={all:'all',pending:'pending',billed:'billed',in_progress:'inprogress',completed:'completed'};
+  const el=document.getElementById('ct-filter-'+(idMap[f]||f));if(el)el.classList.add('active');
+  renderClientTasks();
+}
+
+function renderClientTasks(){
+  const el=document.getElementById('clientTaskList');if(!el)return;
+  const sess=getSession();const isAdmin=sess&&sess.role==='admin';
+  let list=isAdmin?clientTasks:clientTasks.filter(t=>
+    !t.category||(sess&&getUserAllowedCats(sess.userId||sess.id||'').map(catDisplayName).includes(t.category))
+  );
+  if(_ctFilter==='pending') list=list.filter(t=>t.status==='pending');
+  else if(_ctFilter==='in_progress') list=list.filter(t=>t.status==='in_progress');
+  else if(_ctFilter==='completed') list=list.filter(t=>t.status==='completed');
+  else if(_ctFilter==='billed') list=list.filter(t=>t.markBilling);
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div><div style="font-size:.82rem;margin-top:4px">Click + Add Task to create one</div></div>';return;}
+  const stColors={pending:'#f97316',in_progress:'#f8a006',completed:'#16a34a'};
+  const stLabels={pending:'⏳ Pending',in_progress:'🔄 In Progress',completed:'✅ Completed'};
+  el.innerHTML=list.map(t=>`<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid ${stColors[t.status]||'#fed7aa'}">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <input type="checkbox" ${t.markBilling?'checked':''} onchange="toggleClientTaskBilling('${t.id}',this.checked)"
+        style="width:18px;height:18px;accent-color:#f97316;flex-shrink:0;margin-top:2px" title="Mark for billing"/>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:.88rem">${esc(t.client||'')}</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-top:2px">${esc(t.desc||'')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+          <span style="font-size:.68rem;font-weight:700;background:${stColors[t.status]||'#ffedd5'}22;color:${stColors[t.status]||'#f97316'};padding:2px 8px;border-radius:10px;border:1px solid ${stColors[t.status]||'#fed7aa'}">${stLabels[t.status]||t.status}</span>
+          ${t.category?`<span style="font-size:.68rem;background:#ffedd5;color:#111111;padding:2px 8px;border-radius:10px">${esc(t.category)}</span>`:''}
+          ${t.frequency?`<span style="font-size:.68rem;background:#fff3d6;color:#111111;padding:2px 8px;border-radius:10px">${t.frequency}</span>`:''}
+          ${t.dueDate?`<span style="font-size:.68rem;color:var(--muted)">📅 ${fDate(t.dueDate)}</span>`:''}
+          ${t.markBilling?'<span style="font-size:.68rem;font-weight:700;background:#fff3d6;color:#111111;padding:2px 8px;border-radius:10px;border:1px solid #f8a006">💰 For Billing</span>':''}
+        </div>
+        ${t.notes?`<div style="font-size:.72rem;color:var(--muted);margin-top:4px">📝 ${esc(t.notes)}</div>`:''}
+      </div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <select onchange="updateClientTaskStatus('${t.id}',this.value)" style="font-size:.7rem;padding:4px 6px;border:1.5px solid #fed7aa;border-radius:8px;font-family:inherit;cursor:pointer">
+          <option value="pending" ${t.status==='pending'?'selected':''}>⏳ Pending</option>
+          <option value="in_progress" ${t.status==='in_progress'?'selected':''}>🔄 In Progress</option>
+          <option value="completed" ${t.status==='completed'?'selected':''}>✅ Completed</option>
+        </select>
+        <button onclick="openEditClientTask('${t.id}')" style="background:#ffedd5;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:.8rem">✏️</button>
+        <button onclick="deleteClientTask('${t.id}')" style="background:#ffedd5;border:none;border-radius:8px;padding:4px 8px;cursor:pointer;font-size:.8rem">🗑</button>
+      </div>
+    </div>
+  </div>`).join('');
+}
+
+function openAddClientTask(){
+  document.getElementById('ctClient').value='';
+  document.getElementById('ctDesc').value='';
+  document.getElementById('ctCategory').value='';
+  document.getElementById('ctFrequency').value='';
+  document.getElementById('ctDueDate').value='';
+  document.getElementById('ctStatus').value='pending';
+  document.getElementById('ctMarkBilling').checked=false;
+  document.getElementById('ctNotes').value='';
+  document.getElementById('ctEditId').value='';
+  document.getElementById('clientTaskModal').classList.add('open');
+}
+
+function openEditClientTask(id){
+  const t=clientTasks.find(x=>x.id===id);if(!t)return;
+  document.getElementById('ctClient').value=t.client||'';
+  document.getElementById('ctDesc').value=t.desc||'';
+  document.getElementById('ctCategory').value=t.category||'';
+  document.getElementById('ctFrequency').value=t.frequency||'';
+  document.getElementById('ctDueDate').value=t.dueDate||'';
+  document.getElementById('ctStatus').value=t.status||'pending';
+  document.getElementById('ctMarkBilling').checked=!!t.markBilling;
+  document.getElementById('ctNotes').value=t.notes||'';
+  document.getElementById('ctEditId').value=t.id;
+  document.getElementById('clientTaskModal').classList.add('open');
+}
+
+function saveClientTask(){
+  const client=document.getElementById('ctClient').value.trim();
+  const desc=document.getElementById('ctDesc').value.trim();
+  if(!client||!desc){showToast('⚠️ Client name and description are required');return;}
+  const editId=document.getElementById('ctEditId').value;
+  const task={
+    id:editId||'ct'+Date.now(),
+    client,desc,
+    category:document.getElementById('ctCategory').value,
+    frequency:document.getElementById('ctFrequency').value,
+    dueDate:document.getElementById('ctDueDate').value,
+    status:document.getElementById('ctStatus').value,
+    markBilling:document.getElementById('ctMarkBilling').checked,
+    notes:document.getElementById('ctNotes').value.trim(),
+    createdAt:editId?(clientTasks.find(x=>x.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString()
+  };
+  if(editId){const i=clientTasks.findIndex(x=>x.id===editId);if(i>-1)clientTasks[i]=task;else clientTasks.unshift(task);}
+  else clientTasks.unshift(task);
+  saveClientTasksToStorage();
+  closeModal('clientTaskModal');
+  renderClientTasks();
+  showToast(editId?'✅ Task updated!':'✅ Task added!');
+}
+
+function toggleClientTaskBilling(id,checked){
+  const t=clientTasks.find(x=>x.id===id);if(t){t.markBilling=checked;saveClientTasksToStorage();renderClientTasks();}
+}
+
+function updateClientTaskStatus(id,status){
+  const t=clientTasks.find(x=>x.id===id);if(t){t.status=status;saveClientTasksToStorage();renderClientTasks();}
+}
+
+function deleteClientTask(id){
+  if(!confirm('Delete this task?'))return;
+  clientTasks=clientTasks.filter(x=>x.id!==id);
+  saveClientTasksToStorage();renderClientTasks();showToast('Task deleted');
+}
+
 function onBillInvoiceInput(){
   // When invoice number is added, auto-tag as billed
   const inv=document.getElementById('billInvoice').value.trim();
@@ -2740,6 +2990,10 @@ function resetBillForm(){
   ['billAmount','billQuoteAmount','billInvoice','billClient','billPan','billContact','billContactInfo','billGst','billNotes','billSpecialService','billAddrLine1','billAddrArea','billAddrPin']
     .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); 
   ['billAddrCountry','billAddrState','billAddrCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('input[name="billApproval"]').forEach(r=>{r.checked=r.value===''});
+  document.getElementById('billApprovalAttach').style.display='none';
+  clearBillApproval&&clearBillApproval();
+  const bts=document.getElementById('billTaskStatus');if(bts)bts.value='';
   const bd=document.getElementById('billDate');if(bd)bd.value='';
   const bt=document.getElementById('billType');if(bt){bt.value='';bt.disabled=false;}
   populateParentGroupDropdown('billParentGroup');
@@ -2806,6 +3060,10 @@ function openEditBillModal(id){
   document.getElementById('billAmount').value=b.amount||'';
   document.getElementById('billInvoice').value=b.invoice||'';
   document.getElementById('billClient').value=b.client||'';
+  const _bAppr=b.clientApproval||'';
+  document.querySelectorAll('input[name="billApproval"]').forEach(r=>{r.checked=r.value===_bAppr;});
+  document.getElementById('billApprovalAttach').style.display=(_bAppr==='yes')?'block':'none';
+  const _bts=document.getElementById('billTaskStatus');if(_bts)_bts.value=b.taskStatus||'';
   if(b.address&&typeof b.address==='object'){
     const _ba=b.address;
     ['Line1','Area','Pin'].forEach(f=>{const el=document.getElementById('billAddr'+f);if(el)el.value=_ba[f.toLowerCase()]||'';});
@@ -2867,6 +3125,10 @@ function saveBill(){
       city:(document.getElementById('billAddrCity')?document.getElementById('billAddrCity').value||'':''),
       pin:(document.getElementById('billAddrPin')?document.getElementById('billAddrPin').value||'':'')
     },
+    clientApproval:(document.querySelector('input[name="billApproval"]:checked')||{value:''}).value,
+    approvalFileName:document.getElementById('billApprovalFile').dataset.fname||'',
+    approvalFileData:document.getElementById('billApprovalFile').dataset.b64||'',
+    taskStatus:document.getElementById('billTaskStatus').value||'',
     notes: document.getElementById('billNotes').value.trim(),
     createdAt: editId?(bills.find(b=>b.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString()
   };
@@ -2900,6 +3162,9 @@ function renderBills(){
   if(!_bAdmin&&_bAllowed) list=list.filter(b=>_bAllowed.includes(b.type));
   if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
   else if(_billFilterMode==='unbilled') list=list.filter(b=>!b.invoice||!b.invoice.trim());
+  else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
+  else if(_billFilterMode==='completed') list=list.filter(b=>b.taskStatus==='completed');
+  else if(_billFilterMode==='approved') list=list.filter(b=>b.clientApproval==='yes');
   if(!list.length){
     el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:12px">🧾</div><div style="font-weight:700;font-size:1rem;margin-bottom:6px">No one-time bills yet</div><div style="font-size:.82rem">Tap + to add your first bill</div></div>';
     return;
@@ -3316,7 +3581,7 @@ function updateUserChip(u){
     if(isAdmin){el.style.display='flex';}
     else{
       // Users see: notifications, monthly, export (after category approval); agreements/billing shown dynamically
-      const userVisible=['nav-notifications','nav-monthly','nav-export','nav-agreements','nav-billing'];
+      const userVisible=['nav-notifications','nav-monthly','nav-clientmgmt','nav-export','nav-agreements','nav-billing'];
       el.style.display=userVisible.includes(id)?'flex':'none';
     }
   });
