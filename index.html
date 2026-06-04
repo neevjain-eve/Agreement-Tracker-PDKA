@@ -4479,6 +4479,49 @@ async function deleteFile(agrId,fileId){
 // ══════════════════════════════════════════════════
 // MODALS
 // ══════════════════════════════════════════════════
+// ══ WORLD ADDRESS DATA ══════════════════════════════
+const WORLD_DATA={
+"India":{"Andhra Pradesh":["Visakhapatnam","Vijayawada","Guntur","Nellore","Kurnool","Tirupati","Rajahmundry","Kakinada"],"Arunachal Pradesh":["Itanagar","Naharlagun","Pasighat"],"Assam":["Guwahati","Dibrugarh","Silchar","Jorhat","Nagaon"],"Bihar":["Patna","Gaya","Bhagalpur","Muzaffarpur","Darbhanga"],"Chhattisgarh":["Raipur","Bilaspur","Durg","Bhilai","Korba"],"Goa":["Panaji","Margao","Vasco da Gama","Mapusa"],"Gujarat":["Ahmedabad","Surat","Vadodara","Rajkot","Gandhinagar","Bhavnagar","Jamnagar","Anand"],"Haryana":["Gurugram","Faridabad","Hisar","Rohtak","Karnal","Panipat","Ambala","Sonipat"],"Himachal Pradesh":["Shimla","Dharamsala","Solan","Mandi","Palampur"],"Jharkhand":["Ranchi","Jamshedpur","Dhanbad","Bokaro","Hazaribagh"],"Karnataka":["Bengaluru","Mysuru","Mangaluru","Hubballi","Belagavi","Davangere","Shivamogga","Tumkur"],"Kerala":["Thiruvananthapuram","Kochi","Kozhikode","Thrissur","Kollam","Palakkad","Alappuzha","Kannur"],"Madhya Pradesh":["Bhopal","Indore","Gwalior","Jabalpur","Ujjain","Sagar","Rewa"],"Maharashtra":["Mumbai","Pune","Nagpur","Nashik","Aurangabad","Solapur","Kolhapur","Amravati","Navi Mumbai","Thane"],"Manipur":["Imphal","Thoubal"],"Meghalaya":["Shillong","Tura"],"Mizoram":["Aizawl","Lunglei"],"Nagaland":["Kohima","Dimapur"],"Odisha":["Bhubaneswar","Cuttack","Rourkela","Berhampur","Sambalpur","Puri"],"Punjab":["Ludhiana","Amritsar","Jalandhar","Patiala","Bathinda","Mohali"],"Rajasthan":["Jaipur","Jodhpur","Udaipur","Kota","Ajmer","Bikaner","Alwar","Sikar"],"Sikkim":["Gangtok","Namchi"],"Tamil Nadu":["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem","Tirunelveli","Tiruppur","Erode","Vellore"],"Telangana":["Hyderabad","Warangal","Nizamabad","Karimnagar","Khammam"],"Tripura":["Agartala","Dharmanagar"],"Uttar Pradesh":["Lucknow","Kanpur","Agra","Varanasi","Prayagraj","Meerut","Noida","Ghaziabad","Bareilly","Aligarh","Gorakhpur"],"Uttarakhand":["Dehradun","Haridwar","Roorkee","Haldwani","Rishikesh","Nainital"],"West Bengal":["Kolkata","Asansol","Siliguri","Durgapur","Bardhaman","Howrah"],"Delhi":["New Delhi","Dwarka","Rohini","Janakpuri","Lajpat Nagar","Karol Bagh","Saket","Pitampura"],"Jammu & Kashmir":["Srinagar","Jammu","Anantnag","Baramulla"],"Ladakh":["Leh","Kargil"],"Puducherry":["Puducherry","Karaikal"],"Chandigarh":["Chandigarh"],"Andaman & Nicobar":["Port Blair"],"Lakshadweep":["Kavaratti"],"Dadra & Nagar Haveli and Daman & Diu":["Silvassa","Daman","Diu"]},
+"United States":{"California":["Los Angeles","San Francisco","San Diego","San Jose","Sacramento","Fresno","Oakland"],"New York":["New York City","Buffalo","Rochester","Yonkers","Syracuse","Albany"],"Texas":["Houston","Dallas","San Antonio","Austin","Fort Worth","El Paso","Arlington"],"Florida":["Miami","Orlando","Tampa","Jacksonville","Fort Lauderdale","Tallahassee"],"Illinois":["Chicago","Aurora","Rockford","Joliet","Naperville","Springfield"],"Pennsylvania":["Philadelphia","Pittsburgh","Allentown","Erie"],"Ohio":["Columbus","Cleveland","Cincinnati","Toledo","Akron"],"Georgia":["Atlanta","Augusta","Columbus","Savannah"],"Michigan":["Detroit","Grand Rapids","Warren","Lansing"],"Washington":["Seattle","Spokane","Tacoma","Bellevue"],"Arizona":["Phoenix","Tucson","Mesa","Scottsdale","Glendale"],"Massachusetts":["Boston","Worcester","Springfield","Cambridge"],"Tennessee":["Nashville","Memphis","Knoxville","Chattanooga"],"Indiana":["Indianapolis","Fort Wayne","Evansville","South Bend"],"Missouri":["Kansas City","St. Louis","Springfield"]},
+"United Kingdom":{"England":["London","Manchester","Birmingham","Leeds","Liverpool","Sheffield","Bristol","Newcastle","Nottingham"],"Scotland":["Edinburgh","Glasgow","Aberdeen","Dundee","Inverness"],"Wales":["Cardiff","Swansea","Newport","Wrexham"],"Northern Ireland":["Belfast","Derry","Lisburn","Newry"]},
+"Canada":{"Ontario":["Toronto","Ottawa","Mississauga","Brampton","Hamilton","London","Markham"],"Quebec":["Montreal","Quebec City","Laval","Gatineau","Longueuil"],"British Columbia":["Vancouver","Surrey","Burnaby","Richmond","Kelowna"],"Alberta":["Calgary","Edmonton","Red Deer","Lethbridge"],"Manitoba":["Winnipeg","Brandon"],"Saskatchewan":["Saskatoon","Regina"]},
+"Australia":{"New South Wales":["Sydney","Newcastle","Wollongong","Canberra"],"Victoria":["Melbourne","Geelong","Ballarat","Bendigo"],"Queensland":["Brisbane","Gold Coast","Sunshine Coast","Townsville"],"Western Australia":["Perth","Fremantle","Mandurah","Bunbury"],"South Australia":["Adelaide","Mount Gambier","Whyalla"],"Tasmania":["Hobart","Launceston","Devonport"]},
+"United Arab Emirates":{"Dubai":["Dubai","Deira","Bur Dubai","Jumeirah","Al Quoz"],"Abu Dhabi":["Abu Dhabi","Al Ain","Khalifa City"],"Sharjah":["Sharjah","Khor Fakkan"],"Ajman":["Ajman"],"Ras Al Khaimah":["Ras Al Khaimah"],"Fujairah":["Fujairah","Dibba"],"Umm Al Quwain":["Umm Al Quwain"]},
+"Singapore":{"Singapore":["Singapore","Jurong","Woodlands","Tampines","Ang Mo Kio","Bedok"]},
+"Germany":{"Bavaria":["Munich","Nuremberg","Augsburg","Regensburg"],"Berlin":["Berlin"],"Hamburg":["Hamburg"],"Hesse":["Frankfurt","Wiesbaden","Kassel"],"North Rhine-Westphalia":["Cologne","Dusseldorf","Dortmund","Essen","Duisburg"]},
+"France":{"Ile-de-France":["Paris","Boulogne-Billancourt","Argenteuil"],"Auvergne-Rhone-Alpes":["Lyon","Grenoble","Saint-Etienne"],"Provence-Alpes-Cote d Azur":["Marseille","Nice","Toulon"]},
+"Japan":{"Tokyo":["Tokyo","Shinjuku","Shibuya","Harajuku"],"Osaka":["Osaka","Sakai"],"Kanagawa":["Yokohama","Kawasaki"],"Aichi":["Nagoya","Toyota"],"Hokkaido":["Sapporo","Asahikawa"],"Kyoto":["Kyoto"],"Fukuoka":["Fukuoka","Kitakyushu"]},
+"South Africa":{"Gauteng":["Johannesburg","Pretoria","Soweto"],"Western Cape":["Cape Town","Stellenbosch"],"KwaZulu-Natal":["Durban","Pietermaritzburg"]},
+"Other":{"Other":["Other"]}
+};
+
+function populateAddrCountries(prefix){
+  const sel=document.getElementById(prefix+'AddrCountry');
+  if(!sel)return;
+  sel.innerHTML='<option value="">Select Country</option>';
+  const countries=Object.keys(WORLD_DATA).sort((a,b)=>a==='India'?-1:b==='India'?1:a.localeCompare(b));
+  countries.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+}
+function onAddrCountryChange(prefix,presetState,presetCity){
+  const country=document.getElementById(prefix+'AddrCountry').value;
+  const stSel=document.getElementById(prefix+'AddrState');
+  const cSel=document.getElementById(prefix+'AddrCity');
+  stSel.innerHTML='<option value="">Select State / Province</option>';
+  cSel.innerHTML='<option value="">Select City</option>';
+  if(!country||!WORLD_DATA[country])return;
+  Object.keys(WORLD_DATA[country]).sort().forEach(st=>{const o=document.createElement('option');o.value=st;o.textContent=st;stSel.appendChild(o);});
+  if(presetState){stSel.value=presetState;onAddrStateChange(prefix,presetCity);}
+}
+function onAddrStateChange(prefix,presetCity){
+  const country=document.getElementById(prefix+'AddrCountry').value;
+  const state=document.getElementById(prefix+'AddrState').value;
+  const cSel=document.getElementById(prefix+'AddrCity');
+  cSel.innerHTML='<option value="">Select City</option>';
+  if(!country||!state||!WORLD_DATA[country]||!WORLD_DATA[country][state])return;
+  WORLD_DATA[country][state].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;cSel.appendChild(o);});
+  if(presetCity)cSel.value=presetCity;
+}
+
 function resetForm(){
   ['agrName','agrClient','agrStart','agrEnd','agrNotes','agrPan','agrContact','agrContactInfo','agrGst','agrToEmail1','agrToEmail2','agrCcEmails','agrAddrLine1','agrAddrArea','agrAddrPin'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   ['agrAddrCountry','agrAddrState','agrAddrCity'].forEach(id=>{const el=document.getElementById(id);if(el)el.selectedIndex=0;});
