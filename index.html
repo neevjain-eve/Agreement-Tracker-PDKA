@@ -2765,13 +2765,14 @@ function openAddBillModal(){
   }
   populateManagerDropdown('billManagerSel');
   populateAddrCountries('bill');
-  if(isAdmin)document.getElementById('billDate').value=new Date().toISOString().split('T')[0];
+  if(isAdmin){const _bd=document.getElementById('billDate');if(_bd)_bd.value=new Date().toISOString().split('T')[0];}
   document.getElementById('billModal').classList.add('open');
 }
 
 function openEditBillModal(id){
   const b=bills.find(x=>x.id===id); if(!b)return;
   resetBillForm();
+  populateAddrCountries('bill');
   const _editSess=getSession();const _editAdmin=_editSess&&_editSess.role==='admin';
   const _af=document.getElementById('billAdminFields');
   if(_af)_af.style.display=_editAdmin?'block':'none';
@@ -4533,11 +4534,12 @@ function selectElType(elType){
     }
   }
   populateManagerDropdown('agrManagerSel');
+  populateAddrCountries('agr');
   document.getElementById('addModal').classList.add('open');
 }
 function openEditModal(id){
   const a=agreements.find(x=>x.id===id);if(!a)return;
-  resetForm();document.getElementById('modalTitle').textContent='✏️ Edit Agreement';document.getElementById('saveBtn').textContent='💾 Save Changes';
+  resetForm();populateAddrCountries('agr');document.getElementById('modalTitle').textContent='✏️ Edit Agreement';document.getElementById('saveBtn').textContent='💾 Save Changes';
   document.getElementById('editId').value=a.id;
   document.getElementById('agrName').value=a.name||'';
   const _ns=document.getElementById('agrNameSelect');
