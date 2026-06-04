@@ -2827,7 +2827,9 @@ function saveBill(){
   const client=document.getElementById('billClient').value.trim();
   const date=document.getElementById('billDate').value;
   const amount=document.getElementById('billAmount').value;
-  if(!client||!date||!amount){showToast('⚠️ Please fill all required fields');return;}
+  const _billSess=getSession();const _billIsAdmin=_billSess&&_billSess.role==='admin';
+  if(!client){showToast('⚠️ Please enter client name');return;}
+  if(_billIsAdmin&&(!date||!amount)){showToast('⚠️ Please fill billed date and amount');return;}
   const pan=document.getElementById('billPan').value.trim().toUpperCase();
   if(pan&&!validatePAN(pan)){showToast('⚠️ Invalid PAN format');return;}
   const gstRegistered=document.getElementById('billGstToggle').checked;
@@ -2847,6 +2849,14 @@ function saveBill(){
     contact: document.getElementById('billContact').value.trim(),
     contactInfo: document.getElementById('billContactInfo').value.trim(),
     pan, gstRegistered, gst: gstRegistered?gst:'',
+    address:{
+      line1:(document.getElementById('billAddrLine1')?document.getElementById('billAddrLine1').value||'':''),
+      area:(document.getElementById('billAddrArea')?document.getElementById('billAddrArea').value||'':''),
+      country:(document.getElementById('billAddrCountry')?document.getElementById('billAddrCountry').value||'':''),
+      state:(document.getElementById('billAddrState')?document.getElementById('billAddrState').value||'':''),
+      city:(document.getElementById('billAddrCity')?document.getElementById('billAddrCity').value||'':''),
+      pin:(document.getElementById('billAddrPin')?document.getElementById('billAddrPin').value||'':'')
+    },
     notes: document.getElementById('billNotes').value.trim(),
     createdAt: editId?(bills.find(b=>b.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString()
   };
@@ -4434,6 +4444,14 @@ async function saveAgreement(){
     manager:document.getElementById('agrManager').value||document.getElementById('agrManagerSel').value||'',
     contactInfo:document.getElementById('agrContactInfo').value.trim(),
     pan,gstRegistered,gst:gstRegistered?gst:'',
+    address:{
+      line1:(document.getElementById('agrAddrLine1')?document.getElementById('agrAddrLine1').value||'':''),
+      area:(document.getElementById('agrAddrArea')?document.getElementById('agrAddrArea').value||'':''),
+      country:(document.getElementById('agrAddrCountry')?document.getElementById('agrAddrCountry').value||'':''),
+      state:(document.getElementById('agrAddrState')?document.getElementById('agrAddrState').value||'':''),
+      city:(document.getElementById('agrAddrCity')?document.getElementById('agrAddrCity').value||'':''),
+      pin:(document.getElementById('agrAddrPin')?document.getElementById('agrAddrPin').value||'':'')
+    },
     notes:document.getElementById('agrNotes').value.trim(),
     toEmail1:document.getElementById('agrToEmail1').value.trim(),
     toEmail2:document.getElementById('agrToEmail2').value.trim(),
