@@ -2735,7 +2735,7 @@ function renderUserCatDash(){
     const active=agrList.filter(a=>getStatus(a)==='active').length;
     const expiring=agrList.filter(a=>getStatus(a)==='expiring').length;
     const expired=agrList.filter(a=>getStatus(a)==='expired').length;
-    const fmt=n=>'₹'+Number(n).toLocaleString('en-IN');
+    const fmt=n=>'₹'+Math.round(Number(n)||0).toLocaleString('en-IN');
     const card=(icon,label,val,sub,color,bg)=>`<div style="background:${bg};border-radius:14px;padding:16px 18px;border:1.5px solid ${color}22">
       <div style="font-size:.68rem;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${icon} ${label}</div>
       <div style="font-size:1.8rem;font-weight:900;color:${color};line-height:1">${val}</div>
@@ -5281,7 +5281,7 @@ function renderMonthly(){
   const totalAgrAmt=agrData.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
   const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
   const grandTotal=totalAgrAmt+totalBillAmt;
-  const fmt=n=>'₹'+n.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
   const mn=new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
 
   // Summary cards
@@ -5349,7 +5349,7 @@ function downloadMonthlyExcel(){
   if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded');return;}
   const{m,y,agrData,billData}=getMonthlyData();
   const mn=new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
-  const fmt=n=>n?'₹'+Number(n).toLocaleString('en-IN',{minimumFractionDigits:2}):'—';
+  const fmt=n=>n?'₹'+Math.round(Number(n)).toLocaleString('en-IN'):'—';
   const totalAgrAmt=agrData.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
   const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
   const wb=XLSX.utils.book_new();
