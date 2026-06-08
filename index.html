@@ -1524,21 +1524,15 @@
             <div class="form-group"><label>Start Date *</label><input type="date" id="agrStart"/></div>
             <div class="form-group"><label>End Date *</label><input type="date" id="agrEnd"/></div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Billing Month <span style="font-size:.7rem;color:var(--muted)">(optional)</span></label>
-              <input type="month" id="agrMonth"/>
-            </div>
-            <div class="form-group">
-              <label>Billing Frequency</label>
-              <select id="agrBillingFreq">
-                <option value="">Select frequency...</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Quarterly">Quarterly</option>
-                <option value="Half Yearly">Half Yearly</option>
-                <option value="Yearly">Yearly</option>
-              </select>
-            </div>
+          <div class="form-group">
+            <label>Billing Frequency</label>
+            <select id="agrBillingFreq">
+              <option value="">Select frequency...</option>
+              <option value="Monthly">Monthly</option>
+              <option value="Quarterly">Quarterly</option>
+              <option value="Half Yearly">Half Yearly</option>
+              <option value="Yearly">Yearly</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
@@ -3064,7 +3058,7 @@ function onBillGstToggle(){
 }
 
 function syncBillPeriodLEGACY_DISABLED(){
-  const m=document.getElementById('billPeriodMonth').value;
+  const m='';
   const y=document.getElementById('billPeriodYear').value;
   if(m&&y){
     document.getElementById('billDate').value=y+'-'+m;
@@ -3079,7 +3073,7 @@ function syncBillPeriodFromCustomLEGACY_DISABLED(){
   const e=document.getElementById('billDateCustomEnd').value;
   if(s||e){
     document.getElementById('billDate').value=(s||'')+'|'+(e||'');
-    document.getElementById('billPeriodMonth').value='';
+
     document.getElementById('billPeriodYear').value='';
   }
 }
@@ -3144,14 +3138,14 @@ function openEditBillModal(id){
   document.getElementById('billDate').value=_bd;
   if(_bd&&_bd.length===7){
     document.getElementById('billPeriodYear').value=_bd.slice(0,4);
-    document.getElementById('billPeriodMonth').value=_bd.slice(5,7);
+
     document.getElementById('billDateCustomStart').value='';
     document.getElementById('billDateCustomEnd').value='';
   } else if(_bd&&_bd.includes('|')){
     const [_s,_e]=_bd.split('|');
     document.getElementById('billDateCustomStart').value=_s||'';
     document.getElementById('billDateCustomEnd').value=_e||'';
-    document.getElementById('billPeriodMonth').value='';
+
     document.getElementById('billPeriodYear').value='';
   }
   document.getElementById('billAmount').value=b.amount||'';
@@ -4956,7 +4950,7 @@ function resetForm(){
   document.getElementById('agrAmount').value='';
   document.getElementById('agrSpecialService').value='';
   document.getElementById('agrServiceFields').style.display='none';
-  document.getElementById('agrMonth').value='';
+  const _agrM=document.getElementById('agrMonth');if(_agrM)_agrM.value='';
   document.getElementById('agrBillingFreq').value='';
   document.getElementById('gstToggle').checked=false;
   document.getElementById('gstField').classList.remove('visible');
