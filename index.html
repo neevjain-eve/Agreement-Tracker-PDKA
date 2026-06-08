@@ -1047,10 +1047,8 @@
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setBillFilter('all')" id="bill-filter-all">All</button>
         <button class="filter-btn" onclick="setBillFilter('billed')" id="bill-filter-billed" style="background:#fff3d6;border-color:#f8a006">🧾 Billed</button>
-        <button class="filter-btn" onclick="setBillFilter('unbilled')" id="bill-filter-unbilled" style="background:#ffedd5;border-color:#f97316">📋 Unbilled</button>
         <button class="filter-btn" onclick="setBillFilter('in_progress')" id="bill-filter-inprogress" style="background:#ffedd5;border-color:#f97316">🔄 In Progress</button>
         <button class="filter-btn" onclick="setBillFilter('completed')" id="bill-filter-completed" style="background:#fff3d6;border-color:#f8a006">✅ Completed</button>
-        <button class="filter-btn" onclick="setBillFilter('approved')" id="bill-filter-approved" style="background:#fff3d6;border-color:#f8a006">👍 Approved</button>
       </div>
       <div class="agreements-list" id="billList" style="padding:0 16px 90px"></div>
       <button class="fab" onclick="openAddBillModal()">＋</button>
@@ -1668,9 +1666,8 @@
         <div class="form-group">
           <label>Task Status</label>
           <select id="billTaskStatus" style="font-family:inherit">
-            <option value="">— Select Status —</option>
+            <option value="completed" selected>✅ Completed</option>
             <option value="in_progress">🔄 In Progress</option>
-            <option value="completed">✅ Completed</option>
           </select>
         </div>
         <div class="form-group">
@@ -3228,7 +3225,7 @@ function saveBill(){
     clientApproval:(document.querySelector('input[name="billApproval"]:checked')||{value:''}).value,
     approvalFileName:(document.getElementById('billApprovalFile')||{dataset:{}}).dataset.fname||'',
     approvalFileData:(document.getElementById('billApprovalFile')||{dataset:{}}).dataset.b64||'',
-    taskStatus:document.getElementById('billTaskStatus').value||'',
+    taskStatus:document.getElementById('billTaskStatus').value||'completed',
     notes: document.getElementById('billNotes').value.trim(),
     createdAt: editId?(bills.find(b=>b.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString()
   };
@@ -3261,7 +3258,7 @@ function renderBills(){
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bAllowed&&_bAllowed.length) list=list.filter(b=>b.type&&_bAllowed.includes(b.type));
   if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
-  else if(_billFilterMode==='unbilled') list=list.filter(b=>!b.invoice||!b.invoice.trim());
+
   else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
   else if(_billFilterMode==='completed') list=list.filter(b=>b.taskStatus==='completed');
   else if(_billFilterMode==='approved') list=list.filter(b=>b.clientApproval==='yes');
