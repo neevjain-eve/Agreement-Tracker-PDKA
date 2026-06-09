@@ -1270,7 +1270,7 @@
             </div>
             <div class="od-status-row">
               <div class="od-status-label">Save location</div>
-              <div class="od-status-val" style="font-size:.72rem">OneDrive / EL Tracker / agreements.json</div>
+              <div class="od-status-val" style="font-size:.72rem">OneDrive / EL Tracker / el_tracker_data.json</div>
             </div>
             <div id="odConnectedActions" style="display:none">
               <button class="btn-od-connect" onclick="odSyncNow()" style="background:#f97316;color:#000000">🔄 Sync Now</button>
@@ -2570,7 +2570,7 @@ function saveClientTask(){
   };
   if(editId){const i=clientTasks.findIndex(x=>x.id===editId);if(i>-1)clientTasks[i]=task;else clientTasks.unshift(task);}
   else clientTasks.unshift(task);
-  saveClientTasksToStorage();
+  saveClientTasksToStorage();odSyncToOneDrive();
   closeModal('clientTaskModal');
   renderClientTasks();
   showToast(editId?'✅ Task updated!':'✅ Task added!');
@@ -5467,7 +5467,8 @@ function downloadReport(){
 // ══════════════════════════════════════════════════
 const GRAPH='https://graph.microsoft.com/v1.0';
 function encodePath(path){return path.split('/').map(encodeURIComponent).join('/');}
-const OD_FILE='EL Tracker/agreements.json';
+const OD_FILE='EL Tracker/el_tracker_data.json';
+const OD_USERS_FILE_PATH='EL Tracker/el_tracker_users.json';
 const OD_ATTACH_FOLDER='EL Tracker/Attachments';
 const SCOPES=['Files.ReadWrite','User.Read','Mail.Send'];
 let msalApp=null;let odAccount=null;
@@ -5500,26 +5501,76 @@ async function getAccessToken(allowInteraction=false){
 }
 
 async function odSyncToOneDrive(){
-  if(!msalApp)return;setSyncStatus('syncing','Saving to OneDrive...');
-  const token=await getAccessToken(true);if(!token)return;
+  if(!msalApp)return;
+  const token=await getAccessToken(false);if(!token)return;
+  setSyncStatus('syncing','Saving to OneDrive...');
   try{
-    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{method:'PUT',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(agreements,null,2)});
+    const payload={
+      agreements,
+      bills,
+      clientTasks,
+      lastUpdated:new Date().toISOString(),
+      updatedBy:(getSession()||{}).username||'unknown'
+    };
+    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
-    setSyncStatus('connected','✅ Saved to OneDrive · '+new Date().toLocaleTimeString());
-  }catch(e){setSyncStatus('error','Sync failed: '+e.message)}
+    // Store token for other users (shared access)
+    try{localStorage.setItem('elOdSharedToken',token);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
+    setSyncStatus('connected','✅ Saved · '+new Date().toLocaleTimeString());
+  }catch(e){setSyncStatus('error','Save failed: '+e.message);}
 }
 
 async function odLoadFromOneDrive(allowInteraction=false){
-  if(!msalApp)return;setSyncStatus('syncing','Loading from OneDrive...');
-  const token=await getAccessToken(allowInteraction);if(!token)return;
+  const token=await getAccessToken(allowInteraction);
+  if(!token){
+    // Try shared token from admin session
+    const shared=localStorage.getItem('elOdSharedToken');
+    if(!shared)return;
+    return odLoadWithToken(shared);
+  }
+  return odLoadWithToken(token);
+}
+
+async function odLoadWithToken(token){
+  setSyncStatus('syncing','Loading from OneDrive...');
   try{
-    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{headers:{'Authorization':'Bearer '+token}});
+    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
+      headers:{'Authorization':'Bearer '+token}
+    });
     if(r.status===404){await odSyncToOneDrive();return;}
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
     const cloud=await r.json();
-    if(Array.isArray(cloud)){const cloudIds=new Set(cloud.map(a=>a.id));const localOnly=agreements.filter(a=>!cloudIds.has(a.id));const merged=[...cloud,...localOnly];for(const agr of merged)await dbPut('agreements',agr);agreements=await dbGetAll('agreements');renderAgreements();}
-    setSyncStatus('connected','✅ Loaded from OneDrive · '+new Date().toLocaleTimeString());
-  }catch(e){setSyncStatus('error','Load failed: '+e.message)}
+    // Load agreements
+    if(cloud.agreements&&Array.isArray(cloud.agreements)){
+      const cloudIds=new Set(cloud.agreements.map(a=>a.id));
+      const localOnly=agreements.filter(a=>!cloudIds.has(a.id));
+      const merged=[...cloud.agreements,...localOnly];
+      for(const agr of merged)await dbPut('agreements',agr);
+      agreements=await dbGetAll('agreements');
+      renderAgreements();
+    } else if(Array.isArray(cloud)){
+      // Legacy format
+      for(const agr of cloud)await dbPut('agreements',agr);
+      agreements=await dbGetAll('agreements');
+      renderAgreements();
+    }
+    // Load bills
+    if(cloud.bills&&Array.isArray(cloud.bills)){
+      bills=cloud.bills;
+      saveBillsToStorage();
+      renderBills();
+    }
+    // Load client tasks
+    if(cloud.clientTasks&&Array.isArray(cloud.clientTasks)){
+      clientTasks=cloud.clientTasks;
+      saveClientTasksToStorage();
+    }
+    setSyncStatus('connected','✅ Synced · '+new Date().toLocaleTimeString());
+  }catch(e){setSyncStatus('error','Load failed: '+e.message);}
 }
 
 function odConnect(){
