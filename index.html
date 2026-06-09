@@ -5495,9 +5495,61 @@ async function handleMSALRedirect(){
 async function getAccessToken(allowInteraction=false){
   if(!msalApp)return null;
   const accounts=msalApp.getAllAccounts();
-  if(accounts.length===0){if(allowInteraction){await msalApp.loginRedirect({scopes:SCOPES});}return null;}
-  try{const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});odAccount=r.account;return r.accessToken;}
-  catch(e){if(allowInteraction){try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e2){setSyncStatus('error','Login failed: '+e2.message)}}else{setSyncStatus('error','Session expired. Please sync manually.');}return null;}
+  if(accounts.length===0){
+    if(allowInteraction){await msalApp.loginRedirect({scopes:SCOPES});}
+    return null;
+  }
+  // Always try silent refresh first — works as long as user has active M365 session
+  try{
+    const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
+    odAccount=r.account;
+    // Cache token for background use
+    try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
+    return r.accessToken;
+  }catch(silentErr){
+    // Silent failed — try SSO with login_hint (no popup, no redirect, uses existing M365 session)
+    try{
+      const ssoResp=await msalApp.ssoSilent({scopes:SCOPES,loginHint:accounts[0].username});
+      odAccount=ssoResp.account;
+      try{localStorage.setItem('elOdSharedToken',ssoResp.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
+      return ssoResp.accessToken;
+    }catch(ssoErr){
+      // SSO also failed — need user interaction
+      if(allowInteraction){
+        try{await msalApp.loginRedirect({scopes:SCOPES,loginHint:accounts.length>0?accounts[0].username:undefined});}
+        catch(e2){setSyncStatus('error','Login failed: '+e2.message);}
+      } else {
+        // Try cached token if available and recent (< 50 mins)
+        const cached=localStorage.getItem('elOdSharedToken');
+        const cachedTime=parseInt(localStorage.getItem('elOdTokenTime')||'0');
+        if(cached&&(Date.now()-cachedTime)<3000000){return cached;}
+        setSyncStatus('error','Session needs refresh — open Admin Settings → OneDrive');
+      }
+      return null;
+    }
+  }
+}
+
+// ── Auto-renew token every 45 minutes (before 1hr expiry) ──
+function startTokenAutoRenew(){
+  if(window._tokenRenewTimer)clearInterval(window._tokenRenewTimer);
+  window._tokenRenewTimer=setInterval(async()=>{
+    if(!msalApp||!msalApp.getAllAccounts().length)return;
+    try{
+      const accounts=msalApp.getAllAccounts();
+      const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
+      if(r){
+        try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
+      }
+    }catch(e){
+      // Try ssoSilent as fallback
+      try{
+        const accounts=msalApp.getAllAccounts();
+        const r=await msalApp.ssoSilent({scopes:SCOPES,loginHint:accounts[0]?.username});
+        if(r){try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e2){}}
+      }catch(e2){/* Will retry in next interval */}
+    }
+  },45*60*1000); // every 45 minutes
 }
 
 async function odSyncToOneDrive(){
@@ -5840,6 +5892,12 @@ function showComposeError(msg){const el=document.getElementById('composeError');
   if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");}
   else{document.getElementById("loginScreen").style.display="flex";}
   updateZohoStatus();
+  // Renew token when user returns to the tab (e.g. from background)
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden&&msalApp&&msalApp.getAllAccounts().length>0){
+      getAccessToken(false).catch(()=>{});
+    }
+  });
 })();
 
 openDB().then(async()=>{
