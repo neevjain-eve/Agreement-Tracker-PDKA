@@ -5524,13 +5524,18 @@ async function odLoadFromOneDrive(allowInteraction=false){
 
 function odConnect(){
   const cid=(document.getElementById('odClientId').value||'').trim();if(!cid){showToast('⚠️ Please enter your Client ID');return}
-  odConfig={clientId:cid,redirectUri:getRedirectUri()};localStorage.setItem('odConfig',JSON.stringify(odConfig));
+  odConfig={clientId:cid,redirectUri:getRedirectUri()};
+  // Save under shared key so all users pick it up
+  localStorage.setItem('elOdSharedConfig',JSON.stringify(odConfig));
+  localStorage.setItem('odConfig',JSON.stringify(odConfig));
   if(initMSAL()){msalApp.loginRedirect({scopes:SCOPES});}else showToast('⚠️ Could not initialize OneDrive. Check Client ID.');
 }
 
 function odSaveClientId(){
   const cid=(document.getElementById('odClientIdWizard').value||'').trim();if(!cid){showToast('⚠️ Please enter your Client ID');return}
-  odConfig={clientId:cid,redirectUri:getRedirectUri()};localStorage.setItem('odConfig',JSON.stringify(odConfig));
+  odConfig={clientId:cid,redirectUri:getRedirectUri()};
+  localStorage.setItem('elOdSharedConfig',JSON.stringify(odConfig));
+  localStorage.setItem('odConfig',JSON.stringify(odConfig));
   document.getElementById('odClientId').value=cid;closeModal('odSetupModal');
   if(initMSAL()){msalApp.loginRedirect({scopes:SCOPES});}else showToast('⚠️ Could not initialize. Check Client ID.');
 }
@@ -5775,7 +5780,16 @@ function showComposeError(msg){const el=document.getElementById('composeError');
 // ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
-(function(){checkPwResetToken();const s=getSession();if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");}else{document.getElementById("loginScreen").style.display="flex";}updateZohoStatus();})();
+(function(){
+  // Load shared OneDrive config on startup for all users
+  const _shOd=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
+  if(_shOd.clientId){odConfig=_shOd;try{initMSAL();}catch(e){}}
+  checkPwResetToken();
+  const s=getSession();
+  if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");}
+  else{document.getElementById("loginScreen").style.display="flex";}
+  updateZohoStatus();
+})();
 
 openDB().then(async()=>{
   agreements=await dbGetAll('agreements');
