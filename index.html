@@ -2675,7 +2675,7 @@ function saveClientTask(){
   };
   if(editId){const i=clientTasks.findIndex(x=>x.id===editId);if(i>-1)clientTasks[i]=task;else clientTasks.unshift(task);}
   else clientTasks.unshift(task);
-  saveClientTasksToStorage();odSyncToOneDrive();
+  saveClientTasksToStorage();odSyncToOneDrive();if(isZohoConnected())zohoSaveAllData().catch(()=>{});
   closeModal('clientTaskModal');
   renderClientTasks();
   showToast(editId?'✅ Task updated!':'✅ Task added!');
@@ -3182,6 +3182,85 @@ async function zohoApi(method,path,body,token,orgId){
     body:body?JSON.stringify(body):undefined
   });
   return r.json();
+}
+
+// ══ ZOHO BOOKS AS SHARED BACKEND ════════════════════
+// All data stored as a JSON note on a special "EL Tracker Backup" contact in Zoho
+// Every save pushes data; every load pulls it. Works across all browsers/users.
+
+const ZOHO_BACKUP_CONTACT='EL Tracker Data Backup';
+
+async function zohoSaveAllData(){
+  if(!isZohoConnected())return;
+  let token,orgId;
+  try{token=await zohoGetToken();orgId=getZohoConfig().orgId;}catch(e){return;}
+  const payload=JSON.stringify({
+    agreements,bills,clientTasks,
+    savedAt:new Date().toISOString(),
+    version:2
+  });
+  try{
+    // Find or create the backup contact
+    const search=await zohoApi('GET','/contacts?contact_name_contains=EL+Tracker+Data+Backup&contact_type=customer',null,token,orgId);
+    let contactId=search?.contacts?.[0]?.contact_id;
+    if(!contactId){
+      const created=await zohoApi('POST','/contacts',{contact_name:ZOHO_BACKUP_CONTACT,contact_type:'customer',notes:payload},token,orgId);
+      contactId=created?.contact?.contact_id;
+    } else {
+      await zohoApi('PUT','/contacts/'+contactId,{contact_name:ZOHO_BACKUP_CONTACT,contact_type:'customer',notes:payload},token,orgId);
+    }
+    setSyncStatus('connected','☁️ Synced via Zoho · '+new Date().toLocaleTimeString());
+    localStorage.setItem('elLastZohoSync',Date.now().toString());
+  }catch(e){setSyncStatus('error','Zoho sync failed: '+e.message);}
+}
+
+async function zohoLoadAllData(){
+  if(!isZohoConnected())return false;
+  let token,orgId;
+  try{token=await zohoGetToken();orgId=getZohoConfig().orgId;}catch(e){return false;}
+  try{
+    setSyncStatus('syncing','Loading from Zoho...');
+    const search=await zohoApi('GET','/contacts?contact_name_contains=EL+Tracker+Data+Backup&contact_type=customer',null,token,orgId);
+    const contact=search?.contacts?.[0];
+    if(!contact)return false;
+    // Get full contact with notes
+    const full=await zohoApi('GET','/contacts/'+contact.contact_id,null,token,orgId);
+    const notes=full?.contact?.notes;
+    if(!notes)return false;
+    const data=JSON.parse(notes);
+    if(data.version!==2)return false;
+    // Load agreements
+    if(data.agreements&&Array.isArray(data.agreements)){
+      for(const a of data.agreements)await dbPut('agreements',a);
+      agreements=await dbGetAll('agreements');
+      renderAgreements();
+    }
+    // Load bills
+    if(data.bills&&Array.isArray(data.bills)){
+      bills=data.bills;saveBillsToStorage();renderBills();
+    }
+    // Load client tasks
+    if(data.clientTasks&&Array.isArray(data.clientTasks)){
+      clientTasks=data.clientTasks;saveClientTasksToStorage();
+    }
+    setSyncStatus('connected','☁️ Synced via Zoho · '+new Date().toLocaleTimeString());
+    localStorage.setItem('elLastZohoSync',Date.now().toString());
+    return true;
+  }catch(e){setSyncStatus('error','Zoho load failed: '+e.message);return false;}
+}
+
+// Auto-sync via Zoho every 2 minutes
+function startZohoAutoSync(){
+  if(window._zohoSyncTimer)clearInterval(window._zohoSyncTimer);
+  window._zohoSyncTimer=setInterval(async()=>{
+    if(isZohoConnected())zohoLoadAllData().catch(()=>{});
+  },2*60*1000);
+  // Also sync on tab focus
+  document.removeEventListener('visibilitychange',window._zohoVisHandler);
+  window._zohoVisHandler=()=>{
+    if(!document.hidden&&isZohoConnected())zohoLoadAllData().catch(()=>{});
+  };
+  document.addEventListener('visibilitychange',window._zohoVisHandler);
 }
 
 async function zohoSyncNow(){
@@ -5061,7 +5140,7 @@ async function saveAgreement(){
   agreements=await dbGetAll('agreements');
   closeModal('addModal');renderAgreements();
   showToast(renewFromId&&!editId?'🔄 Agreement renewed & old record preserved!':editId?'✅ Updated!':'✅ Agreement added!');
-  odSyncToOneDrive();
+  odSyncToOneDrive();if(isZohoConnected())zohoSaveAllData().catch(()=>{});
 }
 
 // ══════════════════════════════════════════════════
@@ -5073,7 +5152,7 @@ async function deleteAgreement(id){
   if(agr?.fileIds)for(const fid of agr.fileIds)await dbDelete('files',fid);
   if(agr?.renewedFrom){const prev=agreements.find(a=>a.id===agr.renewedFrom);if(prev){prev.renewedTo=null;await dbPut('agreements',prev);}}
   if(agr?.renewedTo){const next=agreements.find(a=>a.id===agr.renewedTo);if(next){next.renewedFrom=null;await dbPut('agreements',next);}}
-  await dbDelete('agreements',id);agreements=await dbGetAll('agreements');renderAgreements();showToast('🗑️ Deleted');odSyncToOneDrive();
+  await dbDelete('agreements',id);agreements=await dbGetAll('agreements');renderAgreements();showToast('🗑️ Deleted');odSyncToOneDrive();if(isZohoConnected())zohoSaveAllData().catch(()=>{});
 }
 async function deleteFile(agrId,fileId){
   if(!confirm('Remove this attachment?'))return;
@@ -6217,6 +6296,7 @@ function showComposeError(msg){const el=document.getElementById('composeError');
   if(_shOd.clientId){odConfig=_shOd;try{initMSAL();}catch(e){}}
   checkPwResetToken();
   const s=getSession();
+  if(s&&isZohoConnected()){setTimeout(()=>{zohoLoadAllData().then(()=>{}).catch(()=>{});startZohoAutoSync();},800);}
   if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");}
   else{document.getElementById("loginScreen").style.display="flex";}
   updateZohoStatus();
