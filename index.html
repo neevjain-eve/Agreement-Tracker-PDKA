@@ -1174,6 +1174,43 @@
     </div>
 
     <!-- ════ SECTION: EXPORT / IMPORT ═════════════════════════ -->
+    <!-- ════ SECTION: ONEDRIVE CONNECT (USER) ══════════════════ -->
+    <div class="section" id="sec-od-user">
+      <div style="padding:20px 16px">
+        <div style="font-size:1rem;font-weight:800;margin-bottom:4px">☁️ OneDrive Connection</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:20px">Connect your Microsoft account to sync data with the shared EL Tracker workspace.</div>
+        <div style="background:#fff;border-radius:14px;padding:16px;border:1.5px solid #fed7aa;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-weight:700;font-size:.88rem">Status</span>
+            <span id="userOdStatus" style="font-size:.82rem;color:var(--muted)">Checking...</span>
+          </div>
+          <div style="font-size:.78rem;color:#555;line-height:1.6;background:#fff7ed;border-radius:8px;padding:10px;margin-bottom:12px">
+            📌 Connect your Microsoft account to access all agreements and bills across devices through the admin's shared workspace.
+          </div>
+          <div id="userOdConnectBtn">
+            <button onclick="odConnectUser()" style="width:100%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:12px;font-size:.88rem;font-weight:700;cursor:pointer">
+              🔗 Connect My Microsoft Account
+            </button>
+          </div>
+          <div id="userOdDisconnectBtn" style="display:none">
+            <div style="font-size:.8rem;font-weight:700;margin-bottom:8px;color:#111111" id="userOdAccount">✅ Connected</div>
+            <button onclick="odSyncNow()" style="width:100%;background:#ffedd5;border:1.5px solid #f97316;color:#111111;border-radius:12px;padding:10px;font-size:.85rem;font-weight:700;cursor:pointer;margin-bottom:8px">🔄 Sync Now</button>
+            <button onclick="odDisconnectUser()" style="width:100%;background:#ffedd5;border:1.5px solid #fed7aa;color:#111111;border-radius:12px;padding:8px;font-size:.78rem;font-weight:600;cursor:pointer">Disconnect</button>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:14px;padding:16px;border:1.5px solid #fed7aa">
+          <div style="font-weight:700;font-size:.85rem;margin-bottom:10px">📋 How it works</div>
+          <div style="font-size:.78rem;line-height:1.8;color:#333">
+            1. Click <b>Connect My Microsoft Account</b><br/>
+            2. Sign in with your work Microsoft account<br/>
+            3. App finds the shared EL Tracker folder automatically<br/>
+            4. All your entries sync to the shared workspace<br/>
+            5. You only need to do this once per device
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="section" id="sec-export">
       <div style="padding:16px 0 0">
         <div class="admin-panel">
