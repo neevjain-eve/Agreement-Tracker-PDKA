@@ -1186,11 +1186,14 @@
             <span id="userOdStatus" style="font-size:.82rem;color:var(--muted)">Checking...</span>
           </div>
           <div style="font-size:.78rem;color:#555;line-height:1.6;background:#fff7ed;border-radius:8px;padding:10px;margin-bottom:12px">
-            📌 Connect your Microsoft account to access all agreements and bills across devices through the admin's shared workspace.
+📌 Data syncs automatically using the admin's OneDrive connection. No separate connection needed! The admin's session keeps everyone in sync. If you see sync errors, ask the admin to open the app to refresh the connection.
           </div>
           <div id="userOdConnectBtn">
-            <button onclick="odConnectUser()" style="width:100%;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:12px;font-size:.88rem;font-weight:700;cursor:pointer">
-              🔗 Connect My Microsoft Account
+            <div id="userOdAutoStatus" style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:12px;font-size:.82rem;color:#111111;margin-bottom:8px">
+              ⏳ Waiting for admin to sync... Once admin opens the app and OneDrive is connected, data will appear here automatically.
+            </div>
+            <button onclick="odLoadFromOneDrive(false).then(()=>showToast('Synced!')).catch(e=>showToast('Sync failed: '+e.message))" style="width:100%;background:#ffedd5;border:1.5px solid #f97316;color:#111111;border-radius:12px;padding:10px;font-size:.85rem;font-weight:700;cursor:pointer">
+              🔄 Sync Now
             </button>
           </div>
           <div id="userOdDisconnectBtn" style="display:none">
@@ -2780,9 +2783,12 @@ function refreshUserOdStatus(){
   const navDot=document.getElementById('navOdUserDot');
   const navLabel=document.getElementById('navOdUserLabel');
 
-  const isConnected=msalApp&&msalApp.getAllAccounts().length>0;
-  const accounts=isConnected?msalApp.getAllAccounts():[];
-  const email=accounts.length>0?accounts[0].username:'';
+  const masterToken=localStorage.getItem('elOdMasterToken');
+  const masterTime=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  const hasMaster=masterToken&&(Date.now()-masterTime)<2700000;
+  const isConnected=(msalApp&&msalApp.getAllAccounts().length>0)||hasMaster;
+  const accounts=msalApp?msalApp.getAllAccounts():[];
+  const email=accounts.length>0?accounts[0].username:(hasMaster?'via admin connection':'');
 
   if(statusEl)statusEl.innerHTML=isConnected
     ?'<span style="color:#f97316;font-weight:700">✅ Connected</span>'
@@ -5772,10 +5778,17 @@ const OD_USERS_FILE_PATH='EL Tracker/el_tracker_users.json';
 async function getOdFilePath(token, filePath){
   const session=getSession();
   const isAdmin=session&&session.role==='admin';
+  const baseUrl=`${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
 
   // Admin always uses their own drive
-  if(isAdmin){
-    return `${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
+  if(isAdmin) return baseUrl;
+
+  // For managers: if using master token (admin's token), /me/drive = admin's drive
+  const masterToken=localStorage.getItem('elOdMasterToken');
+  const masterTime=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  if(masterToken&&token===masterToken&&(Date.now()-masterTime)<2700000){
+    // Using admin's token - /me/drive points to admin's OneDrive
+    return baseUrl;
   }
 
   // Managers: try to use admin's shared access token stored in elOdSharedConfig
@@ -5907,11 +5920,17 @@ async function getAccessToken(allowInteraction=false){
         try{await msalApp.loginRedirect({scopes:SCOPES,loginHint:accounts.length>0?accounts[0].username:undefined});}
         catch(e2){setSyncStatus('error','Login failed: '+e2.message);}
       } else {
-        // Try cached token if available and recent (< 50 mins)
+        // For managers: use master token set by admin (valid 45 min, auto-renewed by admin's session)
+        const masterToken=localStorage.getItem('elOdMasterToken');
+        const masterTime=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+        if(masterToken&&(Date.now()-masterTime)<2700000){ // 45 min
+          return masterToken;
+        }
+        // Try cached token
         const cached=localStorage.getItem('elOdSharedToken');
         const cachedTime=parseInt(localStorage.getItem('elOdTokenTime')||'0');
-        if(cached&&(Date.now()-cachedTime)<3000000){return cached;}
-        setSyncStatus('error','Session needs refresh — open Admin Settings → OneDrive');
+        if(cached&&(Date.now()-cachedTime)<2700000){return cached;}
+        setSyncStatus('error','Sync paused — Admin needs to open the app to refresh the connection');
       }
       return null;
     }
@@ -5927,7 +5946,17 @@ function startTokenAutoRenew(){
     try{
       const accounts=msalApp.getAllAccounts();
       const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
-      if(r){try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}}
+      if(r){
+        try{
+          localStorage.setItem('elOdSharedToken',r.accessToken);
+          localStorage.setItem('elOdTokenTime',Date.now().toString());
+          const _s=getSession();
+          if(_s&&_s.role==='admin'){
+            localStorage.setItem('elOdMasterToken',r.accessToken);
+            localStorage.setItem('elOdMasterTokenTime',Date.now().toString());
+          }
+        }catch(e){}
+      }
     }catch(e){
       try{
         const accounts=msalApp.getAllAccounts();
