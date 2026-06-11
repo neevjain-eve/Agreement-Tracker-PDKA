@@ -5528,6 +5528,37 @@ const GRAPH='https://graph.microsoft.com/v1.0';
 function encodePath(path){return path.split('/').map(encodeURIComponent).join('/');}
 const OD_FILE='EL Tracker/el_tracker_data.json';
 const OD_USERS_FILE_PATH='EL Tracker/el_tracker_users.json';
+
+// ── Get the correct drive path ──
+// Admin: uses their own drive (me/drive)
+// Managers: use the shared folder from admin's drive
+async function getOdFilePath(token, filePath){
+  const session=getSession();
+  const isAdmin=session&&session.role==='admin';
+  // Try direct path first (works for admin and managers with shared folder)
+  const directUrl=`${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
+  // For non-admin, also try shared items
+  if(!isAdmin){
+    try{
+      // Search shared items for EL Tracker folder
+      const sharedUrl=`${GRAPH}/me/drive/sharedWithMe`;
+      const sharedResp=await fetch(sharedUrl,{headers:{'Authorization':'Bearer '+token}});
+      if(sharedResp.ok){
+        const sharedData=await sharedResp.json();
+        const elFolder=sharedData.value&&sharedData.value.find(i=>i.name==='EL Tracker'&&i.folder);
+        if(elFolder){
+          // Found the shared folder — use remoteItem driveId
+          const driveId=elFolder.remoteItem?elFolder.remoteItem.parentReference.driveId:elFolder.parentReference.driveId;
+          const itemId=elFolder.remoteItem?elFolder.remoteItem.id:elFolder.id;
+          // Get the file within that shared folder
+          const fileName=filePath.split('/').pop();
+          return `${GRAPH}/drives/${driveId}/items/${itemId}:/${encodeURIComponent(fileName)}:/content`;
+        }
+      }
+    }catch(e){/* fall through to direct path */}
+  }
+  return directUrl;
+}
 const OD_ATTACH_FOLDER='EL Tracker/Attachments';
 const SCOPES=['Files.ReadWrite','User.Read','Mail.Send'];
 let msalApp=null;let odAccount=null;
@@ -5623,7 +5654,8 @@ async function odSyncToOneDrive(){
       lastUpdated:new Date().toISOString(),
       updatedBy:(getSession()||{}).username||'unknown'
     };
-    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
+    const odUrl=await getOdFilePath(token,OD_FILE);
+    const r=await fetch(odUrl,{
       method:'PUT',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
       body:JSON.stringify(payload)
@@ -5649,7 +5681,8 @@ async function odLoadFromOneDrive(allowInteraction=false){
 async function odLoadWithToken(token){
   setSyncStatus('syncing','Loading from OneDrive...');
   try{
-    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`,{
+    const odUrl=await getOdFilePath(token,OD_FILE);
+    const r=await fetch(odUrl,{
       headers:{'Authorization':'Bearer '+token}
     });
     if(r.status===404){await odSyncToOneDrive();return;}
