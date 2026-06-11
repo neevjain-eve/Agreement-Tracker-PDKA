@@ -838,6 +838,7 @@
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <button id="refreshBtn" onclick="refreshCurrentSection()" title="Refresh" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:10px;font-size:1.1rem;color:#f97316;transition:transform .3s;flex-shrink:0" onmouseenter="this.style.background='#ffedd5'" onmouseleave="this.style.background='none'">🔄</button>
+      <span id="syncIndicator" title="OneDrive sync status" style="font-size:.65rem;color:var(--muted);padding:4px 8px;border-radius:8px;background:#ffedd5;cursor:pointer;flex-shrink:0" onclick="odSyncNow()">☁️</span>
       <button class="user-chip" id="userChip" onclick="showSection('admin')">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
@@ -3391,6 +3392,7 @@ function deleteBill(id){
   if(!confirm('Delete this bill?'))return;
   bills=bills.filter(b=>b.id!==id);
   saveBillsToStorage();
+  odSyncToOneDrive();
   renderBills();
   showToast('🗑️ Bill deleted');
 }
@@ -5730,23 +5732,39 @@ async function getAccessToken(allowInteraction=false){
 // ── Auto-renew token every 45 minutes (before 1hr expiry) ──
 function startTokenAutoRenew(){
   if(window._tokenRenewTimer)clearInterval(window._tokenRenewTimer);
+  // Renew token every 45 minutes
   window._tokenRenewTimer=setInterval(async()=>{
     if(!msalApp||!msalApp.getAllAccounts().length)return;
     try{
       const accounts=msalApp.getAllAccounts();
       const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
-      if(r){
-        try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
-      }
+      if(r){try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}}
     }catch(e){
-      // Try ssoSilent as fallback
       try{
         const accounts=msalApp.getAllAccounts();
         const r=await msalApp.ssoSilent({scopes:SCOPES,loginHint:accounts[0]?.username});
         if(r){try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e2){}}
-      }catch(e2){/* Will retry in next interval */}
+      }catch(e2){}
     }
-  },45*60*1000); // every 45 minutes
+  },45*60*1000);
+
+  // ── Auto-sync from OneDrive every 2 minutes ──
+  if(window._autoSyncTimer)clearInterval(window._autoSyncTimer);
+  window._autoSyncTimer=setInterval(async()=>{
+    if(!msalApp||!msalApp.getAllAccounts().length)return;
+    try{
+      await odLoadFromOneDrive(false);
+    }catch(e){}
+  },2*60*1000); // every 2 minutes
+
+  // ── Sync immediately when tab regains focus ──
+  document.removeEventListener('visibilitychange',window._odVisHandler);
+  window._odVisHandler=()=>{
+    if(!document.hidden&&msalApp&&msalApp.getAllAccounts().length>0){
+      odLoadFromOneDrive(false).catch(()=>{});
+    }
+  };
+  document.addEventListener('visibilitychange',window._odVisHandler);
 }
 
 async function odSyncToOneDrive(){
