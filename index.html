@@ -2718,6 +2718,8 @@ function odDisconnectUser(){
     }
   }
   localStorage.removeItem('elOdSharedToken');
+  window._odSharedFolderUrl=null;
+  window._odSharedFileUrl=null;
   localStorage.removeItem('elOdTokenTime');
   refreshUserOdStatus();
   showToast('Disconnected from OneDrive');
@@ -5644,28 +5646,68 @@ const OD_USERS_FILE_PATH='EL Tracker/el_tracker_users.json';
 async function getOdFilePath(token, filePath){
   const session=getSession();
   const isAdmin=session&&session.role==='admin';
-  // Try direct path first (works for admin and managers with shared folder)
   const directUrl=`${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
-  // For non-admin, also try shared items
-  if(!isAdmin){
-    try{
-      // Search shared items for EL Tracker folder
-      const sharedUrl=`${GRAPH}/me/drive/sharedWithMe`;
-      const sharedResp=await fetch(sharedUrl,{headers:{'Authorization':'Bearer '+token}});
-      if(sharedResp.ok){
-        const sharedData=await sharedResp.json();
-        const elFolder=sharedData.value&&sharedData.value.find(i=>i.name==='EL Tracker'&&i.folder);
-        if(elFolder){
-          // Found the shared folder — use remoteItem driveId
-          const driveId=elFolder.remoteItem?elFolder.remoteItem.parentReference.driveId:elFolder.parentReference.driveId;
-          const itemId=elFolder.remoteItem?elFolder.remoteItem.id:elFolder.id;
-          // Get the file within that shared folder
-          const fileName=filePath.split('/').pop();
-          return `${GRAPH}/drives/${driveId}/items/${itemId}:/${encodeURIComponent(fileName)}:/content`;
-        }
-      }
-    }catch(e){/* fall through to direct path */}
+  if(isAdmin)return directUrl;
+
+  // For managers: find the shared EL Tracker folder from admin's drive
+  // Cache the shared folder info to avoid repeated API calls
+  if(window._odSharedFolderUrl){
+    const fileName=filePath.split('/').pop();
+    return window._odSharedFolderUrl.replace('__FILE__', encodeURIComponent(fileName));
   }
+
+  try{
+    // Step 1: Get items shared with me
+    const sharedResp=await fetch(`${GRAPH}/me/drive/sharedWithMe?$select=id,name,folder,remoteItem`,
+      {headers:{'Authorization':'Bearer '+token}});
+    if(!sharedResp.ok)return directUrl;
+    const sharedData=await sharedResp.json();
+    const items=sharedData.value||[];
+
+    // Step 2: Find EL Tracker folder or el_tracker_data.json directly
+    let targetDriveId=null, targetItemId=null;
+
+    // First look for the file directly
+    const fileItem=items.find(i=>i.name==='el_tracker_data.json');
+    if(fileItem){
+      const ri=fileItem.remoteItem||{};
+      targetDriveId=(ri.parentReference&&ri.parentReference.driveId)||( ri.id&&fileItem.parentReference&&fileItem.parentReference.driveId);
+      targetItemId=ri.id||fileItem.id;
+      if(targetDriveId&&targetItemId){
+        const url=`${GRAPH}/drives/${targetDriveId}/items/${targetItemId}/content`;
+        window._odSharedFileUrl=url;
+        return url;
+      }
+    }
+
+    // Then look for EL Tracker folder
+    const folder=items.find(i=>i.name==='EL Tracker'&&(i.folder||(i.remoteItem&&i.remoteItem.folder)));
+    if(folder){
+      const ri=folder.remoteItem||{};
+      // The folder's own driveId (not parent)
+      targetDriveId=ri.parentReference?ri.parentReference.driveId:folder.parentReference&&folder.parentReference.driveId;
+      targetItemId=ri.id||folder.id;
+      if(targetDriveId&&targetItemId){
+        const template=`${GRAPH}/drives/${targetDriveId}/items/${targetItemId}:/__FILE__:/content`;
+        window._odSharedFolderUrl=template;
+        const fileName=filePath.split('/').pop();
+        return template.replace('__FILE__',encodeURIComponent(fileName));
+      }
+    }
+
+    // Last resort: search drives for the file
+    const searchResp=await fetch(`${GRAPH}/me/drive/root/search(q='el_tracker_data.json')`,
+      {headers:{'Authorization':'Bearer '+token}});
+    if(searchResp.ok){
+      const searchData=await searchResp.json();
+      const found=(searchData.value||[]).find(i=>i.name==='el_tracker_data.json');
+      if(found){
+        const url=`${GRAPH}/drives/${found.parentReference.driveId}/items/${found.id}/content`;
+        window._odSharedFileUrl=url;
+        return url;
+      }
+    }
+  }catch(e){console.warn('getOdFilePath fallback:',e.message);}
   return directUrl;
 }
 const OD_ATTACH_FOLDER='EL Tracker/Attachments';
@@ -5779,7 +5821,7 @@ async function odSyncToOneDrive(){
       lastUpdated:new Date().toISOString(),
       updatedBy:(getSession()||{}).username||'unknown'
     };
-    const odUrl=await getOdFilePath(token,OD_FILE);
+    let odUrl=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));
     const r=await fetch(odUrl,{
       method:'PUT',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
@@ -5806,7 +5848,8 @@ async function odLoadFromOneDrive(allowInteraction=false){
 async function odLoadWithToken(token){
   setSyncStatus('syncing','Loading from OneDrive...');
   try{
-    const odUrl=await getOdFilePath(token,OD_FILE);
+    // Use cached direct file URL if available (set by getOdFilePath for managers)
+    let odUrl=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));
     const r=await fetch(odUrl,{
       headers:{'Authorization':'Bearer '+token}
     });
