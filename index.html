@@ -2204,13 +2204,13 @@ function refreshCurrentSection(){
 }
 
 function showSection(name){
-  ['userdash','dashboard','agreements','billing','monthly','clientmgmt','notifications','export','admin'].forEach(s=>{
+  ['userdash','dashboard','agreements','billing','monthly','clientmgmt','notifications','export','admin','od-user'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
     const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===name);
   });
-  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',clientmgmt:'Client Management',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings'};
+  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',clientmgmt:'Client Management',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings','od-user':'OneDrive Connection'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
   if(name==='admin'){renderSubReqAdmin();renderCatAccessAdmin();updateZohoStatus();updateAiApiStatus();}
@@ -2237,6 +2237,7 @@ function showSection(name){
   }
   if(name==='monthly'){initMonthly();}
   if(name==='clientmgmt'){renderClientTasks();}
+  if(name==='od-user'){refreshUserOdStatus();}
   closeSidebar();
 }
 
@@ -2647,6 +2648,60 @@ function deleteClientTask(id){
   if(!confirm('Delete this task?'))return;
   clientTasks=clientTasks.filter(x=>x.id!==id);
   saveClientTasksToStorage();renderClientTasks();showToast('Task deleted');
+}
+
+// ══ USER ONEDRIVE CONNECT ═══════════════════════════
+function odConnectUser(){
+  // Use shared admin config to init MSAL then login
+  const cfg=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
+  if(!cfg.clientId){
+    showToast('⚠️ Admin has not set up OneDrive yet. Please contact your administrator.');
+    return;
+  }
+  odConfig=cfg;
+  if(initMSAL()){
+    msalApp.loginRedirect({scopes:SCOPES});
+  } else {
+    showToast('⚠️ Could not initialize OneDrive. Contact admin.');
+  }
+}
+
+function odDisconnectUser(){
+  if(!confirm('Disconnect your Microsoft account from this device?'))return;
+  if(msalApp){
+    const accounts=msalApp.getAllAccounts();
+    if(accounts.length>0){
+      msalApp.logoutRedirect({account:accounts[0],onRedirectNavigate:()=>false});
+    }
+  }
+  localStorage.removeItem('elOdSharedToken');
+  localStorage.removeItem('elOdTokenTime');
+  refreshUserOdStatus();
+  showToast('Disconnected from OneDrive');
+}
+
+function refreshUserOdStatus(){
+  const statusEl=document.getElementById('userOdStatus');
+  const connectBtn=document.getElementById('userOdConnectBtn');
+  const disconnectBtn=document.getElementById('userOdDisconnectBtn');
+  const accountEl=document.getElementById('userOdAccount');
+  const navDot=document.getElementById('navOdUserDot');
+  const navLabel=document.getElementById('navOdUserLabel');
+
+  const isConnected=msalApp&&msalApp.getAllAccounts().length>0;
+  const accounts=isConnected?msalApp.getAllAccounts():[];
+  const email=accounts.length>0?accounts[0].username:'';
+
+  if(statusEl)statusEl.innerHTML=isConnected
+    ?'<span style="color:#f97316;font-weight:700">✅ Connected</span>'
+    :'<span style="color:#ea580c">Not connected</span>';
+  if(connectBtn)connectBtn.style.display=isConnected?'none':'block';
+  if(disconnectBtn)disconnectBtn.style.display=isConnected?'block':'none';
+  if(accountEl&&email)accountEl.textContent='✅ Connected as '+email;
+  if(navDot)navDot.style.background=isConnected?'#22c55e':'#d1d5db';
+  if(navLabel)navLabel.textContent=isConnected?'OneDrive ✓':'Connect OneDrive';
+
+  if(isConnected){odLoadFromOneDrive(false).catch(()=>{});}
 }
 
 function onBillInvoiceInput(){
@@ -3736,7 +3791,7 @@ function updateUserChip(u){
     if(isAdmin){el.style.display='flex';}
     else{
       // Users see: notifications, monthly, export (after category approval); agreements/billing shown dynamically
-      const userVisible=['nav-notifications','nav-monthly','nav-clientmgmt','nav-export','nav-agreements','nav-billing'];
+      const userVisible=['nav-notifications','nav-monthly','nav-clientmgmt','nav-export','nav-agreements','nav-billing','nav-od-user','nav-changepw'];
       el.style.display=userVisible.includes(id)?'flex':'none';
     }
   });
