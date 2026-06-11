@@ -3406,7 +3406,17 @@ function renderBills(){
   let list=bills;
   if(q) list=list.filter(b=>((b.name||'')+(b.client||'')+(b.notes||'')+(b.type||'')+(b.subType||'')+(b.invoice||'')).toLowerCase().includes(q));
   if(_bCat) list=list.filter(b=>b.type===_bCat);
-  if(!_bAdmin&&_bAllowed&&_bAllowed.length) list=list.filter(b=>b.type&&_bAllowed.includes(b.type));
+  if(!_bAdmin&&_bSession){
+    const _bUser=getUsers().find(u=>u.id===_bSession.userId||u.id===_bSession.id);
+    const _bName=_bUser?_bUser.name:'';
+    list=list.filter(b=>{
+      // Show if type matches allowed category
+      if(_bAllowed&&_bAllowed.length&&b.type&&_bAllowed.includes(b.type))return true;
+      // Show if manager field matches this user's name
+      if(_bName&&b.manager&&b.manager===_bName)return true;
+      return false;
+    });
+  }
   if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
 
   else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
