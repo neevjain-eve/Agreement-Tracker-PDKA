@@ -5116,7 +5116,7 @@ function resetForm(){
   document.getElementById('agrAmount').value='';
   document.getElementById('agrSpecialService').value='';
   document.getElementById('agrServiceFields').style.display='none';
-  const _agrM=document.getElementById('agrMonth');if(_agrM)_agrM.value='';
+
   document.getElementById('agrBillingFreq').value='';
   document.getElementById('gstToggle').checked=false;
   document.getElementById('gstField').classList.remove('visible');
@@ -5179,7 +5179,7 @@ function openEditModal(id){
   document.getElementById('agrSpecialService').value=a.specialService||'';
   populateParentGroupDropdown('agrParentGroup');
   document.getElementById('agrParentGroup').value=a.parentGroup||'';
-  document.getElementById('agrMonth').value=a.billingMonth||'';
+  const _agrMon=document.getElementById('agrMonth');if(_agrMon)_agrMon.value=a.billingMonth||'';
   document.getElementById('agrBillingFreq').value=a.billingFreq||'';
   populateManagerDropdown('agrManagerSel');
   document.getElementById('agrContact').value=a.contact||'';
@@ -5202,7 +5202,7 @@ function openRenewModal(id){
   if(a.subType){document.getElementById('agrSubType').value=a.subType||'';}
   document.getElementById('agrAmount').value=a.amount||'';
   document.getElementById('agrSpecialService').value=a.specialService||'';
-  document.getElementById('agrMonth').value=a.billingMonth||'';
+  const _agrMon=document.getElementById('agrMonth');if(_agrMon)_agrMon.value=a.billingMonth||'';
   document.getElementById('agrBillingFreq').value=a.billingFreq||'';
   document.getElementById('agrContact').value=a.contact||'';document.getElementById('agrContactInfo').value=a.contactInfo||'';
   document.getElementById('agrPan').value=a.pan||'';document.getElementById('agrNotes').value='';
