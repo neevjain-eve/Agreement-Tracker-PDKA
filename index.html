@@ -5986,8 +5986,11 @@ function startTokenAutoRenew(){
 }
 
 async function odSyncToOneDrive(){
-  if(!msalApp)return;
-  const token=await getAccessToken(false);if(!token)return;
+  // Prefer master token so writes go to admin's drive
+  const _mt=localStorage.getItem('elOdMasterToken');
+  const _mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  let token=(_mt&&(Date.now()-_mtt)<2700000)?_mt:null;
+  if(!token){if(!msalApp)return;token=await getAccessToken(false);if(!token)return;}
   setSyncStatus('syncing','Saving to OneDrive...');
   try{
     const payload={
@@ -6011,9 +6014,12 @@ async function odSyncToOneDrive(){
 }
 
 async function odLoadFromOneDrive(allowInteraction=false){
+  // Prefer master token — it points to admin's drive (the single source of truth)
+  const masterToken=localStorage.getItem('elOdMasterToken');
+  const masterTime=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  if(masterToken&&(Date.now()-masterTime)<2700000){return odLoadWithToken(masterToken);}
   const token=await getAccessToken(allowInteraction);
   if(!token){
-    // Try shared token from admin session
     const shared=localStorage.getItem('elOdSharedToken');
     if(!shared)return;
     return odLoadWithToken(shared);
