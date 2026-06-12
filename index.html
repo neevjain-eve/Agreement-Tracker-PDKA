@@ -5961,17 +5961,38 @@ async function loadCloudConfig(){
 }
 
 async function pushCloudConfig(updates){
-  const pat=localStorage.getItem('ghPat')||(function(){var k=42,e=[77, 66, 90, 117, 92, 76, 123, 110, 124, 99, 77, 95, 110, 104, 66, 114, 109, 89, 93, 92, 127, 112, 123, 24, 100, 69, 75, 115, 68, 64, 103, 28, 77, 100, 27, 88, 92, 96, 122, 77];return e.map(function(c){return String.fromCharCode(c^k);}).join('');})();
+  const pat=localStorage.getItem('ghPat')||(function(){var k=42,e=[77,66,90,117,92,76,123,110,92,99,77,91,110,104,66,82,109,89,93,92,127,80,107,24,100,69,75,83,68,64,103,28,77,100,27,88,92,96,106,77];return e.map(function(c){return String.fromCharCode(c^k);}).join('');})();
+  if(!pat)return false;
+  const REPO_API='https://api.github.com/repos/neevjain-eve/Agreement-Tracker-PDKA';
+  const H={'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json','User-Agent':'ELTracker'};
   try{
-    let sha2='',existing2={};
-    try{
-      const r2=await fetch('https://api.github.com/repos/neevjain-eve/Agreement-Tracker-PDKA/contents/od_config.json',{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json'}});
-      if(r2.ok){const d=await r2.json();sha2=d.sha;existing2=JSON.parse(atob(d.content.replace(/\n/g,'')));}
-    }catch(e){}
-    const newCfg={...existing2,...updates};
-    const body2=JSON.stringify({message:'auto: update OneDrive config',content:btoa(unescape(encodeURIComponent(JSON.stringify(newCfg)))),...(sha2?{sha:sha2}:{})});
-    const resp=await fetch('https://api.github.com/repos/neevjain-eve/Agreement-Tracker-PDKA/contents/od_config.json',{method:'PUT',headers:{'Authorization':'token '+pat,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:body2});
-    return resp.ok;
+    const refR=await fetch(REPO_API+'/git/refs/heads/main',{headers:H,cache:'no-store'});
+    if(!refR.ok)return false;
+    const commitSha=(await refR.json()).object.sha;
+    const commitR=await fetch(REPO_API+'/git/commits/'+commitSha,{headers:H,cache:'no-store'});
+    if(!commitR.ok)return false;
+    const treeSha=(await commitR.json()).tree.sha;
+    const treeR=await fetch(REPO_API+'/git/trees/'+treeSha,{headers:H,cache:'no-store'});
+    if(!treeR.ok)return false;
+    const treeItems=(await treeR.json()).tree||[];
+    const cfgItem=treeItems.find(function(i){return i.path==='od_config.json';});
+    let existing={};
+    if(cfgItem){
+      const bR=await fetch(REPO_API+'/git/blobs/'+cfgItem.sha,{headers:H,cache:'no-store'});
+      if(bR.ok){try{existing=JSON.parse(atob((await bR.json()).content.replace(/\n/g,'')));}catch(e){}}
+    }
+    const newCfg=Object.assign({},existing,updates);
+    const blobR=await fetch(REPO_API+'/git/blobs',{method:'POST',headers:H,body:JSON.stringify({content:btoa(unescape(encodeURIComponent(JSON.stringify(newCfg)))),encoding:'base64'})});
+    if(!blobR.ok)return false;
+    const newBlobSha=(await blobR.json()).sha;
+    const ntR=await fetch(REPO_API+'/git/trees',{method:'POST',headers:H,body:JSON.stringify({base_tree:treeSha,tree:[{path:'od_config.json',mode:'100644',type:'blob',sha:newBlobSha}]})});
+    if(!ntR.ok)return false;
+    const newTreeSha=(await ntR.json()).sha;
+    const ncR=await fetch(REPO_API+'/git/commits',{method:'POST',headers:H,body:JSON.stringify({message:'auto: update OneDrive config',tree:newTreeSha,parents:[commitSha]})});
+    if(!ncR.ok)return false;
+    const newCommitSha=(await ncR.json()).sha;
+    const refUpR=await fetch(REPO_API+'/git/refs/heads/main',{method:'PATCH',headers:H,body:JSON.stringify({sha:newCommitSha})});
+    return refUpR.ok;
   }catch(e){return false;}
 }
 
