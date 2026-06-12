@@ -5831,90 +5831,95 @@ async function getOdFilePath(token, filePath){
   // Admin always uses their own drive
   if(isAdmin) return baseUrl;
 
-  // For managers: if using master token (admin's token), /me/drive = admin's drive
+  // Master token: /me/drive resolves to admin's drive
   const masterToken=localStorage.getItem('elOdMasterToken');
   const masterTime=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
-  if(masterToken&&token===masterToken&&(Date.now()-masterTime)<2700000){
-    // Using admin's token - /me/drive points to admin's OneDrive
-    return baseUrl;
-  }
+  if(masterToken&&token===masterToken&&(Date.now()-masterTime)<2700000) return baseUrl;
 
-  // Managers: try to use admin's shared access token stored in elOdSharedConfig
-  // Admin must generate a share link and store it OR managers use their own drive
-  // with the file synced via admin's share
-
-  // Step 1: Try shared item URL stored by admin
+  // Step 1: Use sharedDriveId/sharedItemId if available (from od_config.json or admin setup)
   const sharedCfg=JSON.parse(localStorage.getItem('elOdSharedConfig')||'{}');
-  // Use stored driveId + itemId from admin's share generation
   if(sharedCfg.sharedDriveId&&sharedCfg.sharedItemId){
-    const cachedUrl=`${GRAPH}/drives/${sharedCfg.sharedDriveId}/items/${sharedCfg.sharedItemId}/content`;
-    window._odSharedFileUrl=cachedUrl;
-    return cachedUrl;
+    const url=`${GRAPH}/drives/${sharedCfg.sharedDriveId}/items/${sharedCfg.sharedItemId}/content`;
+    window._odSharedFileUrl=url;
+    return url;
   }
-  if(sharedCfg.shareUrl){
-    return sharedCfg.shareUrl;
-  }
+  if(sharedCfg.shareUrl) return sharedCfg.shareUrl;
 
-  // Step 2: Try /me/drive (manager's own drive - works if admin has synced there)
-  // First check if the file exists in manager's drive
+  // Step 2: File in manager's own drive
   try{
-    const checkUrl=`${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
-    const checkResp=await fetch(checkUrl,{method:'HEAD',headers:{'Authorization':'Bearer '+token}});
-    if(checkResp.ok||checkResp.status===302){
-      return checkUrl;
-    }
+    const r=await fetch(`${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`,{method:'HEAD',headers:{'Authorization':'Bearer '+token}});
+    if(r.ok||r.status===302) return `${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
   }catch(e){}
 
-  // Step 3: Search all drives including shared
+  // Step 3: Search across all drives
   try{
-    // Try drives API to find shared drive items
-    const drivesResp=await fetch(`${GRAPH}/me/drives`,{headers:{'Authorization':'Bearer '+token}});
-    if(drivesResp.ok){
-      const drivesData=await drivesResp.json();
-      for(const drive of(drivesData.value||[])){
+    const dr=await fetch(`${GRAPH}/me/drives`,{headers:{'Authorization':'Bearer '+token}});
+    if(dr.ok){
+      for(const drive of((await dr.json()).value||[])){
         try{
           const url=`${GRAPH}/drives/${drive.id}/root:/${encodePath(filePath)}:/content`;
           const r=await fetch(url,{method:'HEAD',headers:{'Authorization':'Bearer '+token}});
-          if(r.ok||r.status===302)return url;
+          if(r.ok||r.status===302) return url;
         }catch(e){}
       }
     }
   }catch(e){}
 
-  // Step 4: Try shared with me
+  // Step 4: sharedWithMe — robust extraction for personal + work accounts
   try{
-    const sharedResp=await fetch(`${GRAPH}/me/drive/sharedWithMe`,{headers:{'Authorization':'Bearer '+token}});
-    if(sharedResp.ok){
-      const sharedData=await sharedResp.json();
-      for(const item of(sharedData.value||[])){
-        if(item.name==='el_tracker_data.json'){
-          const ri=item.remoteItem||item;
-          const driveId=(ri.parentReference||{}).driveId;
-          const itemId=ri.id;
-          if(driveId&&itemId){
-            const url=`${GRAPH}/drives/${driveId}/items/${itemId}/content`;
-            window._odSharedFileUrl=url;
-            return url;
-          }
+    const sr=await fetch(`${GRAPH}/me/drive/sharedWithMe`,{headers:{'Authorization':'Bearer '+token}});
+    if(sr.ok){
+      const items=(await sr.json()).value||[];
+      const fileName=filePath.split('/').pop();
+      for(const item of items){
+        const ri=item.remoteItem||item;
+        // Robust driveId extraction — try multiple locations
+        const driveId=ri.parentReference?.driveId
+          ||item.parentReference?.driveId
+          ||ri.sharepointIds?.siteCollectionId
+          ||null;
+        const itemId=ri.id||item.id;
+
+        // Direct file match
+        if(item.name===fileName&&driveId&&itemId){
+          const url=`${GRAPH}/drives/${driveId}/items/${itemId}/content`;
+          window._odSharedFileUrl=url;
+          // Cache for future use
+          const sc2=JSON.parse(localStorage.getItem('elOdSharedConfig')||'{}');
+          sc2.sharedDriveId=driveId;sc2.sharedItemId=itemId;
+          localStorage.setItem('elOdSharedConfig',JSON.stringify(sc2));
+          return url;
         }
-        if(item.name==='EL Tracker'&&(item.folder||(item.remoteItem&&item.remoteItem.folder))){
-          const ri=item.remoteItem||item;
-          const driveId=(ri.parentReference||{}).driveId||(ri.id&&item.parentReference&&item.parentReference.driveId);
-          const folderId=ri.id||item.id;
-          if(driveId&&folderId){
-            const fileName=filePath.split('/').pop();
-            const url=`${GRAPH}/drives/${driveId}/items/${folderId}:/${encodeURIComponent(fileName)}:/content`;
-            window._odSharedFolderUrl=url.replace(encodeURIComponent(fileName),'__FILE__');
-            return url;
-          }
+
+        // Folder match (EL Tracker) — list children to get exact file ID
+        const folderName=(item.name||'').toLowerCase();
+        if((folderName==='el tracker'||folderName==='el_tracker')&&driveId&&itemId){
+          try{
+            const cr=await fetch(`${GRAPH}/drives/${driveId}/items/${itemId}/children?$filter=name eq '${encodeURIComponent(fileName)}'`,{headers:{'Authorization':'Bearer '+token}});
+            if(cr.ok){
+              const children=(await cr.json()).value||[];
+              if(children[0]){
+                const url=`${GRAPH}/drives/${driveId}/items/${children[0].id}/content`;
+                window._odSharedFileUrl=url;
+                const sc2=JSON.parse(localStorage.getItem('elOdSharedConfig')||'{}');
+                sc2.sharedDriveId=driveId;sc2.sharedItemId=children[0].id;
+                localStorage.setItem('elOdSharedConfig',JSON.stringify(sc2));
+                return url;
+              }
+            }
+          }catch(e2){}
+          // Path-based fallback inside folder
+          const url=`${GRAPH}/drives/${driveId}/items/${itemId}:/${encodeURIComponent(fileName)}:/content`;
+          window._odSharedFileUrl=url;
+          return url;
         }
       }
     }
   }catch(e){}
 
-  // Fallback: manager's own drive (data will be local to them)
-  setSyncStatus('error','Could not find shared folder. Ask admin to share EL Tracker folder with you in OneDrive.');
-  return `${GRAPH}/me/drive/root:/${encodePath(filePath)}:/content`;
+  // All steps failed — show helpful message
+  setSyncStatus('error','Sync error: could not locate shared file. Make sure admin has shared the EL Tracker folder with your Microsoft account email.');
+  return baseUrl;
 }
 
 
