@@ -3583,13 +3583,7 @@ function renderBills(){
   if(!_bAdmin&&_bSession){
     const _bUser=getUsers().find(u=>u.id===_bSession.userId||u.id===_bSession.id);
     const _bName=_bUser?_bUser.name:'';
-    list=list.filter(b=>{
-      // Show if type matches allowed category
-      if(_bAllowed&&_bAllowed.length&&b.type&&_bAllowed.includes(b.type))return true;
-      // Show if manager field matches this user's name
-      if(_bName&&b.manager&&b.manager===_bName)return true;
-      return false;
-    });
+    list=list.filter(b=>(_bName&&b.manager===_bName));
   }
   if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
 
@@ -4157,8 +4151,9 @@ async function renderAgreements(){
   const _catFilter=window._activeCat||null;
   const session=getSession();
   const isAdmin=session&&session.role==='admin';
-  // Non-admin: only show their allowed categories
-  const allowedCats=(!isAdmin&&session)?getUserAllowedCats(session.userId):null;
+  // Non-admin: only show agreements assigned to their name
+  const _raUser=(!isAdmin&&session)?getUsers().find(u=>u.id===(session.userId||session.id)):null;
+  const _raName=_raUser?_raUser.name:"";
   let filtered=agreements.filter(a=>{
     const status=getStatus(a);
     const mf=currentFilter==='all'||currentFilter==='email'||currentFilter==='with_el'||currentFilter==='without_el'||status===currentFilter;
@@ -4166,7 +4161,7 @@ async function renderAgreements(){
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
-    const af=isAdmin||!allowedCats||(a.type&&allowedCats.includes(a.type))||a.isEmail;
+    const af=isAdmin||(_raName&&a.manager===_raName);
     const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
       :currentFilter==='with_el'?(a.elType==='with')
       :currentFilter==='without_el'?(a.elType==='without'||!a.elType)
