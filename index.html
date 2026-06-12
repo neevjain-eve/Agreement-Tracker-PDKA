@@ -6545,7 +6545,6 @@ openDB().then(async()=>{
       if(!window._autoSyncTimer){window._autoSyncTimer=setInterval(async()=>{try{await odLoadFromOneDrive(false);}catch(e){}},2*60*1000);}
     }
   }
-  }
   renderAgreements();refreshOdStatusUI();
   setTimeout(sendAutoReminders,2000);
   setTimeout(()=>{
