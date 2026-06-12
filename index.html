@@ -5887,8 +5887,8 @@ async function handleMSALRedirect(){
   if(!msalApp)return false;
   try{
     const resp=await msalApp.handleRedirectPromise();
-    if(resp){odAccount=resp.account;localStorage.setItem('odAccount',JSON.stringify({username:resp.account.username,name:resp.account.name}));setSyncStatus('connected',`Connected as ${resp.account.username}`);await odLoadFromOneDrive(false);return true;}
-    else{const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Synced · ${odAccount.username}`);}}
+    if(resp){odAccount=resp.account;localStorage.setItem('odAccount',JSON.stringify({username:resp.account.username,name:resp.account.name}));setSyncStatus('connected',`Connected as ${resp.account.username}`);await odLoadFromOneDrive(false);startTokenAutoRenew();return true;}
+    else{const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Synced · ${odAccount.username}`);startTokenAutoRenew();}}
   }catch(e){setSyncStatus('error','Auth error: '+e.message)}
   return false;
 }
@@ -5905,7 +5905,7 @@ async function getAccessToken(allowInteraction=false){
     const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
     odAccount=r.account;
     // Cache token for background use
-    try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
+    try{localStorage.setItem('elOdSharedToken',r.accessToken);localStorage.setItem('elOdTokenTime',Date.now().toString());const _as=getSession();if(_as&&_as.role==='admin'){localStorage.setItem('elOdMasterToken',r.accessToken);localStorage.setItem('elOdMasterTokenTime',Date.now().toString());}}catch(e){}
     return r.accessToken;
   }catch(silentErr){
     // Silent failed — try SSO with login_hint (no popup, no redirect, uses existing M365 session)
@@ -6342,7 +6342,7 @@ openDB().then(async()=>{
   if(odConfig.clientId){
     if(initMSAL()){
       const redirectHandled=await handleMSALRedirect();
-      if(!redirectHandled){const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Connected · ${odAccount.username}`);await odLoadFromOneDrive(false);odLoadUsers().catch(e=>console.warn('OD users load on start:',e));}}
+      if(!redirectHandled){const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Connected · ${odAccount.username}`);await odLoadFromOneDrive(false);startTokenAutoRenew();odLoadUsers().catch(e=>console.warn('OD users load on start:',e));}}
     }
   }
   renderAgreements();refreshOdStatusUI();
