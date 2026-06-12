@@ -2731,14 +2731,46 @@ function odDisconnectUser(){
 }
 
 async function odGenerateShareLink(){
-  const token=await getAccessToken(true);if(!token)return;
+  // Get a fresh token — if this triggers loginRedirect, the page navigates away
+  // and nothing below runs (which is fine — on return handleMSALRedirect fires)
+  let token=null;
+  try{
+    if(!msalApp){showToast('Connect OneDrive first');return;}
+    const accounts=msalApp.getAllAccounts();
+    if(!accounts.length){msalApp.loginRedirect({scopes:SCOPES});return;}
+    const r=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accounts[0]});
+    token=r.accessToken;
+    // Save master token immediately
+    try{localStorage.setItem('elOdMasterToken',token);localStorage.setItem('elOdMasterTokenTime',Date.now().toString());}catch(e){}
+  }catch(e){
+    try{msalApp.loginRedirect({scopes:SCOPES});}catch(e2){}
+    return;
+  }
+  if(!token)return;
   setSyncStatus('syncing','Connecting to OneDrive...');
   try{
-    await odSyncToOneDrive();
-    const fileUrl=`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}`;
-    const itemResp=await fetch(fileUrl,{headers:{'Authorization':'Bearer '+token}});
-    if(!itemResp.ok){const e=await itemResp.json();throw new Error((e.error&&e.error.message)||itemResp.statusText);}
-    const itemData=await itemResp.json();
+    const contentUrl=`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}:/content`;
+    const metaUrl=`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}`;
+    // Step 1: upload current data (creates folder + file if needed)
+    const payload={agreements,bills,clientTasks,lastUpdated:new Date().toISOString(),updatedBy:'admin'};
+    const putResp=await fetch(contentUrl,{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!putResp.ok){
+      let msg=putResp.status+'';
+      try{const j=await putResp.json();msg=j.error?.message||msg;}catch(e){}
+      throw new Error(msg);
+    }
+    // Step 2: get file metadata for driveId + itemId
+    const metaResp=await fetch(metaUrl,{headers:{'Authorization':'Bearer '+token}});
+    if(!metaResp.ok){
+      let msg=metaResp.status+'';
+      try{const j=await metaResp.json();msg=j.error?.message||msg;}catch(e){}
+      throw new Error('Metadata fetch failed: '+msg);
+    }
+    const itemData=await metaResp.json();
     const driveId=itemData.parentReference&&itemData.parentReference.driveId;
     const itemId=itemData.id;
     if(driveId&&itemId){
@@ -2746,14 +2778,20 @@ async function odGenerateShareLink(){
       cfg.sharedDriveId=driveId;
       cfg.sharedItemId=itemId;
       localStorage.setItem('elOdSharedConfig',JSON.stringify(cfg));
-      try{localStorage.setItem('elOdMasterToken',token);localStorage.setItem('elOdMasterTokenTime',Date.now().toString());}catch(e){}
       const box=document.getElementById('odShareLinkBox');
-      if(box){box.style.display='block';box.innerHTML='<b>✅ OneDrive connected!</b> Managers will now sync automatically using your connection. No manual sharing needed.';}
-      setSyncStatus('connected','OneDrive ready for all users');
+      if(box){box.style.display='block';box.innerHTML='<b>✅ OneDrive connected!</b> Data saved. Managers will sync automatically.';}
+      setSyncStatus('connected','OneDrive ready · '+new Date().toLocaleTimeString());
     }else{
-      throw new Error('Could not read file ID from OneDrive — try syncing first');
+      throw new Error('Could not read file ID from response');
     }
-  }catch(e){setSyncStatus('error','Connection failed: '+e.message);}
+  }catch(e){
+    const msg=e.message||String(e);
+    if(msg.includes('Failed to fetch')||msg.includes('NetworkError')){
+      setSyncStatus('error','Network error — check internet connection and try again');
+    }else{
+      setSyncStatus('error','Connection failed: '+msg);
+    }
+  }
 }
 
 function refreshUserOdStatus(){
