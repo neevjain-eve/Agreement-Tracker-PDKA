@@ -2709,11 +2709,26 @@ function deleteClientTask(id){
 }
 
 // ══ USER ONEDRIVE CONNECT ═══════════════════════════
-function odConnectUser(){
-  // Use shared admin config to init MSAL then login
-  const cfg=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
+async function odConnectUser(){
+  // Try localStorage first, fallback to cloud config if missing
+  let cfg=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
+  if(!cfg.clientId){
+    setSyncStatus('syncing','Fetching configuration...');
+    await loadCloudConfig();
+    cfg=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
+  }
+  // If master token exists and is fresh, load data without requiring MS login
+  const _mt=localStorage.getItem('elOdMasterToken');
+  const _mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  if(_mt&&(Date.now()-_mtt)<2700000){
+    setSyncStatus('syncing','Loading data...');
+    try{await odLoadFromOneDrive(false);setSyncStatus('connected','Synced · '+new Date().toLocaleTimeString());showToast('✅ OneDrive data loaded');}
+    catch(e){setSyncStatus('error','Load failed: '+e.message);}
+    return;
+  }
   if(!cfg.clientId){
     showToast('⚠️ Admin has not set up OneDrive yet. Please contact your administrator.');
+    setSyncStatus('','');
     return;
   }
   odConfig=cfg;
@@ -6420,7 +6435,21 @@ function showComposeError(msg){const el=document.getElementById('composeError');
   const _shOd=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
   if(_shOd.clientId){odConfig=_shOd;try{initMSAL();}catch(e){}}
   // Also fetch cloud config (cross-device support) — fire and forget
-  loadCloudConfig().then(()=>{if(odConfig.clientId&&!msalApp){try{initMSAL();}catch(e){}}}).catch(()=>{});
+  loadCloudConfig().then(async()=>{
+    if(odConfig.clientId&&!msalApp){try{initMSAL();}catch(e){}}
+    // Auto-load data for managers using master token (no MS login required)
+    const _cmt=localStorage.getItem('elOdMasterToken');
+    const _cmtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+    const _s2=getSession();
+    if(_cmt&&(Date.now()-_cmtt)<2700000&&_s2&&_s2.role!=='admin'){
+      setSyncStatus('syncing','Loading shared data...');
+      try{await odLoadFromOneDrive(false);}catch(e){}
+    }
+  }).catch(()=>{});
+  // Re-fetch cloud config every 30 min to get fresh master token for long sessions
+  setInterval(()=>{
+    loadCloudConfig().then(()=>{}).catch(()=>{});
+  },1800000);
   checkPwResetToken();
   const s=getSession();
   if(s&&isZohoConnected()){setTimeout(()=>{zohoLoadAllData().then(()=>{}).catch(()=>{});startZohoAutoSync();},800);}
