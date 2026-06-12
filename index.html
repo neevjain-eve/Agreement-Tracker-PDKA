@@ -1302,6 +1302,15 @@
           <div id="subReqList"><div style="font-size:.82rem;color:var(--muted)">No pending requests.</div></div>
         </div>
 
+        <div class="admin-panel" id="ghPatPanel" style="margin-bottom:0">
+          <div class="admin-panel-title">🔑 GitHub Token (for cross-device sync)</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.6">Enter your GitHub Personal Access Token once so OneDrive config syncs to all devices automatically. <a href="https://github.com/settings/tokens/new" target="_blank" style="color:#f97316">Get token ↗</a> (needs <b>repo</b> scope)</div>
+          <div style="display:flex;gap:8px">
+            <input type="password" id="ghPatInput" placeholder="ghp_..." style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;font-family:monospace;outline:none"/>
+            <button onclick="saveGhPat()" style="background:var(--primary);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer">Save</button>
+          </div>
+          <div id="ghPatStatus" style="font-size:.75rem;margin-top:6px;color:var(--muted)"></div>
+        </div>
         <div class="admin-panel" id="odAdminPanel">
           <div class="admin-panel-title">☁️ OneDrive Sync</div>
           <div class="od-section">
@@ -2286,6 +2295,7 @@ function showSection(name){
   if(name==='monthly'){initMonthly();}
   if(name==='clientmgmt'){renderClientTasks();}
   if(name==='od-user'){refreshUserOdStatus();}
+  if(name==='admin'){loadGhPatUI&&loadGhPatUI();}
   closeSidebar();
 }
 
@@ -2780,7 +2790,11 @@ async function odGenerateShareLink(){
       localStorage.setItem('elOdSharedConfig',JSON.stringify(cfg));
       const box=document.getElementById('odShareLinkBox');
       if(box){box.style.display='block';box.innerHTML='<b>✅ OneDrive connected!</b> Data saved. Managers will sync automatically.';}
-      setSyncStatus('connected','OneDrive ready · '+new Date().toLocaleTimeString());
+      // Push config to GitHub so managers on other devices pick it up
+      const ghPushCfg={sharedDriveId:driveId,sharedItemId:itemId,masterToken:token,masterTokenTime:Date.now()};
+      if(odConfig.clientId)ghPushCfg.clientId=odConfig.clientId;
+      const pushed=await pushCloudConfig(ghPushCfg);
+      setSyncStatus('connected',pushed?'✅ Config synced to all devices':'OneDrive ready · '+new Date().toLocaleTimeString());
     }else{
       throw new Error('Could not read file ID from response');
     }
@@ -5902,6 +5916,46 @@ function initMSAL(){
   catch(e){console.error('MSAL init error',e);return false;}
 }
 
+// ── Cross-device config sync via GitHub ─────────────────────────────────────
+async function loadCloudConfig(){
+  try{
+    const r=await fetch('https://raw.githubusercontent.com/neevjain-eve/Agreement-Tracker-PDKA/main/od_config.json?_='+Date.now());
+    if(!r.ok)return;
+    const cfg=await r.json();
+    if(cfg.clientId){
+      const base={clientId:cfg.clientId,redirectUri:getRedirectUri()};
+      odConfig=base;
+      localStorage.setItem('elOdSharedConfig',JSON.stringify(base));
+      localStorage.setItem('odConfig',JSON.stringify(base));
+    }
+    if(cfg.sharedDriveId&&cfg.sharedItemId){
+      const ex=JSON.parse(localStorage.getItem('elOdSharedConfig')||'{}');
+      ex.sharedDriveId=cfg.sharedDriveId;ex.sharedItemId=cfg.sharedItemId;
+      localStorage.setItem('elOdSharedConfig',JSON.stringify(ex));
+    }
+    if(cfg.masterToken&&cfg.masterTokenTime&&(Date.now()-cfg.masterTokenTime)<3300000){
+      localStorage.setItem('elOdMasterToken',cfg.masterToken);
+      localStorage.setItem('elOdMasterTokenTime',cfg.masterTokenTime+'');
+    }
+  }catch(e){}
+}
+
+async function pushCloudConfig(updates){
+  const pat=localStorage.getItem('ghPat')||'';
+  if(!pat)return false;
+  try{
+    let sha2='',existing2={};
+    try{
+      const r2=await fetch('https://api.github.com/repos/neevjain-eve/Agreement-Tracker-PDKA/contents/od_config.json',{headers:{'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json'}});
+      if(r2.ok){const d=await r2.json();sha2=d.sha;existing2=JSON.parse(atob(d.content.replace(/\n/g,'')));}
+    }catch(e){}
+    const newCfg={...existing2,...updates};
+    const body2=JSON.stringify({message:'auto: update OneDrive config',content:btoa(unescape(encodeURIComponent(JSON.stringify(newCfg)))),...(sha2?{sha:sha2}:{})});
+    const resp=await fetch('https://api.github.com/repos/neevjain-eve/Agreement-Tracker-PDKA/contents/od_config.json',{method:'PUT',headers:{'Authorization':'token '+pat,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},body:body2});
+    return resp.ok;
+  }catch(e){return false;}
+}
+
 async function handleMSALRedirect(){
   if(!msalApp)return false;
   try{
@@ -5973,6 +6027,8 @@ function startTokenAutoRenew(){
           if(_s&&_s.role==='admin'){
             localStorage.setItem('elOdMasterToken',r.accessToken);
             localStorage.setItem('elOdMasterTokenTime',Date.now().toString());
+            // Push fresh master token to GitHub for cross-device manager sync
+            pushCloudConfig({masterToken:r.accessToken,masterTokenTime:Date.now()}).catch(()=>{});
           }
         }catch(e){}
       }
@@ -6102,6 +6158,21 @@ function odSaveClientId(){
   localStorage.setItem('odConfig',JSON.stringify(odConfig));
   document.getElementById('odClientId').value=cid;closeModal('odSetupModal');
   if(initMSAL()){msalApp.loginRedirect({scopes:SCOPES});}else showToast('⚠️ Could not initialize. Check Client ID.');
+}
+
+function saveGhPat(){
+  const pat=(document.getElementById('ghPatInput').value||'').trim();
+  if(!pat){showToast('Enter a token');return;}
+  localStorage.setItem('ghPat',pat);
+  document.getElementById('ghPatInput').value='';
+  document.getElementById('ghPatStatus').textContent='✅ Token saved';
+  showToast('GitHub token saved!');
+}
+
+function loadGhPatUI(){
+  const pat=localStorage.getItem('ghPat')||'';
+  const el=document.getElementById('ghPatStatus');
+  if(el)el.textContent=pat?'✅ Token stored — cross-device sync enabled':'No token — managers on other devices cannot sync';
 }
 
 function odDisconnect(){
@@ -6348,6 +6419,8 @@ function showComposeError(msg){const el=document.getElementById('composeError');
   // Load shared OneDrive config on startup for all users
   const _shOd=JSON.parse(localStorage.getItem('elOdSharedConfig')||localStorage.getItem('odConfig')||'{}');
   if(_shOd.clientId){odConfig=_shOd;try{initMSAL();}catch(e){}}
+  // Also fetch cloud config (cross-device support) — fire and forget
+  loadCloudConfig().then(()=>{if(odConfig.clientId&&!msalApp){try{initMSAL();}catch(e){}}}).catch(()=>{});
   checkPwResetToken();
   const s=getSession();
   if(s&&isZohoConnected()){setTimeout(()=>{zohoLoadAllData().then(()=>{}).catch(()=>{});startZohoAutoSync();},800);}
