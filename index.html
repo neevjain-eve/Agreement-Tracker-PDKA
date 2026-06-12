@@ -6108,17 +6108,36 @@ async function odSyncToOneDrive(){
 }
 
 async function odLoadFromOneDrive(allowInteraction=false){
-  // Prefer master token — it points to admin's drive (the single source of truth)
+  // 1. Try to get a fresh token from MSAL silently (best option)
+  let freshToken=null;
+  if(msalApp){
+    const accs=msalApp.getAllAccounts();
+    if(accs.length>0){
+      try{
+        const tr=await msalApp.acquireTokenSilent({scopes:SCOPES,account:accs[0]});
+        freshToken=tr.accessToken;
+        // Update master token with fresh value
+        const _s=getSession();
+        if(_s&&_s.role==='admin'){
+          localStorage.setItem('elOdMasterToken',freshToken);
+          localStorage.setItem('elOdMasterTokenTime',Date.now().toString());
+        }
+      }catch(e){}
+    }
+  }
+  if(freshToken) return odLoadWithToken(freshToken);
+
+  // 2. Fall back to stored master token if still within 55-min window (token lifetime = 60 min)
   const masterToken=localStorage.getItem('elOdMasterToken');
   const masterTime=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
-  if(masterToken&&(Date.now()-masterTime)<2700000){return odLoadWithToken(masterToken);}
-  const token=await getAccessToken(allowInteraction);
-  if(!token){
-    const shared=localStorage.getItem('elOdSharedToken');
-    if(!shared)return;
-    return odLoadWithToken(shared);
+  if(masterToken&&(Date.now()-masterTime)<3300000) return odLoadWithToken(masterToken);
+
+  // 3. If interaction allowed, trigger Microsoft login
+  if(allowInteraction&&msalApp){
+    try{await msalApp.loginRedirect({scopes:SCOPES});}catch(e){}
+    return;
   }
-  return odLoadWithToken(token);
+  setSyncStatus('error','Session expired — please reconnect OneDrive');
 }
 
 async function odLoadWithToken(token){
