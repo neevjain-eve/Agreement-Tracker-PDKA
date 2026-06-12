@@ -6517,10 +6517,9 @@ openDB().then(async()=>{
   if(odConfig.clientId){
     const _sess_init=getSession();
     if(_sess_init&&_sess_init.role==='admin'){
-      // Admin: full MSAL flow
       if(initMSAL()){
         const redirectHandled=await handleMSALRedirect();
-        if(!redirectHandled){const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',Connected · );await odLoadFromOneDrive(false);startTokenAutoRenew();odLoadUsers().catch(e=>console.warn('OD users load on start:',e));
+        if(!redirectHandled){const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Connected · ${odAccount.username}`);await odLoadFromOneDrive(false);startTokenAutoRenew();odLoadUsers().catch(e=>console.warn('OD users load on start:',e));
         if(msalApp){
           (async()=>{
             try{
@@ -6531,7 +6530,7 @@ openDB().then(async()=>{
               const _sc8=JSON.parse(localStorage.getItem('elOdSharedConfig')||'{}');
               if(!_sc8.sharedDriveId||!_sc8.sharedItemId){
                 try{
-                  const _mr8=await fetch(\/me/drive/root:/\:/content\,{headers:{'Authorization':'Bearer '+_mt8}});
+                  const _mr8=await fetch(`${GRAPH}/me/drive/root:/${encodePath(OD_FILE)}`,{headers:{'Authorization':'Bearer '+_mt8}});
                   if(_mr8.ok){const _md8=await _mr8.json();const _di8=(_md8.parentReference||{}).driveId;const _ii8=_md8.id;if(_di8&&_ii8){_sc8.sharedDriveId=_di8;_sc8.sharedItemId=_ii8;localStorage.setItem('elOdSharedConfig',JSON.stringify(_sc8));}}
                 }catch(e){}
               }
@@ -6542,7 +6541,6 @@ openDB().then(async()=>{
       }}
       }
     } else {
-      // Non-admin: load from OneDrive using admin master token only -- no MSAL
       try{await odLoadFromOneDrive(false);}catch(e){}
       if(!window._autoSyncTimer){window._autoSyncTimer=setInterval(async()=>{try{await odLoadFromOneDrive(false);}catch(e){}},2*60*1000);}
     }
