@@ -5979,7 +5979,7 @@ async function handleMSALRedirect(){
   if(!msalApp)return false;
   try{
     const resp=await msalApp.handleRedirectPromise();
-    if(resp){odAccount=resp.account;localStorage.setItem('odAccount',JSON.stringify({username:resp.account.username,name:resp.account.name}));setSyncStatus('connected',`Connected as ${resp.account.username}`);await odLoadFromOneDrive(false);startTokenAutoRenew();return true;}
+    if(resp){odAccount=resp.account;localStorage.setItem('odAccount',JSON.stringify({username:resp.account.username,name:resp.account.name}));setSyncStatus('connected',`Connected as ${resp.account.username}`);await odLoadFromOneDrive(getSession()&&getSession().role==='admin');startTokenAutoRenew();return true;}
     else{const accounts=msalApp.getAllAccounts();if(accounts.length>0){odAccount=accounts[0];setSyncStatus('connected',`Synced · ${odAccount.username}`);startTokenAutoRenew();}}
   }catch(e){setSyncStatus('error','Auth error: '+e.message)}
   return false;
@@ -6080,11 +6080,10 @@ function startTokenAutoRenew(){
 }
 
 async function odSyncToOneDrive(){
-  // Prefer master token so writes go to admin's drive
-  const _mt=localStorage.getItem('elOdMasterToken');
-  const _mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
-  let token=(_mt&&(Date.now()-_mtt)<2700000)?_mt:null;
-  if(!token){if(!msalApp)return;token=await getAccessToken(false);if(!token)return;}
+  let token=null;
+  if(msalApp){const _sa=msalApp.getAllAccounts();if(_sa.length>0){try{const _tr=await msalApp.acquireTokenSilent({scopes:SCOPES,account:_sa[0]});token=_tr.accessToken;const _ss2=getSession();if(_ss2&&_ss2.role==='admin'){localStorage.setItem('elOdMasterToken',token);localStorage.setItem('elOdMasterTokenTime',Date.now().toString());}}catch(e){}}}
+  if(!token){const _mt2=localStorage.getItem('elOdMasterToken');const _mtt2=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');if(_mt2&&(Date.now()-_mtt2)<3300000)token=_mt2;}
+  if(!token){setSyncStatus('error','Session expired — reconnect OneDrive');return;}
   setSyncStatus('syncing','Saving to OneDrive...');
   try{
     const payload={
