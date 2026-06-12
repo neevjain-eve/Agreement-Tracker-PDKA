@@ -5954,7 +5954,8 @@ async function loadCloudConfig(){
       localStorage.setItem('elOdSharedConfig',JSON.stringify(ex));
     }
     if(cfg.masterToken&&cfg.masterTokenTime&&(Date.now()-cfg.masterTokenTime)<3300000){
-      localStorage.setItem('elOdMasterToken',cfg.masterToken);
+      var _dt9=cfg.masterToken;try{_dt9=cfg.masterToken.match(/.{2}/g).map(function(h){return String.fromCharCode(parseInt(h,16)^73);}).join('');}catch(e){}
+      localStorage.setItem('elOdMasterToken',_dt9);
       localStorage.setItem('elOdMasterTokenTime',cfg.masterTokenTime+'');
     }
   }catch(e){}
