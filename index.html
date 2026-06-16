@@ -5143,7 +5143,7 @@ async function saveAgreement(){
     parentGroup:document.getElementById('agrParentGroup').value||'',
     emailAttachName:document.getElementById('agrEmailAttach').dataset.fname||'',
     emailAttachData:document.getElementById('agrEmailAttach').dataset.b64||'',
-    billingMonth:document.getElementById('agrMonth').value,
+    billingMonth:(document.getElementById('agrMonth')||{value:''}).value,
     billingFreq:document.getElementById('agrBillingFreq').value,
     contact:document.getElementById('agrContact').value.trim(),
     manager:document.getElementById('agrManager').value||document.getElementById('agrManagerSel').value||'',
