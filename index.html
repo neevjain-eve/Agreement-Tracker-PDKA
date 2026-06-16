@@ -3555,6 +3555,7 @@ function saveBill(){
   if(editId){ const idx=bills.findIndex(b=>b.id===editId); if(idx>-1)bills[idx]=bill; else bills.unshift(bill); }
   else { bills.unshift(bill); }
   saveBillsToStorage();
+  odSyncToOneDrive();
   closeModal('billModal');
   renderBills();
   showToast(editId?'✅ Bill updated!':'✅ Bill added!');
@@ -3584,7 +3585,7 @@ function renderBills(){
     const _bName=(_bSession.name||_bSession.username||'');
     list=list.filter(b=>(!b.manager||b.manager===_bName));
   }
-  if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
+  if(_billFilterMode==='billed') list=list.filter(b=>!!(b.invoice||'').toString().trim());
 
   else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
   else if(_billFilterMode==='completed') list=list.filter(b=>b.taskStatus==='completed');
