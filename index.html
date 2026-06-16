@@ -3581,8 +3581,7 @@ function renderBills(){
   if(q) list=list.filter(b=>((b.name||'')+(b.client||'')+(b.notes||'')+(b.type||'')+(b.subType||'')+(b.invoice||'')).toLowerCase().includes(q));
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bSession){
-    const _bUser=getUsers().find(u=>u.id===_bSession.userId||u.id===_bSession.id);
-    const _bName=_bUser?_bUser.name:'';
+    const _bName=(_bSession.name||_bSession.username||'');
     list=list.filter(b=>(_bName&&b.manager===_bName));
   }
   if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
@@ -4152,8 +4151,7 @@ async function renderAgreements(){
   const session=getSession();
   const isAdmin=session&&session.role==='admin';
   // Non-admin: only show agreements assigned to their name
-  const _raUser=(!isAdmin&&session)?getUsers().find(u=>u.id===(session.userId||session.id)):null;
-  const _raName=_raUser?_raUser.name:"";
+  const _raName=(!isAdmin&&session)?(session.name||session.username||""):"";
   let filtered=agreements.filter(a=>{
     const status=getStatus(a);
     const mf=currentFilter==='all'||currentFilter==='email'||currentFilter==='with_el'||currentFilter==='without_el'||status===currentFilter;
