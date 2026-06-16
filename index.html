@@ -5340,6 +5340,7 @@ function openEditModal(id){
   }
   document.getElementById('agrEnd').value=a.endDate||'';
   document.getElementById('agrType').value=a.type||'';
+  window._currentElType=a.elType||'';
   onTypeChange();
   if(a.subType){document.getElementById('agrSubType').value=a.subType||'';}
   document.getElementById('agrAmount').value=a.amount||'';
@@ -5348,7 +5349,6 @@ function openEditModal(id){
   document.getElementById('agrParentGroup').value=a.parentGroup||'';
   const _agrMon=document.getElementById('agrMonth');if(_agrMon)_agrMon.value=a.billingMonth||'';
   document.getElementById('agrBillingFreq').value=a.billingFreq||'';
-  populateManagerDropdown('agrManagerSel');
   document.getElementById('agrContact').value=a.contact||'';
   const _amf=document.getElementById('agrManager');if(_amf)_amf.value=a.manager||'';
   const _ams=document.getElementById('agrManagerSel');if(_ams&&a.manager){const _aopt=[..._ams.options].find(o=>o.value===a.manager);if(_aopt)_ams.value=a.manager;}
