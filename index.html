@@ -3582,7 +3582,7 @@ function renderBills(){
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bSession){
     const _bName=(_bSession.name||_bSession.username||'');
-    list=list.filter(b=>(_bName&&b.manager===_bName));
+    list=list.filter(b=>(!b.manager||b.manager===_bName));
   }
   if(_billFilterMode==='billed') list=list.filter(b=>b.invoice&&b.invoice.trim());
 
@@ -4159,7 +4159,7 @@ async function renderAgreements(){
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
-    const af=isAdmin||(_raName&&a.manager===_raName);
+    const af=isAdmin||(!a.manager||a.manager===_raName);
     const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
       :currentFilter==='with_el'?(a.elType==='with')
       :currentFilter==='without_el'?(a.elType==='without'||!a.elType)
