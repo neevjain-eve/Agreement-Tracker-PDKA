@@ -796,7 +796,7 @@
         <span class="nav-icon">📊</span><span class="nav-label">Export / Import</span>
       </button>
       <button class="nav-item" onclick="showSection('admin')" id="nav-admin" style="display:none">
-        <span class="nav-icon">⚙️</span><span class="nav-label">Admin Settings</span>
+        <span class="nav-icon">&#9881;</span><span class="nav-label">Admin Settings</span>
       </button>
     </nav>
     <div class="sidebar-footer">
@@ -4030,7 +4030,7 @@ function updateUserChip(u){
   document.getElementById('userAvatar').textContent=ini;
   document.getElementById('userChipName').textContent=u.name.split(' ')[0];
   const sn=document.getElementById('sidebarUserName');if(sn)sn.textContent=u.name+' ('+u.role+')';
-  const isAdmin=(u.role==='admin');
+  const isAdmin=(u.userId==='admin'||u.id==='admin');
   const an=document.getElementById('nav-admin');if(an)an.style.display=isAdmin?'flex':'none';
   const sc=document.getElementById('syncChip');if(sc)sc.style.display=isAdmin?'flex':'none';
   const zc=document.getElementById('zohoChip');if(zc)zc.style.display=isAdmin?'flex':'none';
