@@ -3604,8 +3604,9 @@ function renderBills(){
   if(q) list=list.filter(b=>((b.name||'')+(b.client||'')+(b.notes||'')+(b.type||'')+(b.subType||'')+(b.invoice||'')).toLowerCase().includes(q));
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bSession){
-    const _bName=(_bSession.name||_bSession.username||'');
-    list=list.filter(b=>(!b.manager||b.manager===_bName));
+    // Filter by allowed categories (consistent with dashboard and sync logic)
+    const _bCatsFilter=getUserAllowedCats(_bSession.userId||_bSession.id||'');
+    if(_bCatsFilter.length>0) list=list.filter(b=>_bCatsFilter.includes(b.type));
   }
   if(_billFilterMode==='billed') list=list.filter(b=>!!(b.invoice||'').toString().trim());
 
@@ -4007,7 +4008,7 @@ function doLogin(){
   if(!u){err.style.display='block';err.textContent='Incorrect username/email or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection(u.role==='admin'?'dashboard':'userdash');showToast('Welcome, '+u.name+'!');
-  if(u.role!=='admin'){setTimeout(()=>{loadCloudConfig().catch(()=>{});startManagerAutoSync();},500);}
+  if(u.role!=='admin'){setTimeout(async()=>{await loadCloudConfig().catch(()=>{});await odLoadFromOneDrive(false).catch(()=>{});startManagerAutoSync();},500);}
 }
 function doLogout(){
   if(!confirm('Sign out?'))return;
@@ -4186,7 +4187,9 @@ async function renderAgreements(){
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
-    const af=isAdmin||(!a.manager||a.manager===_raName);
+    // Non-admins see all records in their assigned categories (consistent with dashboard)
+    const _allowedCats=isAdmin?null:getUserAllowedCats(session.userId||session.id||'');
+    const af=isAdmin||!_allowedCats||_allowedCats.length===0||_allowedCats.includes(a.type)||!!a.isEmail;
     const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
       :currentFilter==='with_el'?(a.elType==='with')
       :currentFilter==='without_el'?(a.elType==='without'||!a.elType)
@@ -6544,7 +6547,7 @@ function showComposeError(msg){const el=document.getElementById('composeError');
   checkPwResetToken();
   const s=getSession();
   if(s&&isZohoConnected()){setTimeout(()=>{zohoLoadAllData().then(()=>{}).catch(()=>{});startZohoAutoSync();},800);}
-  if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");if(s.role!=='admin'){setTimeout(()=>{startManagerAutoSync();},1000);}}
+  if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");if(s.role!=='admin'){setTimeout(async()=>{await loadCloudConfig().catch(()=>{});await odLoadFromOneDrive(false).catch(()=>{});startManagerAutoSync();},1000);}}
   else{document.getElementById("loginScreen").style.display="flex";}
   updateZohoStatus();
   // Renew token when user returns to the tab (e.g. from background)
