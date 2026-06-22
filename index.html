@@ -2597,8 +2597,8 @@ function clearBillApproval(){
 }
 
 // ══ CLIENT MANAGEMENT ══════════════════════════════
-let clientTasks=(function(){try{const _rs=localStorage.getItem('agrSession');if(!_rs)return JSON.parse(localStorage.getItem('elClientTasks')||'[]');const _ss=JSON.parse(_rs);if(_ss&&_ss.userId!=='admin')return[];return JSON.parse(localStorage.getItem('elClientTasks')||'[]');}catch(e){return[];}})();
-function saveClientTasksToStorage(){try{const _sCt=JSON.parse(localStorage.getItem('agrSession')||'null');if(_sCt&&_sCt.userId!=='admin')return;}catch(e){}localStorage.setItem('elClientTasks',JSON.stringify(clientTasks));}
+let clientTasks=(function(){try{const _all=JSON.parse(localStorage.getItem('elClientTasks')||'[]');const _rs=localStorage.getItem('agrSession');if(!_rs)return _all;const _ss=JSON.parse(_rs);if(_ss&&_ss.userId!=='admin'){const _uid=_ss.userId||_ss.id||'';return _all.filter(t=>!t.createdByUserId||t.createdByUserId===_uid);}return _all;}catch(e){return[];}})();
+function saveClientTasksToStorage(){localStorage.setItem('elClientTasks',JSON.stringify(clientTasks));}
 
 let _ctFilter='all';
 function setClientTaskFilter(f){
