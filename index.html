@@ -891,14 +891,6 @@
           </div>
         </div>
 
-        <div class="fd-card" id="dashManagerList" style="margin:4px 0 14px;padding:16px 16px 8px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <h3 style="font-size:.92rem;font-weight:800;color:var(--text)">&#128101; Manager List</h3>
-            <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#11015; Download All</button>
-          </div>
-          <div id="dashManagerListContainer"><div style="font-size:.82rem;color:var(--muted)">Loading...</div></div>
-        </div>
-
         <div class="dash-quick-panel" id="dashQuickPanel" style="display:none">
           <div class="dash-quick-panel-inner">
             <div class="dash-qp-header">
@@ -1029,6 +1021,13 @@
             </div>
           </div>
         </div>
+      </div>
+            <div class="fd-card" id="dashManagerList" style="margin:14px 0 4px;padding:16px 16px 8px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h3 style="font-size:.92rem;font-weight:800;color:var(--text)">&#128101; Manager List</h3>
+          <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#11015; Download All</button>
+        </div>
+        <div id="dashManagerListContainer"><div style="font-size:.82rem;color:var(--muted)">Loading...</div></div>
       </div>
       <canvas id="agreementPieChart" style="display:none" aria-hidden="true"></canvas>
     </div>
