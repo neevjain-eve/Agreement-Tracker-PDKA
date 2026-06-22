@@ -6216,7 +6216,7 @@ async function odSyncToOneDrive(){
   let payload;
   if(_isAdmin_sync){
     // Admin: full write -- owns all data
-    payload={agreements,bills,clientTasks,lastUpdated:new Date().toISOString(),updatedBy:(_sess_sync||{}).username||'unknown'};
+    let _cFM={clientTasks:[]};try{const _mU=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));const _mR=await fetch(_mU,{headers:{'Authorization':'Bearer '+token}});if(_mR.ok)_cFM=await _mR.json();}catch(e){}const _cT=(_cFM.clientTasks||[]);const _lIds=new Set(clientTasks.map(t=>t.id));const _mT=[...clientTasks,..._cT.filter(t=>!_lIds.has(t.id))];payload={agreements,bills,clientTasks:_mT,lastUpdated:new Date().toISOString(),updatedBy:(_sess_sync||{}).username||'unknown'};
   } else {
     // Manager: read-merge-write -- only replace own category records, never touch other managers' data
     const _myCats=getUserAllowedCats(_sess_sync.userId||_sess_sync.id||'');
