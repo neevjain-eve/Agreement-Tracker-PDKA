@@ -1247,7 +1247,7 @@
             <div class="form-group"><label>Username *</label><input type="text" id="newUserUsername" placeholder="e.g. naveen" autocomplete="off"/></div>
             <div class="form-group"><label>Email Address</label><input type="email" id="newUserEmail" placeholder="e.g. naveen@company.com"/><div style="font-size:.71rem;color:var(--muted);margin-top:2px">Reminders will also be sent to this email</div></div>
             <div class="form-group"><label>Password *</label><div class="pw-wrap"><input type="password" id="newUserPass" placeholder="Min 4 characters"/><button class="pw-eye" onclick="togglePw('newUserPass',this)" type="button">👁</button></div></div>
-            <div class="form-group"><label>Role</label><select id="newUserRole"><option value="admin">Admin</option><option value="user" selected>User</option></select></div>
+            <div class="form-group"><label>Role</label><select id="newUserRole"><option value="user" selected>User</option><option value="admin">Admin</option></select></div>
             <div style="display:flex;gap:8px"><button class="btn-primary" onclick="saveNewUser()" style="flex:1">💾 Save</button><button class="btn-secondary" onclick="hideAddUserForm()" style="flex:1">Cancel</button></div>
           </div>
           <div class="od-sync-note" id="userSyncNote">
@@ -3281,7 +3281,7 @@ async function zohoLoadAllData(){
     }
     // Load bills
     if(data.bills&&Array.isArray(data.bills)){
-      bills=data.bills;saveBillsToStorage();renderBills();
+      {const _zs=getSession();if(_zs&&_zs.userId!=='admin'&&!(_zs.role==='admin'&&!getUserAllowedCats(_zs.userId||'').length)){const _zu=_zs.userId||_zs.id||'';const _zn=(_zs.name||_zs.username||'').toLowerCase();bills=data.bills.filter(b=>{if(b.createdByUserId)return b.createdByUserId===_zu;if(!_zn)return false;return(b.manager||'').toLowerCase()===_zn;});}else{bills=data.bills;}saveBillsToStorage();renderBills();}
     }
     // Load client tasks
     if(data.clientTasks&&Array.isArray(data.clientTasks)){
@@ -3387,9 +3387,9 @@ async function zohoSyncNow(){
 // ONE TIME BILLING
 // ══════════════════════════════════════════════════
 // Non-admins never read bills from localStorage - always loaded fresh from OneDrive
-let bills=(function(){try{const _rs=localStorage.getItem('agrSession');if(!_rs)return JSON.parse(localStorage.getItem('agrBills')||'[]');const _ss=JSON.parse(_rs);if(_ss&&_ss.role!=='admin')return[];return JSON.parse(localStorage.getItem('agrBills')||'[]');}catch(e){return[];}})();
+let bills=(function(){try{const _rs=localStorage.getItem('agrSession');if(!_rs)return JSON.parse(localStorage.getItem('agrBills')||'[]');const _ss=JSON.parse(_rs); if(_ss&&_ss.userId!=='admin')return[];return JSON.parse(localStorage.getItem('agrBills')||'[]');}catch(e){return[];}})();
 
-function saveBillsToStorage(){try{const _sBs=JSON.parse(localStorage.getItem('agrSession')||'null');if(_sBs&&_sBs.role!=='admin')return;}catch(e){}localStorage.setItem('agrBills',JSON.stringify(bills));}
+function saveBillsToStorage(){try{const _sBs=JSON.parse(localStorage.getItem('agrSession')||'null');if(_sBs&&_sBs.userId!=='admin'&&!(_sBs.role==='admin'&&!getUserAllowedCats(_sBs.userId||'').length))return;}catch(e){}localStorage.setItem('agrBills',JSON.stringify(bills));}
 
 function onBillTypeChange(){
   const type = document.getElementById('billType').value;
@@ -3599,18 +3599,17 @@ function renderBills(){
   const q=(document.getElementById('billSearchInput')?.value||'').toLowerCase();
   const _bCat=window._activeCat||null;
   const _bSession=getSession();
-  const _bAdmin=_bSession&&_bSession.role==='admin';
+  const _bAdmin=_bSession&&(_bSession.userId==='admin'||(_bSession.role==='admin'&&!getUserAllowedCats(_bSession.userId||'').length));
   const _bAllowed=(!_bAdmin&&_bSession)?getUserAllowedCats(_bSession.userId):null;
   const _billFilterMode=window._billFilter||'all';
   let list=bills;
   if(q) list=list.filter(b=>((b.name||'')+(b.client||'')+(b.notes||'')+(b.type||'')+(b.subType||'')+(b.invoice||'')).toLowerCase().includes(q));
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bSession){
-    // Show only bills in this manager's allowed categories AND assigned to them by name
-    const _bCatsFilter=getUserAllowedCats(_bSession.userId||_bSession.id||'');
-    const _bName=(_bSession.name||_bSession.username||'');
+    // Pure ownership: show only bills created by this manager
     const _bUid=_bSession.userId||_bSession.id||'';
-    list=list.filter(b=>_bCatsFilter.includes(b.type)&&(b.createdByUserId?b.createdByUserId===_bUid:(_bName&&b.manager===_bName)));
+    const _bName=(_bSession.name||_bSession.username||'').toLowerCase();
+    list=list.filter(b=>{if(b.createdByUserId)return b.createdByUserId===_bUid;if(!_bName)return false;return(b.manager||'').toLowerCase()===_bName;});
   }
   if(_billFilterMode==='billed') list=list.filter(b=>!!(b.invoice||'').toString().trim());
 
@@ -4012,7 +4011,7 @@ function doLogin(){
   if(!u){err.style.display='block';err.textContent='Incorrect username/email or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection(u.role==='admin'?'dashboard':'userdash');showToast('Welcome, '+u.name+'!');
-  if(u.role!=='admin'){setTimeout(async()=>{await loadCloudConfig().catch(()=>{});await odLoadFromOneDrive(false).catch(()=>{});startManagerAutoSync();},500);}
+  if(u.role!=='admin'){setTimeout(async()=>{await loadCloudConfig().catch(()=>{});await odLoadFromOneDrive(false).catch(()=>{});startManagerAutoSync();},500);}else{setTimeout(async()=>{await odLoadFromOneDrive(false).catch(()=>{});startTokenAutoRenew();},500);}
 }
 function doLogout(){
   if(!confirm('Sign out?'))return;
@@ -6248,7 +6247,7 @@ async function odLoadWithToken(token){
     // Load bills
     if(cloud.bills&&Array.isArray(cloud.bills)){
       const _lt_sess=getSession();
-      if(_lt_sess&&_lt_sess.role!=='admin'){
+      if(_lt_sess&&_lt_sess.userId!=='admin'&&!(_lt_sess.role==='admin'&&!getUserAllowedCats(_lt_sess.userId||'').length)){
         const _lt_uid=_lt_sess.userId||_lt_sess.id||'';
         const _lt_name=(_lt_sess.name||_lt_sess.username||'').toLowerCase();
         bills=cloud.bills.filter(b=>{
