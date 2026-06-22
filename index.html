@@ -3387,6 +3387,8 @@ async function zohoSyncNow(){
 // ONE TIME BILLING
 // ══════════════════════════════════════════════════
 let bills = JSON.parse(localStorage.getItem('agrBills') || '[]');
+// Immediately filter bills for non-admin managers using raw localStorage session
+(function(){try{const _rs=localStorage.getItem('agrSession');if(!_rs)return;const _ss=JSON.parse(_rs);if(!_ss||_ss.role==='admin')return;const _uid=_ss.userId||_ss.id||'';const _nm=(_ss.name||_ss.username||'').toLowerCase();bills=bills.filter(function(b){if(b.createdByUserId)return b.createdByUserId===_uid;if(!_nm)return false;return(b.manager||'').toLowerCase()===_nm;});}catch(e){}})();
 
 function saveBillsToStorage(){ localStorage.setItem('agrBills', JSON.stringify(bills)); }
 
