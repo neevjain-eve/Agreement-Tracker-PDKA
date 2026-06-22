@@ -2964,8 +2964,9 @@ function renderUserCatDash(){
       const nv=document.getElementById(id);if(nv)nv.style.display='flex';
     });
     // ── Render category dashboard inside sec-userdash ──
-    const agrList=agreements.filter(a=>a.type===cat);
-    const billList=bills.filter(b=>b.type===cat);
+    const _uid=session.userId||session.id||'';const _name=(session.name||session.username||'').toLowerCase();
+    const agrList=agreements.filter(a=>{if(a.type!==cat)return false;if(a.createdByUserId)return a.createdByUserId===_uid;return _name&&(a.manager||'').toLowerCase()===_name;});
+    const billList=bills.filter(b=>{if(b.type!==cat)return false;if(b.createdByUserId)return b.createdByUserId===_uid;return _name&&(b.manager||'').toLowerCase()===_name;});
     const totalAgr=agrList.length;
     const totalBill=billList.length;
     const totalAmt=agrList.reduce((s,a)=>s+(parseFloat(a.amount)||0),0)+billList.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
