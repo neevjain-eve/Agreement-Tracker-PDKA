@@ -3306,6 +3306,28 @@ function startZohoAutoSync(){
   };
   document.addEventListener('visibilitychange',window._zohoVisHandler);
 }
+function startManagerAutoSync(){
+  if(window._managerSyncTimer)clearInterval(window._managerSyncTimer);
+  // Every 5 min: pull fresh token from GitHub cloud config, then reload OneDrive data
+  window._managerSyncTimer=setInterval(async()=>{
+    const _s=getSession();if(!_s||_s.role==='admin')return;
+    try{await loadCloudConfig();}catch(e){}
+    const _mt=localStorage.getItem('elOdMasterToken');
+    const _mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+    if(_mt&&(Date.now()-_mtt)<3300000){odLoadFromOneDrive(false).catch(()=>{});}
+  },5*60*1000);
+  // Also sync on tab focus
+  document.removeEventListener('visibilitychange',window._managerVisHandler);
+  window._managerVisHandler=async()=>{
+    if(document.hidden)return;
+    const _s=getSession();if(!_s||_s.role==='admin')return;
+    try{await loadCloudConfig();}catch(e){}
+    const _mt=localStorage.getItem('elOdMasterToken');
+    const _mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+    if(_mt&&(Date.now()-_mtt)<3300000){odLoadFromOneDrive(false).catch(()=>{});}
+  };
+  document.addEventListener('visibilitychange',window._managerVisHandler);
+}
 
 async function zohoSyncNow(){
   if(!isZohoConnected()){showToast('Connect Zoho Books first');return;}
@@ -3985,6 +4007,7 @@ function doLogin(){
   if(!u){err.style.display='block';err.textContent='Incorrect username/email or password.';return}
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection(u.role==='admin'?'dashboard':'userdash');showToast('Welcome, '+u.name+'!');
+  if(u.role!=='admin'){setTimeout(()=>{loadCloudConfig().catch(()=>{});startManagerAutoSync();},500);}
 }
 function doLogout(){
   if(!confirm('Sign out?'))return;
@@ -6147,6 +6170,11 @@ async function odLoadFromOneDrive(allowInteraction=false){
     try{msalApp.loginRedirect({scopes:SCOPES});}catch(e){}
     return;
   }
+  // Try refreshing token from cloud config before giving up
+  try{await loadCloudConfig();}catch(e){}
+  const mt2=localStorage.getItem('elOdMasterToken');
+  const mtt2=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  if(mt2&&(Date.now()-mtt2)<3300000) return odLoadWithToken(mt2);
   setSyncStatus('error','Session expired -- ask admin to open the app to refresh sync');
 }
 async function odLoadWithToken(token){
@@ -6495,7 +6523,7 @@ function showComposeError(msg){const el=document.getElementById('composeError');
   checkPwResetToken();
   const s=getSession();
   if(s&&isZohoConnected()){setTimeout(()=>{zohoLoadAllData().then(()=>{}).catch(()=>{});startZohoAutoSync();},800);}
-  if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");}
+  if(s){document.getElementById("loginScreen").style.display="none";document.getElementById("appShell").style.display="block";updateUserChip(s);showSection(s.role==="admin"?"dashboard":"userdash");if(s.role!=='admin'){setTimeout(()=>{startManagerAutoSync();},1000);}}
   else{document.getElementById("loginScreen").style.display="flex";}
   updateZohoStatus();
   // Renew token when user returns to the tab (e.g. from background)
