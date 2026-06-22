@@ -4253,7 +4253,7 @@ async function buildCard(a){
   }
   const renewBtn=(status==='expired')?`<button class="btn-renew" onclick="openRenewModal('${a.id}')">🔄 Renew</button>`:'';
   const histBtn=(a.renewedFrom||a.renewedTo)?`<button class="btn-history" onclick="showHistory('${a.id}')">📜 History</button>`:'';
-  const remindBtn=`<button class="btn-edit" onclick="openEmailModal('${a.id}')" style="background:#ffedd5;color:#111111" title="Compose &amp; Send reminder email">📧</button>`;
+  const remindBtn=`<button class="btn-edit" onclick="openEmailModal('${a.id}')" style="background:#ffedd5;color:#111111" title="Compose &amp; Send reminder email"> Email</button>`;
   const editBtn=`<button class="btn-edit" onclick="openEditModal('${a.id}')">✏️ Edit</button>`;
   const delBtn=`<button class="btn-delete" onclick="deleteAgreement('${a.id}')">🗑️ Delete</button>`;
   const pdfBtn=`<button class="btn-history" onclick="downloadAgrPdf('${a.id}')" title="Download PDF">📄 PDF</button>`;
