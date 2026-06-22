@@ -3604,9 +3604,10 @@ function renderBills(){
   if(q) list=list.filter(b=>((b.name||'')+(b.client||'')+(b.notes||'')+(b.type||'')+(b.subType||'')+(b.invoice||'')).toLowerCase().includes(q));
   if(_bCat) list=list.filter(b=>b.type===_bCat);
   if(!_bAdmin&&_bSession){
-    // Filter by allowed categories (consistent with dashboard and sync logic)
+    // Show only bills in this manager's category AND assigned to them (or unassigned)
     const _bCatsFilter=getUserAllowedCats(_bSession.userId||_bSession.id||'');
-    if(_bCatsFilter.length>0) list=list.filter(b=>_bCatsFilter.includes(b.type));
+    const _bName=(_bSession.name||_bSession.username||'');
+    list=list.filter(b=>_bCatsFilter.includes(b.type)&&(!b.manager||b.manager===_bName));
   }
   if(_billFilterMode==='billed') list=list.filter(b=>!!(b.invoice||'').toString().trim());
 
