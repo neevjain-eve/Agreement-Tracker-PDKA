@@ -4139,7 +4139,7 @@ function renderManagerList(){
   const td='padding:8px 10px;font-size:.8rem;border-bottom:1px solid var(--border-light);vertical-align:middle';
   const rows=managers.map(u=>{
     const _uId=u.id||'';const _uName=(u.name||'').toLowerCase();
-    const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:false);
+    const _uCatNames=(u.allowedCats||[]).map(catDisplayName);const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:_uCatNames.includes(t.category||''));
     const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const cat=(u.allowedCats||[]).map(catDisplayName).join(', ')||'ΓÇö';
     const amt=uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
