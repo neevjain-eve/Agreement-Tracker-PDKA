@@ -819,7 +819,7 @@
         <span class="nav-icon">🔑</span><span class="nav-label">My Profile</span>
       </button>
       <button class="nav-item" id="nav-od-user" onclick="showSection('od-user')" style="color:rgba(255,255,255,.6)">
-        <span class="nav-icon">☁️</span>
+        <span class="nav-icon">Sync</span>
         <span class="nav-label" id="navOdUserLabel">Connect OneDrive</span>
         <span id="navOdUserDot" style="width:8px;height:8px;border-radius:50%;background:#d1d5db;margin-left:auto;flex-shrink:0;display:inline-block"></span>
       </button>
@@ -837,8 +837,8 @@
     <div class="topbar">
       <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
-      <button id="refreshBtn" onclick="refreshCurrentSection()" title="Refresh" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:10px;font-size:1.1rem;color:#f97316;transition:transform .3s;flex-shrink:0" onmouseenter="this.style.background='#ffedd5'" onmouseleave="this.style.background='none'">🔄</button>
-      <span id="syncIndicator" title="OneDrive sync status" style="font-size:.65rem;color:var(--muted);padding:4px 8px;border-radius:8px;background:#ffedd5;cursor:pointer;flex-shrink:0" onclick="odSyncNow()">☁️</span>
+      <button id="refreshBtn" onclick="refreshCurrentSection()" title="Refresh" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:10px;font-size:1.1rem;color:#f97316;transition:transform .3s;flex-shrink:0" onmouseenter="this.style.background='#ffedd5'" onmouseleave="this.style.background='none'">&#x21BB;</button>
+      <span id="syncIndicator" title="OneDrive sync status" style="font-size:.65rem;color:var(--muted);padding:4px 8px;border-radius:8px;background:#ffedd5;cursor:pointer;flex-shrink:0" onclick="odSyncNow()">Sync</span>
       <button class="user-chip" id="userChip" onclick="showSection('admin')">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
