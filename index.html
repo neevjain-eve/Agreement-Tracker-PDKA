@@ -1301,15 +1301,7 @@
           <div id="subReqList"><div style="font-size:.82rem;color:var(--muted)">No pending requests.</div></div>
         </div>
 
-        <div class="admin-panel" id="ghPatPanel" style="margin-bottom:0">
-          <div class="admin-panel-title">🔑 GitHub Token (for cross-device sync)</div>
-          <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;line-height:1.6">Enter your GitHub Personal Access Token once so OneDrive config syncs to all devices automatically. <a href="https://github.com/settings/tokens/new" target="_blank" style="color:#f97316">Get token ↗</a> (needs <b>repo</b> scope)</div>
-          <div style="display:flex;gap:8px">
-            <input type="password" id="ghPatInput" placeholder="ghp_..." style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.78rem;font-family:monospace;outline:none"/>
-            <button onclick="saveGhPat()" style="background:var(--primary);color:#fff;border:none;border-radius:9px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer">Save</button>
-          </div>
-          <div id="ghPatStatus" style="font-size:.75rem;margin-top:6px;color:var(--muted)"></div>
-        </div>
+        
         <div class="admin-panel" id="odAdminPanel">
           <div class="admin-panel-title">☁️ OneDrive Sync</div>
           <div class="od-section">
@@ -1328,7 +1320,7 @@
             </div>
             <div id="odConnectedActions" style="display:none">
               <button class="btn-od-connect" onclick="odSyncNow()" style="background:#f97316;color:#000000">🔄 Sync Now</button>
-              <button onclick="odGenerateShareLink()" style="width:100%;margin-top:8px;background:#ffedd5;border:1.5px solid #f97316;color:#111111;border-radius:10px;padding:9px;font-size:.82rem;font-weight:700;cursor:pointer">🔗 Generate Share Link for Managers</button>
+              
               <div id="odShareLinkBox" style="display:none;margin-top:8px;padding:10px;background:#fff7ed;border-radius:10px;font-size:.75rem;color:#111111"></div>
               <button class="btn-od-disconnect" onclick="odDisconnect()">Disconnect OneDrive</button>
             </div>
