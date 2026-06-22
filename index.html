@@ -5598,17 +5598,21 @@ function getMonthlyData(){
   // Agreements active during this month (start <= last day of month AND end >= first day)
   const first=new Date(y,m-1,1);
   const last=new Date(y,m,0);
-  const _mSess=getSession();const _mAdmin=_mSess&&_mSess.role==='admin';const _mAllowed=(!_mAdmin&&_mSess)?getUserAllowedCats(_mSess.userId):null;
+  const _mSess=getSession();const _mAdmin=_mSess&&(_mSess.userId==='admin'||_mSess.id==='admin');const _mUid=_mSess?(_mSess.userId||_mSess.id||''):'';const _mName=(_mSess?(_mSess.name||_mSess.username||''):'').toLowerCase();const _mAllowed=(!_mAdmin&&_mSess)?getUserAllowedCats(_mSess.userId):null;
   const _activeCatMonthly=window._activeCat||null;
   const agrData=agreements.filter(a=>{
     if(!a.startDate||!a.endDate)return false;
     const s=new Date(a.startDate),e=new Date(a.endDate);
-    const af=_mAdmin||!_mAllowed||(a.type&&_mAllowed.includes(a.type));
     const catf=!_activeCatMonthly||(a.type===_activeCatMonthly);
-    return (s<=last&&e>=first)&&af&&catf;
+    if(!catf)return false;
+    if(_mAdmin)return s<=last&&e>=first;
+    if(a.createdByUserId)return a.createdByUserId===_mUid&&s<=last&&e>=first;
+    if(_mName&&(a.manager||'').toLowerCase()===_mName)return s<=last&&e>=first;
+    return false;
   });
-  // Bills in this month — match period (month field or custom date range)
+  // Bills in this month - match period (month field or custom date range)
   const billData=bills.filter(b=>{
+    if(!_mAdmin){if(b.createdByUserId?b.createdByUserId!==_mUid:(!_mName||(b.manager||'').toLowerCase()!==_mName))return false;}
     if(_activeCatMonthly&&b.type!==_activeCatMonthly)return false;
     if(!b.date)return false;
     if(b.date.includes('|')){
