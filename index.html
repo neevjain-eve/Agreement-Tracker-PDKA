@@ -3298,7 +3298,7 @@ async function zohoLoadAllData(){
     }
     // Load client tasks
     if(data.clientTasks&&Array.isArray(data.clientTasks)){
-      {const _zct=getSession();if(_zct&&_zct.userId!=='admin'){const _zcu=_zct.userId||_zct.id||'';clientTasks=data.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_zcu:false);}else{clientTasks=data.clientTasks;}saveClientTasksToStorage();}
+      {const _zct=getSession();if(_zct&&_zct.userId!=='admin'){const _zcu=_zct.userId||_zct.id||'';const _zFiltered=data.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_zcu:false);const _zLocal=(()=>{try{return JSON.parse(localStorage.getItem('elClientTasks')||'[]').filter(t=>!t.createdByUserId||t.createdByUserId===_zcu);}catch(e){return[];}})();const _zIds=new Set(_zFiltered.map(t=>t.id));clientTasks=[..._zFiltered,..._zLocal.filter(t=>!_zIds.has(t.id))];}else{clientTasks=data.clientTasks;}saveClientTasksToStorage();}
     }
     setSyncStatus('connected','☁️ Synced via Zoho · '+new Date().toLocaleTimeString());
     localStorage.setItem('elLastZohoSync',Date.now().toString());
@@ -6349,7 +6349,7 @@ async function odLoadWithToken(token){
     }
     // Load client tasks
     if(cloud.clientTasks&&Array.isArray(cloud.clientTasks)){
-      {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';clientTasks=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:false);}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
+      {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';const _oFiltered=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:false);const _oLocal=(()=>{try{return JSON.parse(localStorage.getItem('elClientTasks')||'[]').filter(t=>!t.createdByUserId||t.createdByUserId===_ocu);}catch(e){return[];}})();const _oIds=new Set(_oFiltered.map(t=>t.id));clientTasks=[..._oFiltered,..._oLocal.filter(t=>!_oIds.has(t.id))];}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
     }
     setSyncStatus('connected','✅ Synced · '+new Date().toLocaleTimeString());
     {const _rmlS=getSession();if(_rmlS&&(_rmlS.userId==='admin'||_rmlS.id==='admin'))setTimeout(renderManagerList,0);}
