@@ -3550,7 +3550,7 @@ function saveBill(){
     id: editId||Date.now().toString(),
     name: desc, client, date, amount,
     quoteAmount: document.getElementById('billQuoteAmount').value||'',
-    manager: document.getElementById('billManager').value||document.getElementById('billManagerSel').value||'',
+    manager: _billIsAdmin?(document.getElementById('billManager').value||document.getElementById('billManagerSel').value||''):(_billSess.name||_billSess.username||''),
     parentGroup:document.getElementById('billParentGroup').value||'',
     type: document.getElementById('billType').value,
     subType: document.getElementById('billSubType').value,
@@ -3607,7 +3607,7 @@ function renderBills(){
     // Show only bills in this manager's category AND assigned to them (or unassigned)
     const _bCatsFilter=getUserAllowedCats(_bSession.userId||_bSession.id||'');
     const _bName=(_bSession.name||_bSession.username||'');
-    list=list.filter(b=>_bCatsFilter.includes(b.type)&&(!b.manager||b.manager===_bName));
+    list=list.filter(b=>_bCatsFilter.includes(b.type)&&b.manager===_bName);
   }
   if(_billFilterMode==='billed') list=list.filter(b=>!!(b.invoice||'').toString().trim());
 
