@@ -2604,8 +2604,9 @@ function renderClientTasks(){
   const el=document.getElementById('clientTaskList');if(!el)return;
   const sess=getSession();const isAdmin=sess&&(sess.userId==='admin'||(!getUserAllowedCats(sess.userId||'').length&&sess.role==='admin'));
   let list=isAdmin?clientTasks:clientTasks.filter(t=>{
-    if(t.createdByUserId)return t.createdByUserId===(sess.userId||sess.id||'');
-    return !t.category||(getUserAllowedCats(sess.userId||sess.id||'').map(catDisplayName).includes(t.category));
+    const _ctUid=sess.userId||sess.id||'';
+    if(t.createdByUserId)return t.createdByUserId===_ctUid;
+    return false;
   });
   if(_ctFilter==='pending') list=list.filter(t=>t.status==='pending');
   else if(_ctFilter==='in_progress') list=list.filter(t=>t.status==='in_progress');
@@ -3287,7 +3288,7 @@ async function zohoLoadAllData(){
     }
     // Load client tasks
     if(data.clientTasks&&Array.isArray(data.clientTasks)){
-      {const _zct=getSession();if(_zct&&_zct.userId!=='admin'){const _zcu=_zct.userId||_zct.id||'';clientTasks=data.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_zcu:(!t.category||(getUserAllowedCats(_zcu).map(catDisplayName).includes(t.category))));}else{clientTasks=data.clientTasks;}saveClientTasksToStorage();}
+      {const _zct=getSession();if(_zct&&_zct.userId!=='admin'){const _zcu=_zct.userId||_zct.id||'';clientTasks=data.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_zcu:false);}else{clientTasks=data.clientTasks;}saveClientTasksToStorage();}
     }
     setSyncStatus('connected','☁️ Synced via Zoho · '+new Date().toLocaleTimeString());
     localStorage.setItem('elLastZohoSync',Date.now().toString());
@@ -6268,7 +6269,7 @@ async function odLoadWithToken(token){
     }
     // Load client tasks
     if(cloud.clientTasks&&Array.isArray(cloud.clientTasks)){
-      {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';clientTasks=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:(!t.category||(getUserAllowedCats(_ocu).map(catDisplayName).includes(t.category))));}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
+      {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';clientTasks=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:false);}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
     }
     setSyncStatus('connected','✅ Synced · '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Load failed: '+e.message);}
