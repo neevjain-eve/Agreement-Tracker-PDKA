@@ -6155,11 +6155,16 @@ async function odSyncToOneDrive(){
       if(!_myName_s)return true;
       return(b.manager||'').toLowerCase()!==_myName_s;
     });
-    const _otherTasks=(_cloudData.clientTasks||[]).filter(t=>!_myCats.includes(t.category));
+    const _myCatsDisp=_myCats.map(catDisplayName);
+    const _otherTasks=(_cloudData.clientTasks||[]).filter(t=>{
+        if(!_myCatsDisp.includes(t.category))return true;
+        if(t.createdByUserId)return t.createdByUserId!==_myUserId_s;
+        return true;
+    });
     // My local records (already filtered to only my bills at load time)
     const _myAgrs=agreements.filter(a=>_myCats.includes(a.type));
     const _myBills=bills.filter(b=>_myCats.includes(b.type));
-    const _myTasks=clientTasks.filter(t=>_myCats.includes(t.category));
+    const _myTasks=clientTasks.filter(t=>_myCatsDisp.includes(t.category));
     payload={
       agreements:[..._otherAgrs,..._myAgrs],
       bills:[..._otherBills,..._myBills],
