@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -6121,30 +6121,46 @@ async function odSyncToOneDrive(){
   const _sess_sync=getSession();
   if(_sess_sync&&_sess_sync.role==='admin'&&msalApp){const _sa=msalApp.getAllAccounts();if(_sa.length>0){try{const _tr=await msalApp.acquireTokenSilent({scopes:SCOPES,account:_sa[0]});token=_tr.accessToken;localStorage.setItem('elOdMasterToken',token);localStorage.setItem('elOdMasterTokenTime',Date.now().toString());}catch(e){}}}
   if(!token){const _mt2=localStorage.getItem('elOdMasterToken');const _mtt2=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');if(_mt2&&(Date.now()-_mtt2)<3300000)token=_mt2;}
-  if(!token){setSyncStatus('error','Session expired — reconnect OneDrive');return;}
+  if(!token){setSyncStatus('error','Session expired -- reconnect OneDrive');return;}
   setSyncStatus('syncing','Saving to OneDrive...');
-  try{
-    const payload={
-      agreements,
-      bills,
-      clientTasks,
+  const _isAdmin_sync=_sess_sync&&_sess_sync.role==='admin';
+  let payload;
+  if(_isAdmin_sync){
+    // Admin: full write -- owns all data
+    payload={agreements,bills,clientTasks,lastUpdated:new Date().toISOString(),updatedBy:(_sess_sync||{}).username||'unknown'};
+  } else {
+    // Manager: read-merge-write -- only replace own category records, never touch other managers' data
+    const _myCats=getUserAllowedCats(_sess_sync.userId||_sess_sync.id||'');
+    let _cloudData={agreements:[],bills:[],clientTasks:[]};
+    try{
+      const _cUrl=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));
+      const _cr=await fetch(_cUrl,{headers:{'Authorization':'Bearer '+token}});
+      if(_cr.ok)_cloudData=await _cr.json();
+    }catch(e){}
+    // Keep cloud records that belong to other categories/managers
+    const _otherAgrs=(_cloudData.agreements||[]).filter(a=>!_myCats.includes(a.type));
+    const _otherBills=(_cloudData.bills||[]).filter(b=>!_myCats.includes(b.type));
+    const _otherTasks=(_cloudData.clientTasks||[]).filter(t=>!_myCats.includes(t.category));
+    // My local records (only my categories)
+    const _myAgrs=agreements.filter(a=>_myCats.includes(a.type));
+    const _myBills=bills.filter(b=>_myCats.includes(b.type));
+    const _myTasks=clientTasks.filter(t=>_myCats.includes(t.category));
+    payload={
+      agreements:[..._otherAgrs,..._myAgrs],
+      bills:[..._otherBills,..._myBills],
+      clientTasks:[..._otherTasks,..._myTasks],
       lastUpdated:new Date().toISOString(),
-      updatedBy:(getSession()||{}).username||'unknown'
+      updatedBy:_sess_sync.username||'unknown'
     };
+  }
+  try{
     let odUrl=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));
-    const r=await fetch(odUrl,{
-      method:'PUT',
-      headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
-    });
+    const r=await fetch(odUrl,{method:'PUT',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(payload)});
     if(!r.ok)throw new Error((await r.json()).error?.message||r.statusText);
-    // Store token for other users (shared access)
     try{localStorage.setItem('elOdSharedToken',token);localStorage.setItem('elOdTokenTime',Date.now().toString());}catch(e){}
-    setSyncStatus('connected','✅ Saved · '+new Date().toLocaleTimeString());
+    setSyncStatus('connected','Saved '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Save failed: '+e.message);}
-}
-
-async function odLoadFromOneDrive(allowInteraction=false){
+}async function odLoadFromOneDrive(allowInteraction=false){
   // Only admins use their own MSAL session; managers always use admin master token
   const _sess_load=getSession();const _isAdmin_load=_sess_load&&_sess_load.role==='admin';
   let freshToken=null;
