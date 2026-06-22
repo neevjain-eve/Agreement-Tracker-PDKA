@@ -839,7 +839,7 @@
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <button id="refreshBtn" onclick="refreshCurrentSection()" title="Refresh" style="background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:10px;font-size:1.1rem;color:#f97316;transition:transform .3s;flex-shrink:0" onmouseenter="this.style.background='#ffedd5'" onmouseleave="this.style.background='none'">&#x21BB;</button>
       <span id="syncIndicator" title="OneDrive sync status" style="font-size:.65rem;color:var(--muted);padding:4px 8px;border-radius:8px;background:#ffedd5;cursor:pointer;flex-shrink:0" onclick="odSyncNow()">Sync</span>
-      <button class="user-chip" id="userChip" onclick="showSection('admin')">
+      <button class="user-chip" id="userChip" onclick="(function(){const _s=getSession();showSection(_s&&_s.userId==='admin'?'admin':'userdash');})()">
         <span class="user-avatar" id="userAvatar">?</span>
         <span id="userChipName">User</span>
       </button>
@@ -2260,6 +2260,7 @@ function refreshCurrentSection(){
 }
 
 function showSection(name){
+  const _ssSess=getSession();if((name==='admin'||name==='od-user')&&(!_ssSess||_ssSess.userId!=='admin')){name='userdash';}
   ['userdash','dashboard','agreements','billing','monthly','clientmgmt','notifications','export','admin','od-user'].forEach(s=>{
     const sec=document.getElementById('sec-'+s);
     if(sec) sec.classList.toggle('active',s===name);
