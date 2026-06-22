@@ -2588,8 +2588,8 @@ function clearBillApproval(){
 }
 
 // ══ CLIENT MANAGEMENT ══════════════════════════════
-let clientTasks=JSON.parse(localStorage.getItem('elClientTasks')||'[]');
-function saveClientTasksToStorage(){localStorage.setItem('elClientTasks',JSON.stringify(clientTasks));}
+let clientTasks=(function(){try{const _rs=localStorage.getItem('agrSession');if(!_rs)return JSON.parse(localStorage.getItem('elClientTasks')||'[]');const _ss=JSON.parse(_rs);if(_ss&&_ss.userId!=='admin')return[];return JSON.parse(localStorage.getItem('elClientTasks')||'[]');}catch(e){return[];}})();
+function saveClientTasksToStorage(){try{const _sCt=JSON.parse(localStorage.getItem('agrSession')||'null');if(_sCt&&_sCt.userId!=='admin')return;}catch(e){}localStorage.setItem('elClientTasks',JSON.stringify(clientTasks));}
 
 let _ctFilter='all';
 function setClientTaskFilter(f){
@@ -2602,10 +2602,11 @@ function setClientTaskFilter(f){
 
 function renderClientTasks(){
   const el=document.getElementById('clientTaskList');if(!el)return;
-  const sess=getSession();const isAdmin=sess&&sess.role==='admin';
-  let list=isAdmin?clientTasks:clientTasks.filter(t=>
-    !t.category||(sess&&getUserAllowedCats(sess.userId||sess.id||'').map(catDisplayName).includes(t.category))
-  );
+  const sess=getSession();const isAdmin=sess&&(sess.userId==='admin'||(!getUserAllowedCats(sess.userId||'').length&&sess.role==='admin'));
+  let list=isAdmin?clientTasks:clientTasks.filter(t=>{
+    if(t.createdByUserId)return t.createdByUserId===(sess.userId||sess.id||'');
+    return !t.category||(getUserAllowedCats(sess.userId||sess.id||'').map(catDisplayName).includes(t.category));
+  });
   if(_ctFilter==='pending') list=list.filter(t=>t.status==='pending');
   else if(_ctFilter==='in_progress') list=list.filter(t=>t.status==='in_progress');
   else if(_ctFilter==='completed') list=list.filter(t=>t.status==='completed');
@@ -2683,7 +2684,8 @@ function saveClientTask(){
     status:document.getElementById('ctStatus').value,
     markBilling:document.getElementById('ctMarkBilling').checked,
     notes:document.getElementById('ctNotes').value.trim(),
-    createdAt:editId?(clientTasks.find(x=>x.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString()
+    createdAt:editId?(clientTasks.find(x=>x.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString(),
+    createdByUserId:editId?(clientTasks.find(x=>x.id===editId)||{}).createdByUserId||(function(){const _cts=getSession();return _cts?(_cts.userId||_cts.id||''):'';})():(function(){const _cts=getSession();return _cts?(_cts.userId||_cts.id||''):'';})() 
   };
   if(editId){const i=clientTasks.findIndex(x=>x.id===editId);if(i>-1)clientTasks[i]=task;else clientTasks.unshift(task);}
   else clientTasks.unshift(task);
@@ -3285,7 +3287,7 @@ async function zohoLoadAllData(){
     }
     // Load client tasks
     if(data.clientTasks&&Array.isArray(data.clientTasks)){
-      clientTasks=data.clientTasks;saveClientTasksToStorage();
+      {const _zct=getSession();if(_zct&&_zct.userId!=='admin'){const _zcu=_zct.userId||_zct.id||'';clientTasks=data.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_zcu:(!t.category||(getUserAllowedCats(_zcu).map(catDisplayName).includes(t.category))));}else{clientTasks=data.clientTasks;}saveClientTasksToStorage();}
     }
     setSyncStatus('connected','☁️ Synced via Zoho · '+new Date().toLocaleTimeString());
     localStorage.setItem('elLastZohoSync',Date.now().toString());
@@ -6261,8 +6263,7 @@ async function odLoadWithToken(token){
     }
     // Load client tasks
     if(cloud.clientTasks&&Array.isArray(cloud.clientTasks)){
-      clientTasks=cloud.clientTasks;
-      saveClientTasksToStorage();
+      {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';clientTasks=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:(!t.category||(getUserAllowedCats(_ocu).map(catDisplayName).includes(t.category))));}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
     }
     setSyncStatus('connected','✅ Synced · '+new Date().toLocaleTimeString());
   }catch(e){setSyncStatus('error','Load failed: '+e.message);}
