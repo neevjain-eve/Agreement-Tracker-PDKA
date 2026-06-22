@@ -4194,8 +4194,7 @@ async function renderAgreements(){
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
     // Non-admins see all records in their assigned categories (consistent with dashboard)
-    const _allowedCats=isAdmin?null:getUserAllowedCats(session.userId||session.id||'');
-    const af=isAdmin||!_allowedCats||_allowedCats.length===0||_allowedCats.includes(a.type)||!!a.isEmail;
+    const af=isAdmin||(()=>{const _aUid=session?session.userId||session.id||'':'';const _aName=(session?session.name||session.username||'':'').toLowerCase();if(a.createdByUserId)return a.createdByUserId===_aUid;if(_aName&&(a.manager||'').toLowerCase()===_aName)return true;return !!a.isEmail;})();
     const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
       :currentFilter==='with_el'?(a.elType==='with')
       :currentFilter==='without_el'?(a.elType==='without'||!a.elType)
@@ -5200,7 +5199,8 @@ async function saveAgreement(){
     createdAt:existing?existing.createdAt:new Date().toISOString(),
     fileIds:existing?(existing.fileIds||[]):[],
     renewedFrom:renewFromId||existing?.renewedFrom||null,
-    renewedTo:existing?.renewedTo||null
+    renewedTo:existing?.renewedTo||null,
+    createdByUserId:editId?(existing?.createdByUserId||''):(session&&session.userId!=='admin'?(session.userId||session.id||''):'')
   };
   for(const pf of pendingFiles){
     const fid=Date.now().toString()+Math.random().toString(36).slice(2);
