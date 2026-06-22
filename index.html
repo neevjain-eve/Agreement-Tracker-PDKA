@@ -6143,11 +6143,18 @@ async function odSyncToOneDrive(){
       const _cr=await fetch(_cUrl,{headers:{'Authorization':'Bearer '+token}});
       if(_cr.ok)_cloudData=await _cr.json();
     }catch(e){}
-    // Keep cloud records that belong to other categories/managers
+    // Keep cloud records that don't belong to this manager
+    const _myUserId_s=_sess_sync.userId||_sess_sync.id||'';
+    const _myName_s=(_sess_sync.name||_sess_sync.username||'').toLowerCase();
     const _otherAgrs=(_cloudData.agreements||[]).filter(a=>!_myCats.includes(a.type));
-    const _otherBills=(_cloudData.bills||[]).filter(b=>!_myCats.includes(b.type));
+    const _otherBills=(_cloudData.bills||[]).filter(b=>{
+      if(!_myCats.includes(b.type))return true;
+      if(b.createdByUserId)return b.createdByUserId!==_myUserId_s;
+      if(!_myName_s)return true;
+      return(b.manager||'').toLowerCase()!==_myName_s;
+    });
     const _otherTasks=(_cloudData.clientTasks||[]).filter(t=>!_myCats.includes(t.category));
-    // My local records (only my categories)
+    // My local records (already filtered to only my bills at load time)
     const _myAgrs=agreements.filter(a=>_myCats.includes(a.type));
     const _myBills=bills.filter(b=>_myCats.includes(b.type));
     const _myTasks=clientTasks.filter(t=>_myCats.includes(t.category));
@@ -6239,7 +6246,16 @@ async function odLoadWithToken(token){
     }
     // Load bills
     if(cloud.bills&&Array.isArray(cloud.bills)){
-      bills=cloud.bills;
+      const _lt_sess=getSession();
+      if(_lt_sess&&_lt_sess.role!=='admin'){
+        const _lt_uid=_lt_sess.userId||_lt_sess.id||'';
+        const _lt_name=(_lt_sess.name||_lt_sess.username||'').toLowerCase();
+        bills=cloud.bills.filter(b=>{
+          if(b.createdByUserId)return b.createdByUserId===_lt_uid;
+          if(!_lt_name)return false;
+          return(b.manager||'').toLowerCase()===_lt_name;
+        });
+      }else{bills=cloud.bills;}
       saveBillsToStorage();
       renderBills();
     }
