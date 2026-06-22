@@ -2293,7 +2293,7 @@ function showSection(name){
   }
   if(name==='monthly'){initMonthly();}
   if(name==='clientmgmt'){renderClientTasks();}
-  if(name==='od-user'){refreshUserOdStatus();}
+  if(name==='od-user'){const _odSess=getSession();if(_odSess&&_odSess.role!=='admin'){showSection('userdash');return;}refreshUserOdStatus();}
   if(name==='admin'){loadGhPatUI&&loadGhPatUI();}
   closeSidebar();
 }
@@ -4034,11 +4034,14 @@ function updateUserChip(u){
     if(isAdmin){el.style.display='flex';}
     else{
       // Users see: notifications, monthly, export (after category approval); agreements/billing shown dynamically
-      const userVisible=['nav-notifications','nav-monthly','nav-clientmgmt','nav-export','nav-agreements','nav-billing','nav-od-user','nav-changepw'];
+      const userVisible=['nav-notifications','nav-monthly','nav-clientmgmt','nav-export','nav-agreements','nav-billing','nav-changepw'];
       el.style.display=userVisible.includes(id)?'flex':'none';
     }
   });
   const ud=document.getElementById('nav-userdash');if(ud)ud.style.display=isAdmin?'none':'flex';
+  // Always hide OneDrive nav and topbar sync indicator for non-admins
+  const nodUser=document.getElementById('nav-od-user');if(nodUser)nodUser.style.display=isAdmin?'flex':'none';
+  const si=document.getElementById('syncIndicator');if(si)si.style.display=isAdmin?'':'none';
   // Sidebar profile card
   const spa=document.getElementById('sidebarProfileAvatar');if(spa)spa.textContent=ini;
   const spn=document.getElementById('sidebarProfileName');if(spn)spn.textContent=u.name;
@@ -6276,6 +6279,8 @@ function showOdSetup(){
 }
 
 function setSyncStatus(state,msg){
+  // Only admin sees OneDrive sync UI — managers sync silently in background
+  const _syncSess=getSession();if(_syncSess&&_syncSess.role!=='admin')return;
   const dot=document.getElementById('syncDot');const label=document.getElementById('syncLabel');
   const bar=document.getElementById('syncBar');const barText=document.getElementById('syncBarText');
   dot.className='sync-dot';
