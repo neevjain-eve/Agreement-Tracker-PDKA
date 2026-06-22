@@ -891,6 +891,14 @@
           </div>
         </div>
 
+        <div class="fd-card" id="dashManagerList" style="margin:4px 0 14px;padding:16px 16px 8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <h3 style="font-size:.92rem;font-weight:800;color:var(--text)">&#128101; Manager List</h3>
+            <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#11015; Download All</button>
+          </div>
+          <div id="dashManagerListContainer"><div style="font-size:.82rem;color:var(--muted)">Loading...</div></div>
+        </div>
+
         <div class="dash-quick-panel" id="dashQuickPanel" style="display:none">
           <div class="dash-quick-panel-inner">
             <div class="dash-qp-header">
@@ -1021,13 +1029,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div id="dashManagerList" style="margin-top:20px;padding:0 0 8px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <h3 style="font-size:.95rem;font-weight:800;color:var(--text)">&#128101; Manager List</h3>
-          <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">&#11015; Download All</button>
-        </div>
-        <div id="dashManagerListContainer"></div>
       </div>
       <canvas id="agreementPieChart" style="display:none" aria-hidden="true"></canvas>
     </div>
@@ -4137,8 +4138,9 @@ function renderManagerList(){
   const managers=getUsers().filter(u=>u.status==='active'&&u.id!=='admin');
   if(!managers.length){con.innerHTML='<div style="font-size:.82rem;color:var(--muted)">No managers found.</div>';return;}
   const _html=managers.map(u=>{
-    const uTasks=clientTasks.filter(t=>t.createdByUserId===u.id);
-    const uBills=bills.filter(b=>b.createdByUserId===u.id);
+    const _uName=(u.name||'').toLowerCase();const _uId=u.id||'';
+    const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:false);
+    const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const cats=(u.allowedCats||[]).map(catDisplayName).join(', ')||'ΓÇö';
     const initials=u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     const taskRows=uTasks.map(t=>`<tr style="border-bottom:1px solid var(--border-light)"><td style="padding:5px 8px">${t.client||''}</td><td style="padding:5px 8px;max-width:160px">${t.desc||''}</td><td style="padding:5px 8px">${t.category||''}</td><td style="padding:5px 8px">${t.frequency||''}</td><td style="padding:5px 8px">${t.dueDate||''}</td><td style="padding:5px 8px"><span style="background:${t.status==='completed'?'#dcfce7':t.status==='in-progress'?'#dbeafe':'#fff7ed'};color:${t.status==='completed'?'#16a34a':t.status==='in-progress'?'#1d4ed8':'#92400e'};padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700">${t.status||''}</span></td></tr>`).join('');
@@ -4184,15 +4186,17 @@ function downloadAllManagersExcel(){
   const wb=XLSX.utils.book_new();
   const sumHdr=['Manager','Category','EL Tasks','One Time Bills','Total Bill Amount'];
   const sumRows=managers.map(u=>{
-    const uTasks=clientTasks.filter(t=>t.createdByUserId===u.id);
-    const uBills=bills.filter(b=>b.createdByUserId===u.id);
+    const _uName=(u.name||'').toLowerCase();const _uId=u.id||'';
+    const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:false);
+    const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const cats=(u.allowedCats||[]).map(catDisplayName).join(', ')||'ΓÇö';
     return[u.name,cats,uTasks.length,uBills.length,uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0)];
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([sumHdr,...sumRows]),'Summary');
   managers.forEach(u=>{
-    const uTasks=clientTasks.filter(t=>t.createdByUserId===u.id);
-    const uBills=bills.filter(b=>b.createdByUserId===u.id);
+    const _uName=(u.name||'').toLowerCase();const _uId=u.id||'';
+    const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:false);
+    const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const sn=u.name.slice(0,28).replace(/[\\\/\?\*\[\]:]/g,'');
     const rows=[[u.name+' - EL Tracker Tasks'],['Client','Description','Category','Frequency','Due Date','Status','Notes'],...uTasks.map(t=>[t.client||'',t.desc||'',t.category||'',t.frequency||'',t.dueDate||'',t.status||'',t.notes||'']),[], [u.name+' - One Time Bills'],['Client','Service','Category','Date','Amount','Invoice','Task Status','Notes'],...uBills.map(b=>[b.client||'',b.name||b.specialService||'',catDisplayName(b.type||''),b.date||'',parseFloat(b.amount||0)||0,b.invoice||'',b.taskStatus||'',b.notes||''])];
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),sn||'Manager');
