@@ -6353,7 +6353,7 @@ async function odLoadWithToken(token){
       {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';const _oFiltered=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:false);const _oLocal=(()=>{try{return JSON.parse(localStorage.getItem('elClientTasks')||'[]').filter(t=>!t.createdByUserId||t.createdByUserId===_ocu);}catch(e){return[];}})();const _oIds=new Set(_oFiltered.map(t=>t.id));clientTasks=[..._oFiltered,..._oLocal.filter(t=>!_oIds.has(t.id))];}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
     }
     setSyncStatus('connected','✅ Synced · '+new Date().toLocaleTimeString());
-    {const _rmlS=getSession();if(_rmlS&&(_rmlS.userId==='admin'||_rmlS.id==='admin'))setTimeout(renderManagerList,0);}
+    {const _rmlS=getSession();if(_rmlS&&(_rmlS.userId==='admin'||_rmlS.id==='admin'))setTimeout(renderManagerList,0);}setTimeout(renderClientTasks,0);
   }catch(e){setSyncStatus('error','Load failed: '+e.message);}
 }
 
