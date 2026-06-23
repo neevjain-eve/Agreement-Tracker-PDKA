@@ -4143,7 +4143,7 @@ function renderManagerList(){
     const _uCatNames=(u.allowedCats||[]).map(catDisplayName);const _uAllCats=[...(u.allowedCats||[]),..._uCatNames];const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:_uAllCats.includes(t.category||''));
     const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));const uAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_uId:(_uName&&(a.manager||'').toLowerCase()===_uName));
     const cat=(u.allowedCats||[]).map(catDisplayName).join(', ')||'ΓÇö';
-    const amt=uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
+    const amt=uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0)+uAgrs.reduce((s,a)=>s+(parseFloat(a.amount||0)),0);
     const init=u.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
     return `<tr>
       <td style="${td}"><div style="display:flex;align-items:center;gap:8px"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;font-weight:800;font-size:.72rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">${init}</div><span style="font-weight:700">${u.name}</span></div></td>
