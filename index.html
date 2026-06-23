@@ -5244,6 +5244,7 @@ async function saveAgreement(){
   const editId=document.getElementById('editId').value;
   const renewFromId=document.getElementById('renewFromId').value;
   const existing=editId?agreements.find(a=>a.id===editId):null;
+  const session=getSession();
   const agr={
     id:editId||Date.now().toString(),name,client,startDate,endDate,
     type:document.getElementById('agrType').value==='__email__'?'':document.getElementById('agrType').value,
