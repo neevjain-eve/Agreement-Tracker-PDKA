@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -1026,6 +1026,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <h3 style="font-size:.92rem;font-weight:800;color:var(--text)">&#128101; Manager List</h3>
           <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#11015; Download All</button>
+          <button onclick="odLoadFromOneDrive(false).then(()=>setTimeout(renderManagerList,200))" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#8635; Refresh</button>
         </div>
         <div id="dashManagerListContainer"><div style="font-size:.82rem;color:var(--muted)">Loading...</div></div>
       </div>
@@ -6238,14 +6239,13 @@ async function odSyncToOneDrive(){
     });
     const _myCatsDisp=_myCats.map(catDisplayName);
     const _otherTasks=(_cloudData.clientTasks||[]).filter(t=>{
-        if(!_myCatsDisp.includes(t.category))return true;
         if(t.createdByUserId)return t.createdByUserId!==_myUserId_s;
-        return true;
+        return !_myCatsDisp.includes(t.category);
     });
     // My local records (already filtered to only my bills at load time)
     const _myAgrs=agreements.filter(a=>_myCats.includes(a.type));
     const _myBills=bills.filter(b=>_myCats.includes(b.type));
-    const _myTasks=clientTasks.filter(t=>_myCatsDisp.includes(t.category));
+    const _myTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_myUserId_s:_myCatsDisp.includes(t.category));
     payload={
       agreements:[..._otherAgrs,..._myAgrs],
       bills:[..._otherBills,..._myBills],
