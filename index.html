@@ -4176,21 +4176,31 @@ function downloadManagerExcel(userId,userName){
 function downloadAllManagersExcel(){
   const managers=getUsers().filter(u=>u.status==='active'&&u.id!=='admin');
   const wb=XLSX.utils.book_new();
-  const sumHdr=['Manager','Category','EL Tasks','One Time Bills','Total Bill Amount'];
+  const sumHdr=['Manager','Service','Agreements','Agr. Amount','Bills','Bill Amount'];
   const sumRows=managers.map(u=>{
     const _uName=(u.name||'').toLowerCase();const _uId=u.id||'';
-    const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:false);
+    const uAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_uId:(_uName&&(a.manager||'').toLowerCase()===_uName));
     const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const cats=(u.allowedCats||[]).map(catDisplayName).join(', ')||'ΓÇö';
-    return[u.name,cats,uTasks.length,uBills.length,uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0)];
+    const agrAmt=uAgrs.reduce((s,a)=>s+(parseFloat(a.amount||0)),0);
+    const billAmt=uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
+    return[u.name,cats,uAgrs.length,agrAmt,uBills.length,billAmt];
   });
   XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([sumHdr,...sumRows]),'Summary');
   managers.forEach(u=>{
     const _uName=(u.name||'').toLowerCase();const _uId=u.id||'';
-    const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:false);
+    const uAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_uId:(_uName&&(a.manager||'').toLowerCase()===_uName));
     const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const sn=u.name.slice(0,28).replace(/[\\\/\?\*\[\]:]/g,'');
-    const rows=[[u.name+' - EL Tracker Tasks'],['Client','Description','Category','Frequency','Due Date','Status','Notes'],...uTasks.map(t=>[t.client||'',t.desc||'',t.category||'',t.frequency||'',t.dueDate||'',t.status||'',t.notes||'']),[], [u.name+' - One Time Bills'],['Client','Service','Category','Date','Amount','Invoice','Task Status','Notes'],...uBills.map(b=>[b.client||'',b.name||b.specialService||'',catDisplayName(b.type||''),b.date||'',parseFloat(b.amount||0)||0,b.invoice||'',b.taskStatus||'',b.notes||''])];
+    const rows=[
+      [u.name+' - Agreements'],
+      ['Client','Type','Start Date','End Date','Amount','Contact','Manager','Status'],
+      ...uAgrs.map(a=>[a.client||'',catDisplayName(a.type||''),a.startDate||'',a.endDate||'',parseFloat(a.amount||0)||0,a.contact||'',a.manager||'',a.isEmail?'Email':((a.endDate&&new Date(a.endDate)<new Date())?'Expired':'Active')]),
+      [],
+      [u.name+' - Bills'],
+      ['Client','Service','Category','Date','Amount','Invoice','Status','Notes'],
+      ...uBills.map(b=>[b.client||'',b.name||b.specialService||'',catDisplayName(b.type||''),b.date||'',parseFloat(b.amount||0)||0,b.invoice||'',b.taskStatus||'',b.notes||''])
+    ];
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),sn||'Manager');
   });
   XLSX.writeFile(wb,'All_Managers_Records.xlsx');
