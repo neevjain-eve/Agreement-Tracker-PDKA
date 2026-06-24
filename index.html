@@ -6898,7 +6898,8 @@ openDB().then(async()=>{
 
 <!-- EL TYPE CHOOSER -->
 <div id="elTypeChooser">
-  <div class="el-chooser-card">
+  <div class="el-chooser-card" style="position:relative">
+    <button onclick="document.getElementById('elTypeChooser').style.display='none'" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1;" title="Close">&times;</button>
     <div class="el-chooser-title">📋 New Agreement</div>
     <div class="el-chooser-sub">Is this agreement accompanied by an Engagement Letter?</div>
     <div class="el-chooser-btns">
