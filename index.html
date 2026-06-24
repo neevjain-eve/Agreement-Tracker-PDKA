@@ -1093,20 +1093,11 @@
           </div>
         </div>
 
-        <!-- Summary cards -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px" id="monthlySummaryCards"></div>
-
-        <!-- Agreements table -->
-        <div class="admin-panel" style="margin:0 0 14px;overflow:hidden">
-          <div class="admin-panel-title">📋 Agreements Active This Month</div>
-          <div style="overflow-x:auto"><table id="monthlyAgrTable" style="width:100%;border-collapse:collapse;font-size:.78rem"></table></div>
-        </div>
-
-        <!-- Bills table -->
-        <div class="admin-panel" style="margin:0 0 90px;overflow:hidden">
-          <div class="admin-panel-title">🧾 One Time Bills This Month</div>
-          <div style="overflow-x:auto"><table id="monthlyBillTable" style="width:100%;border-collapse:collapse;font-size:.78rem"></table></div>
-        </div>
+        <!-- Monthly summary (clickable totals) -->
+        <div id="monthlySummaryCards" style="margin-bottom:90px"></div>
+        <!-- Hidden table placeholders kept for JS refs -->
+        <table id="monthlyAgrTable" style="display:none"></table>
+        <table id="monthlyBillTable" style="display:none"></table>
 
       </div>
     </div>
@@ -5767,67 +5758,75 @@ function renderMonthly(){
   const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
   const grandTotal=totalAgrAmt+totalBillAmt;
   const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
-  const mn=new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
 
-  // Summary cards
+  // Clear old tables (no longer used)
+  const agrTable=document.getElementById('monthlyAgrTable');if(agrTable)agrTable.innerHTML='';
+  const billTable=document.getElementById('monthlyBillTable');if(billTable)billTable.innerHTML='';
+
+  // Build clickable summary rows with expandable client detail
+  const rowStyle='display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none;border-radius:12px;margin-bottom:8px;transition:background .15s';
+  const detailStyle='display:none;padding:0 8px 10px 8px';
+  const clientRowStyle='display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid var(--border-light);font-size:.82rem';
+
+  // EL client rows
+  const agrClients=agrData.map(a=>`<div style="${clientRowStyle}"><span style="color:var(--text)">${esc(a.client||'—')}</span><span style="font-weight:700;color:#3b82f6">${a.amount?fmt(parseFloat(a.amount)):'—'}</span></div>`).join('');
+
+  // Bill client rows
+  const billClients=billData.map(b=>`<div style="${clientRowStyle}"><span style="color:var(--text)">${esc(b.client||'—')}</span><span style="font-weight:700;color:#f59e0b">${b.amount?fmt(parseFloat(b.amount)):'—'}</span></div>`).join('');
+
+  const html=`
+  <div style="max-width:540px;margin:0 auto">
+    <!-- EL Row -->
+    <div style="border:1.5px solid #bfdbfe;border-radius:14px;margin-bottom:10px;overflow:hidden;background:#fff">
+      <div style="${rowStyle};background:#eff6ff" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.mth-arrow').style.transform=this.nextElementSibling.style.display==='block'?'rotate(180deg)':'rotate(0deg)'">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1rem">📋</span>
+          <div>
+            <div style="font-size:.7rem;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.06em">EL / Agreements</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:1px">${agrData.length} client${agrData.length!==1?'s':''}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.25rem;font-weight:900;color:#3b82f6">${fmt(totalAgrAmt)}</span>
+          <span class="mth-arrow" style="font-size:.85rem;color:#3b82f6;transition:transform .2s">▼</span>
+        </div>
+      </div>
+      <div style="${detailStyle}">
+        ${agrData.length?agrClients:'<div style="padding:12px 16px;color:var(--muted);font-size:.82rem">No agreements this month</div>'}
+        <div style="display:flex;justify-content:space-between;padding:10px 16px;font-weight:800;font-size:.82rem;background:#eff6ff;border-top:1.5px solid #bfdbfe"><span>Total</span><span style="color:#3b82f6">${fmt(totalAgrAmt)}</span></div>
+      </div>
+    </div>
+
+    <!-- Bills Row -->
+    <div style="border:1.5px solid #fde68a;border-radius:14px;margin-bottom:10px;overflow:hidden;background:#fff">
+      <div style="${rowStyle};background:#fffbeb" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.mth-arrow').style.transform=this.nextElementSibling.style.display==='block'?'rotate(180deg)':'rotate(0deg)'">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1rem">🧾</span>
+          <div>
+            <div style="font-size:.7rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.06em">One Time Billing</div>
+            <div style="font-size:.78rem;color:var(--muted);margin-top:1px">${billData.length} client${billData.length!==1?'s':''}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:1.25rem;font-weight:900;color:#d97706">${fmt(totalBillAmt)}</span>
+          <span class="mth-arrow" style="font-size:.85rem;color:#d97706;transition:transform .2s">▼</span>
+        </div>
+      </div>
+      <div style="${detailStyle}">
+        ${billData.length?billClients:'<div style="padding:12px 16px;color:var(--muted);font-size:.82rem">No bills this month</div>'}
+        <div style="display:flex;justify-content:space-between;padding:10px 16px;font-weight:800;font-size:.82rem;background:#fffbeb;border-top:1.5px solid #fde68a"><span>Total</span><span style="color:#d97706">${fmt(totalBillAmt)}</span></div>
+      </div>
+    </div>
+
+    <!-- Grand Total -->
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:linear-gradient(135deg,#f8a006,#f97316);border-radius:14px;color:#fff">
+      <span style="font-size:.85rem;font-weight:800;letter-spacing:.04em">GRAND TOTAL</span>
+      <span style="font-size:1.35rem;font-weight:900">${fmt(grandTotal)}</span>
+    </div>
+  </div>`;
+
   const cards=document.getElementById('monthlySummaryCards');
-  if(cards) cards.innerHTML=[
-    {label:'Agreements',val:agrData.length,sub:fmt(totalAgrAmt),color:'#3b82f6',bg:'#eff6ff'},
-    {label:'One Time Bills',val:billData.length,sub:fmt(totalBillAmt),color:'#f59e0b',bg:'#fffbeb'},
-    {label:'Grand Total',val:agrData.length+billData.length,sub:fmt(grandTotal),color:'#f8a006',bg:'#fff3d6'}
-  ].map(c=>`<div style="background:${c.bg};border-radius:14px;padding:16px 18px;border:1.5px solid ${c.color}22">
-    <div style="font-size:.68rem;font-weight:700;color:${c.color};text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${c.label}</div>
-    <div style="font-size:1.6rem;font-weight:900;color:${c.color};line-height:1">${c.val}</div>
-    <div style="font-size:.78rem;font-weight:700;color:${c.color};margin-top:4px;opacity:.8">${c.sub}</div>
-  </div>`).join('');
-
-  // Agreements table
-  const th=(t,w)=>`<th style="padding:8px 10px;text-align:left;font-size:.68rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);white-space:nowrap;${w?'width:'+w:''}">` + t + '</th>';
-  const td=(t,s='')=>`<td style="padding:8px 10px;border-bottom:1px solid var(--border-light);${s}">${t??'—'}</td>`;
-  const badge=(s,c,b)=>`<span style="background:${b};color:${c};font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:20px">${s}</span>`;
-  const statusColor={active:['#f8a006','#fff3d6'],expiring:['#d97706','#fef9c3'],expired:['#dc2626','#fee2e2'],renewed:['#f97316','#ffedd5']};
-
-  const agrTable=document.getElementById('monthlyAgrTable');
-  if(agrTable){
-    if(!agrData.length){
-      agrTable.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--muted);font-size:.82rem">No agreements active this month</td></tr>';
-    }else{
-      const hdr='<thead><tr>'+th('#','40px')+th('Agreement Name')+th('Client')+th('Type')+th('Sub-Service')+th('Start')+th('End')+th('Amount','100px')+th('Status','90px')+'</tr></thead>';
-      const rows=agrData.map((a,i)=>{
-        const st=getStatus(a);const[c,b]=statusColor[st]||['#6b7280','#f3f4f6'];
-        const lbl={active:'Active',expiring:'Expiring',expired:'Expired',renewed:'Renewed'}[st];
-        return'<tr>'+
-          td(i+1,'')+td(`<strong>${esc(a.name||'')}</strong>`)+td(esc(a.client||''))+
-          td(esc(a.type||''))+td(esc(a.subType||a.specialService||''))+
-          td(fDate(a.startDate))+td(fDate(a.endDate))+
-          td(a.amount?'₹'+Number(a.amount).toLocaleString('en-IN'):'—','font-weight:700')+
-          td(badge(lbl,c,b))+'</tr>';
-      }).join('');
-      agrTable.innerHTML=hdr+'<tbody>'+rows+'</tbody>'+
-        '<tfoot><tr><td colspan="7" style="padding:10px;font-weight:800;font-size:.82rem">Total</td>'+
-        '<td style="padding:10px;font-weight:800;color:#f8a006">'+fmt(totalAgrAmt)+'</td><td></td></tr></tfoot>';
-    }
-  }
-
-  // Bills table
-  const billTable=document.getElementById('monthlyBillTable');
-  if(billTable){
-    if(!billData.length){
-      billTable.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--muted);font-size:.82rem">No bills this month</td></tr>';
-    }else{
-      const hdr='<thead><tr>'+th('#','40px')+th('Client')+th('Service Type')+th('Sub-Service')+th('Description')+th('Period')+th('Invoice No.')+th('Amount','100px')+'</tr></thead>';
-      const rows=billData.map((b,i)=>{
-        const dt=b.date?(b.date.includes('|')?(()=>{const[s,e]=b.date.split('|');const f=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';return[f(s),f(e)].filter(Boolean).join(' – ');})():b.date.length===7?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'short',year:'numeric'}):new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})):'—';
-        return'<tr>'+td(i+1)+td(esc(b.client||''))+td(esc(b.type||''))+
-          td(esc(b.subType||''))+td(esc(b.specialService||''))+td(dt)+
-          td(esc(b.invoice||''))+
-          td(b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—','font-weight:700')+'</tr>';
-      }).join('');
-      billTable.innerHTML=hdr+'<tbody>'+rows+'</tbody>'+
-        '<tfoot><tr><td colspan="7" style="padding:10px;font-weight:800;font-size:.82rem">Total</td>'+
-        '<td style="padding:10px;font-weight:800;color:#f59e0b">'+fmt(totalBillAmt)+'</td></tr></tfoot>';
-    }
-  }
+  if(cards)cards.innerHTML=html;
 }
 
 function downloadMonthlyExcel(){
