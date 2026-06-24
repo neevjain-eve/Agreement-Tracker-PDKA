@@ -3277,7 +3277,7 @@ async function zohoLoadAllData(){
     }
     // Load bills
     if(data.bills&&Array.isArray(data.bills)){
-      {const _zs=getSession();if(_zs&&_zs.userId!=='admin'&&!(_zs.role==='admin'&&!getUserAllowedCats(_zs.userId||'').length)){const _zu=_zs.userId||_zs.id||'';const _zn=(_zs.name||_zs.username||'').toLowerCase();bills=data.bills.filter(b=>{if(b.createdByUserId)return b.createdByUserId===_zu;if(!_zn)return false;return(b.manager||'').toLowerCase()===_zn;});}else{bills=data.bills;}saveBillsToStorage();renderBills();}
+      bills=data.bills;saveBillsToStorage();renderBills();
     }
     // Load client tasks
     if(data.clientTasks&&Array.isArray(data.clientTasks)){
@@ -3382,10 +3382,10 @@ async function zohoSyncNow(){
 // ══════════════════════════════════════════════════
 // ONE TIME BILLING
 // ══════════════════════════════════════════════════
-// Non-admins never read bills from localStorage - always loaded fresh from OneDrive
-let bills=(function(){try{const _rs=localStorage.getItem('agrSession');if(!_rs)return JSON.parse(localStorage.getItem('agrBills')||'[]');const _ss=JSON.parse(_rs); if(_ss&&_ss.userId!=='admin')return[];return JSON.parse(localStorage.getItem('agrBills')||'[]');}catch(e){return[];}})();
+// Bills are loaded from localStorage for all users; cloud is always authoritative on sync
+let bills=(function(){try{return JSON.parse(localStorage.getItem('agrBills')||'[]');}catch(e){return[];}})();
 
-function saveBillsToStorage(){try{const _sBs=JSON.parse(localStorage.getItem('agrSession')||'null');if(_sBs&&_sBs.userId!=='admin'&&!(_sBs.role==='admin'&&!getUserAllowedCats(_sBs.userId||'').length))return;}catch(e){}localStorage.setItem('agrBills',JSON.stringify(bills));}
+function saveBillsToStorage(){try{localStorage.setItem('agrBills',JSON.stringify(bills));}catch(e){}}
 
 function onBillTypeChange(){
   const type = document.getElementById('billType').value;
@@ -6329,9 +6329,14 @@ async function odSyncToOneDrive(){
         if(t.createdByUserId)return t.createdByUserId!==_myUserId_s;
         return !_myCatsDisp.includes(t.category);
     });
-    // My local records (already filtered to only my bills at load time)
+    // My local records — only push records this manager actually owns (not all bills in their category)
     const _myAgrs=agreements.filter(a=>_myCats.includes(a.type));
-    const _myBills=bills.filter(b=>_myCats.includes(b.type));
+    const _myBills=bills.filter(b=>{
+      if(!_myCats.includes(b.type))return false;
+      if(b.createdByUserId)return b.createdByUserId===_myUserId_s;
+      if(!_myName_s)return false;
+      return(b.manager||'').toLowerCase()===_myName_s;
+    });
     const _myTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_myUserId_s:_myCatsDisp.includes(t.category));
     payload={
       agreements:[..._otherAgrs,..._myAgrs],
@@ -6423,22 +6428,10 @@ async function odLoadWithToken(token){
       agreements=await dbGetAll('agreements');
       renderAgreements();
     }
-    // Load bills — cloud is authoritative: replace local bills entirely from cloud
+    // Load bills — cloud is fully authoritative for all users
+    // Store ALL cloud bills locally; renderBills() filters per-manager at display time
     if(cloud.bills&&Array.isArray(cloud.bills)){
-      const _lt_sess=getSession();
-      const _lt_isAdmin=_lt_sess&&(_lt_sess.userId==='admin'||(_lt_sess.role==='admin'&&!getUserAllowedCats(_lt_sess.userId||'').length));
-      if(!_lt_isAdmin&&_lt_sess){
-        const _lt_uid=_lt_sess.userId||_lt_sess.id||'';
-        const _lt_name=(_lt_sess.name||_lt_sess.username||'').toLowerCase();
-        bills=cloud.bills.filter(b=>{
-          if(b.createdByUserId)return b.createdByUserId===_lt_uid;
-          if(!_lt_name)return false;
-          return(b.manager||'').toLowerCase()===_lt_name;
-        });
-      }else{
-        // Admin: use all cloud bills (cloud is authoritative, so deleted bills are gone)
-        bills=cloud.bills;
-      }
+      bills=cloud.bills;
       saveBillsToStorage();
       renderBills();
     }
