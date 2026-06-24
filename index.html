@@ -5871,7 +5871,7 @@ function downloadZohoExcel(){
   const headers=[
     'Invoice Number','Estimate Number','Invoice Date','Invoice Status',
     'Customer Name','Account','Item Type','HSN/SAC',
-    'Quantity','Usage unit','Item Price','Is Inclusive Tax','Item Tax'
+    'Quantity','Usage unit','Item Price','Is Inclusive Tax','Item Tax','Item Description'
   ];
 
   // Convert date string to Excel serial number (Zoho expects numeric date in xls)
@@ -5883,13 +5883,17 @@ function downloadZohoExcel(){
     }catch(e){return '';}
   };
 
+  // Month label for EL description e.g. "Jun-25"
+  const monthLabel=new Date(y,m-1,1).toLocaleString('en-US',{month:'short'})+'-'+String(y).slice(2);
+  // Tax code helper: Karnataka state → GST18, any other state → IGST18, not registered → ''
+  const taxCode=(rec)=>{if(!rec.gstRegistered)return '';const st=(rec.address&&rec.address.state)||'';return st.trim().toLowerCase()==='karnataka'?'GST18':'IGST18';};
+
   const rows=[];
 
   // EL / Agreements
   agrData.forEach((a,i)=>{
     const invNo='EL-'+String(i+1).padStart(3,'0')+'-'+String(m).padStart(2,'0')+y;
     const rate=parseFloat(a.amount)||0;
-    const taxCode=a.gstRegistered?(a.gst&&a.gst.startsWith(a.pan?.slice(0,5)||'XX')?'GST18':'IGST18'):'';
     rows.push([
       invNo,          // Invoice Number
       '',             // Estimate Number
@@ -5898,12 +5902,13 @@ function downloadZohoExcel(){
       a.client||'',  // Customer Name
       'Sales',        // Account
       'service',      // Item Type
-      '',             // HSN/SAC
+      '998222',       // HSN/SAC — always 998222 for EL agreements
       1,              // Quantity
       'count',        // Usage unit
       rate,           // Item Price
       0,              // Is Inclusive Tax
-      taxCode         // Item Tax
+      taxCode(a),     // Item Tax (GST18 if Karnataka, IGST18 otherwise)
+      'Accounting & Compliance services for the month of '+monthLabel // Item Description
     ]);
   });
 
@@ -5912,7 +5917,6 @@ function downloadZohoExcel(){
     const invNo=b.invoice||('OTB-'+String(i+1).padStart(3,'0')+'-'+String(m).padStart(2,'0')+y);
     const rate=parseFloat(b.amount)||0;
     const rawDate=b.date?b.date.includes('|')?b.date.split('|')[0]:b.date.length===7?b.date+'-01':b.date:'';
-    const taxCode=b.gstRegistered?(b.gst?'GST18':'IGST18'):'';
     rows.push([
       invNo,          // Invoice Number
       '',             // Estimate Number
@@ -5926,7 +5930,8 @@ function downloadZohoExcel(){
       'count',        // Usage unit
       rate,           // Item Price
       0,              // Is Inclusive Tax
-      taxCode         // Item Tax
+      taxCode(b),     // Item Tax (GST18 if Karnataka, IGST18 otherwise)
+      b.specialService||b.type||'' // Item Description
     ]);
   });
 
@@ -5936,7 +5941,7 @@ function downloadZohoExcel(){
     const cellRef=XLSX.utils.encode_cell({r,c:2});
     if(ws[cellRef]){ws[cellRef].t='n';ws[cellRef].z='DD/MM/YYYY';}
   }
-  ws['!cols']=[{wch:18},{wch:14},{wch:13},{wch:13},{wch:28},{wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:12},{wch:16},{wch:12}];
+  ws['!cols']=[{wch:18},{wch:14},{wch:13},{wch:13},{wch:28},{wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:12},{wch:16},{wch:12},{wch:50}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Sample Data');
   const mn2=new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'}).replace(' ','-');
