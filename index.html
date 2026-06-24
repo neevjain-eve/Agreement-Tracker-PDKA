@@ -1616,6 +1616,14 @@
           </select>
           <input type="hidden" id="agrManager"/>
         </div>
+        <div class="form-group">
+          <label>Billing From</label>
+          <select id="agrBillingFrom" style="font-family:inherit">
+            <option value="">— Select —</option>
+            <option value="P DILIP KUMAR AND ASSOCIATES">P DILIP KUMAR AND ASSOCIATES</option>
+            <option value="SERVITUS CORPORATE SERVICES PVT LTD">SERVITUS CORPORATE SERVICES PVT LTD</option>
+          </select>
+        </div>
         <div class="form-section-title">📎 Attach Documents</div>
         <div class="form-group">
           <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()"
@@ -5286,6 +5294,7 @@ async function saveAgreement(){
     emailAttachData:document.getElementById('agrEmailAttach').dataset.b64||'',
     billingMonth:(document.getElementById('agrMonth')||{value:''}).value,
     billingFreq:document.getElementById('agrBillingFreq').value,
+    billingFrom:(document.getElementById('agrBillingFrom')||{value:''}).value,
     contact:document.getElementById('agrContact').value.trim(),
     manager:document.getElementById('agrManager').value||document.getElementById('agrManagerSel').value||'',
     contactInfo:document.getElementById('agrContactInfo').value.trim(),
@@ -5433,6 +5442,7 @@ function resetForm(){
   document.getElementById('agrServiceFields').style.display='none';
 
   document.getElementById('agrBillingFreq').value='';
+  const _abfR=document.getElementById('agrBillingFrom');if(_abfR)_abfR.value='';
   document.getElementById('gstToggle').checked=false;
   document.getElementById('gstField').classList.remove('visible');
   document.getElementById('gstToggleLabel').textContent='Not Registered under GST';
@@ -5497,6 +5507,7 @@ function openEditModal(id){
   document.getElementById('agrParentGroup').value=a.parentGroup||'';
   const _agrMon=document.getElementById('agrMonth');if(_agrMon)_agrMon.value=a.billingMonth||'';
   document.getElementById('agrBillingFreq').value=a.billingFreq||'';
+  const _abfE=document.getElementById('agrBillingFrom');if(_abfE)_abfE.value=a.billingFrom||'';
   document.getElementById('agrContact').value=a.contact||'';
   const _amf=document.getElementById('agrManager');if(_amf)_amf.value=a.manager||'';
   const _ams=document.getElementById('agrManagerSel');if(_ams&&a.manager){const _aopt=[..._ams.options].find(o=>o.value===a.manager);if(_aopt)_ams.value=a.manager;}
@@ -5519,6 +5530,7 @@ function openRenewModal(id){
   document.getElementById('agrSpecialService').value=a.specialService||'';
   const _agrMon=document.getElementById('agrMonth');if(_agrMon)_agrMon.value=a.billingMonth||'';
   document.getElementById('agrBillingFreq').value=a.billingFreq||'';
+  const _abfE2=document.getElementById('agrBillingFrom');if(_abfE2)_abfE2.value=a.billingFrom||'';
   document.getElementById('agrContact').value=a.contact||'';document.getElementById('agrContactInfo').value=a.contactInfo||'';
   document.getElementById('agrPan').value=a.pan||'';document.getElementById('agrNotes').value='';
   document.getElementById('agrToEmail1').value=a.toEmail1||a.notifEmail||'';
