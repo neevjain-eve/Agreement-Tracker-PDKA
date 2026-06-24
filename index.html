@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -3964,7 +3964,7 @@ function saveChangePw(){
   if(pw!==pw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return}
   const users=getUsers();const u=users.find(x=>x.id===uid);
   if(!u){errEl.style.display='block';errEl.textContent='User not found.';return}
-  u.pwHash=hashPw(pw);saveUsers(users);closeChangePw();showToast('✅ Password changed for '+u.name);
+  u.pwHash=hashPw(pw);saveUsers(users);{const _ppc=JSON.parse(localStorage.getItem('agrPendingPwChanges')||'{}');_ppc[u.id]=u.pwHash;localStorage.setItem('agrPendingPwChanges',JSON.stringify(_ppc));}closeChangePw();showToast('✅ Password changed for '+u.name);
 }
 
 // ══════════════════════════════════════════════
@@ -6622,7 +6622,7 @@ async function odLoadUsers(){
     if(Array.isArray(cloudUsers)&&cloudUsers.length>0){
       const hasAdmin=cloudUsers.find(u=>u.id==='admin');const localUsers=JSON.parse(localStorage.getItem('agrUsers')||'[]');
       let merged=cloudUsers;if(!hasAdmin){const localAdmin=localUsers.find(u=>u.id==='admin');if(localAdmin)merged=[localAdmin,...cloudUsers.filter(u=>u.id!=='admin')];}
-      localStorage.setItem('agrUsers',JSON.stringify(merged));renderUserList();updateUserSyncNote(true);
+      const _ppch=JSON.parse(localStorage.getItem('agrPendingPwChanges')||'{}');if(Object.keys(_ppch).length){merged=merged.map(u=>_ppch[u.id]?{...u,pwHash:_ppch[u.id]}:u);}localStorage.setItem('agrUsers',JSON.stringify(merged));renderUserList();updateUserSyncNote(true);
     }
   }catch(e){console.warn('[OD] Users load failed:',e.message);updateUserSyncNote(false,e.message);}
 }
