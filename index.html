@@ -3933,10 +3933,42 @@ function openChangePw(userId){
   const u=users.find(x=>x.id===targetId);
   if(!u){showToast('User not found');return}
   document.getElementById('cpwUserId').value=targetId;
-  document.getElementById('cpwTitle').textContent=userId&&userId!==session.userId?'🔑 Reset Password — '+u.name:'🔑 Change My Password';
+  const _cpwT=document.getElementById('cpwTitle');
+  if(_cpwT)_cpwT.textContent=userId&&userId!==session.userId?'🔑 Reset Password — '+u.name:'🔑 Change My Password';
   document.getElementById('cpwNew').value='';document.getElementById('cpwNew2').value='';
   const cpwErr=document.getElementById('cpwError');cpwErr.style.display='none';cpwErr.textContent='';
+  // Populate profile tab fields
+  const _cpwName=document.getElementById('cpwName');if(_cpwName)_cpwName.value=u.name||'';
+  const _cpwEmail=document.getElementById('cpwEmail');if(_cpwEmail)_cpwEmail.value=u.email||'';
+  const _cpwUname=document.getElementById('cpwUsername');if(_cpwUname)_cpwUname.value=u.username||u.id||'';
+  const _cpwPE=document.getElementById('cpwProfileError');if(_cpwPE){_cpwPE.style.display='none';_cpwPE.textContent='';}
+  // Default tab: profile when opening for self, password tab when admin resets someone else
+  cpwSwitchTab(userId&&userId!==session.userId?'password':'profile');
   document.getElementById('changePwModal').classList.add('open');
+}
+function cpwSwitchTab(tab){
+  const isProfile=tab==='profile';
+  const profPane=document.getElementById('cpwProfilePane');if(profPane)profPane.style.display=isProfile?'':'none';
+  const pwPane=document.getElementById('cpwPasswordPane');if(pwPane)pwPane.style.display=isProfile?'none':'';
+  const tabProf=document.getElementById('cpwTabProfile');
+  const tabPw=document.getElementById('cpwTabPassword');
+  if(tabProf){tabProf.style.borderBottomColor=isProfile?'#f97316':'transparent';tabProf.style.color=isProfile?'#f97316':'#111';}
+  if(tabPw){tabPw.style.borderBottomColor=isProfile?'transparent':'#f97316';tabPw.style.color=isProfile?'#111':'#f97316';}
+}
+function saveProfile(){
+  const uid=document.getElementById('cpwUserId').value;
+  const nameVal=(document.getElementById('cpwName')||{value:''}).value.trim();
+  const emailVal=(document.getElementById('cpwEmail')||{value:''}).value.trim();
+  const errEl=document.getElementById('cpwProfileError');
+  if(!nameVal){if(errEl){errEl.style.display='block';errEl.textContent='Name cannot be empty.';}return;}
+  if(emailVal&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)){if(errEl){errEl.style.display='block';errEl.textContent='Invalid email address.';}return;}
+  const users=getUsers();const u=users.find(x=>x.id===uid);
+  if(!u){if(errEl){errEl.style.display='block';errEl.textContent='User not found.';}return;}
+  u.name=nameVal;u.email=emailVal;
+  saveUsers(users);
+  // Persist via OD
+  (async()=>{try{const _tok=await odGetActiveToken();if(!_tok)return;const _url=GRAPH+'/me/drive/root:/'+encodePath(OD_USERS_FILE)+':/content';await fetch(_url,{method:'PUT',headers:{'Authorization':'Bearer '+_tok,'Content-Type':'application/json'},body:JSON.stringify(getUsers(),null,2)});}catch(e){console.warn('[Profile] OD save error:',e.message);}})();
+  closeChangePw();showToast('✅ Profile updated!');
 }
 function closeChangePw(){document.getElementById('changePwModal').classList.remove('open');}
 function saveChangePw(){
