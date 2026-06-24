@@ -6405,24 +6405,29 @@ async function odLoadWithToken(token){
       throw new Error((errMsg||r.statusText)+' ('+r.status+')');
     }
     const cloud=await r.json();
-    // Load agreements
+    // Load agreements — cloud is authoritative: write cloud records and DELETE any local records not in cloud
     if(cloud.agreements&&Array.isArray(cloud.agreements)){
       const cloudIds=new Set(cloud.agreements.map(a=>a.id));
-
-      const merged=cloud.agreements; // Cloud is authoritative; deleted items stay deleted
-      for(const agr of merged)await dbPut('agreements',agr);
+      for(const agr of cloud.agreements)await dbPut('agreements',agr);
+      // Remove any locally-stored agreements that were deleted in cloud
+      const _localAgrs=await dbGetAll('agreements');
+      for(const la of _localAgrs){if(!cloudIds.has(la.id))await dbDelete('agreements',la.id);}
       agreements=await dbGetAll('agreements');
       renderAgreements();
     } else if(Array.isArray(cloud)){
-      // Legacy format
+      // Legacy format — still purge deleted local records
+      const _legIds=new Set(cloud.map(a=>a.id));
       for(const agr of cloud)await dbPut('agreements',agr);
+      const _legLocal=await dbGetAll('agreements');
+      for(const la of _legLocal){if(!_legIds.has(la.id))await dbDelete('agreements',la.id);}
       agreements=await dbGetAll('agreements');
       renderAgreements();
     }
-    // Load bills
+    // Load bills — cloud is authoritative: replace local bills entirely from cloud
     if(cloud.bills&&Array.isArray(cloud.bills)){
       const _lt_sess=getSession();
-      if(_lt_sess&&_lt_sess.userId!=='admin'&&!(_lt_sess.role==='admin'&&!getUserAllowedCats(_lt_sess.userId||'').length)){
+      const _lt_isAdmin=_lt_sess&&(_lt_sess.userId==='admin'||(_lt_sess.role==='admin'&&!getUserAllowedCats(_lt_sess.userId||'').length));
+      if(!_lt_isAdmin&&_lt_sess){
         const _lt_uid=_lt_sess.userId||_lt_sess.id||'';
         const _lt_name=(_lt_sess.name||_lt_sess.username||'').toLowerCase();
         bills=cloud.bills.filter(b=>{
@@ -6430,7 +6435,10 @@ async function odLoadWithToken(token){
           if(!_lt_name)return false;
           return(b.manager||'').toLowerCase()===_lt_name;
         });
-      }else{bills=cloud.bills;}
+      }else{
+        // Admin: use all cloud bills (cloud is authoritative, so deleted bills are gone)
+        bills=cloud.bills;
+      }
       saveBillsToStorage();
       renderBills();
     }
