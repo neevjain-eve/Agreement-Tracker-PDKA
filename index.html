@@ -1596,18 +1596,7 @@
           </select>
         </div>
         <div id="agrServiceFields" style="display:none">
-          <div class="form-group">
-            <label>Sub-Service</label>
-            <select id="agrSubType" onchange="onAgrSubChange()">
-              <option value="">Select sub-service...</option>
-              <option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>
-            </select>
-            <div id="agrAddSubRow" style="display:none;margin-top:6px;gap:6px;align-items:center">
-              <input type="text" id="agrNewSubInput" placeholder="New sub-service name" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')saveAgrSubCategory()"/>
-              <button type="button" onclick="saveAgrSubCategory()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;cursor:pointer">Request</button>
-              <button type="button" onclick="hideAgrAddSub()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted)">✕</button>
-            </div>
-          </div>
+          
           <div class="form-group"><label>Amount (₹)</label>
             <input type="number" id="agrAmount" placeholder="e.g. 50000" min="0" step="0.01"/>
           </div>
@@ -1736,17 +1725,7 @@
           </select>
         </div>
         <div id="billSubTypeGroup" style="display:none">
-          <div class="form-group"><label>Sub-Service</label>
-            <select id="billSubType" onchange="onBillSubChange()">
-              <option value="">Select sub-service...</option>
-              <option value="__add_new__" style="color:var(--fd-primary);font-weight:700">＋ Add new sub-service...</option>
-            </select>
-            <div id="billAddSubRow" style="display:none;margin-top:6px;gap:6px;align-items:center">
-              <input type="text" id="billNewSubInput" placeholder="New sub-service name" style="flex:1;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.78rem;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')saveBillSubCategory()"/>
-              <button type="button" onclick="saveBillSubCategory()" style="background:var(--fd-primary);color:#fff;border:none;border-radius:8px;padding:7px 12px;font-size:.75rem;font-weight:700;cursor:pointer">Request</button>
-              <button type="button" onclick="hideBillAddSub()" style="background:none;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted)">✕</button>
-            </div>
-          </div>
+          
         </div>
         <div class="form-group"><label>Description</label>
           <input type="text" id="billSpecialService" placeholder="e.g. Describe the service or billing details..."/>
@@ -2525,19 +2504,19 @@ function mergeApprovedIntoServices(){
 
 // ── Agreements: detect "Add new" selection ──
 function onAgrSubChange(){
-  const sel=document.getElementById('agrSubType');
+  const sel=(document.getElementById('agrSubType')||{value:'',innerHTML:''});if(!sel)return;
   if(sel.value==='__add_new__'){
     sel.value='';
     const type=document.getElementById('agrType').value;
     if(!type){showToast('Please select a service type first');return;}
-    document.getElementById('agrAddSubRow').style.display='flex';
+    (document.getElementById('agrAddSubRow')||{style:{}}).style.display='flex';
     setTimeout(()=>document.getElementById('agrNewSubInput').focus(),50);
   }
 }
 function hideAgrAddSub(){
-  document.getElementById('agrAddSubRow').style.display='none';
+  (document.getElementById('agrAddSubRow')||{style:{}}).style.display='none';
   document.getElementById('agrNewSubInput').value='';
-  const sel=document.getElementById('agrSubType');
+  const sel=(document.getElementById('agrSubType')||{value:'',innerHTML:''});
   if(sel.value==='__add_new__')sel.value='';
 }
 function saveAgrSubCategory(){
@@ -2557,7 +2536,7 @@ function saveAgrSubCategory(){
 
 // ── Billing: detect "Add new" selection ──
 function onBillSubChange(){
-  const sel=document.getElementById('billSubType');
+  const sel=(document.getElementById('billSubType')||{value:'',innerHTML:''});if(!sel)return;
   if(sel.value==='__add_new__'){
     sel.value='';
     const type=document.getElementById('billType').value;
@@ -2569,7 +2548,7 @@ function onBillSubChange(){
 function hideBillAddSub(){
   document.getElementById('billAddSubRow').style.display='none';
   document.getElementById('billNewSubInput').value='';
-  const sel=document.getElementById('billSubType');
+  const sel=(document.getElementById('billSubType')||{value:'',innerHTML:''});
   if(sel.value==='__add_new__')sel.value='';
 }
 function setBillFilter(f){
@@ -2924,7 +2903,7 @@ function rejectSubReq(id){
 function onTypeChange(){
   const type = document.getElementById('agrType').value;
   const fields = document.getElementById('agrServiceFields');
-  const subSel = document.getElementById('agrSubType');
+  const subSel = (document.getElementById('agrSubType')||{value:'',innerHTML:''});
   const subs = SUB_SERVICES[type] || [];
   subSel.innerHTML = '<option value="">Select sub-service...</option>' +
     subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
@@ -3408,8 +3387,8 @@ function saveBillsToStorage(){try{const _sBs=JSON.parse(localStorage.getItem('ag
 
 function onBillTypeChange(){
   const type = document.getElementById('billType').value;
-  const grp = document.getElementById('billSubTypeGroup');
-  const sel = document.getElementById('billSubType');
+  const grp = (document.getElementById('billSubTypeGroup')||{style:{display:'none'}});
+  const sel = (document.getElementById('billSubType')||{value:'',innerHTML:''});
   const subs = SUB_SERVICES[type] || [];
   sel.innerHTML = '<option value="">Select sub-service...</option>' +
     subs.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('') +
@@ -3456,9 +3435,9 @@ function resetBillForm(){
   const bt=document.getElementById('billType');if(bt){bt.value='';bt.disabled=false;}
   populateParentGroupDropdown('billParentGroup');
   const bpg=document.getElementById('billParentGroup');if(bpg)bpg.value='';
-  const bst=document.getElementById('billSubType');if(bst)bst.value='';
+  const bst=(document.getElementById('billSubType')||{value:'',innerHTML:''});if(bst)bst.value='';
   if(typeof hideBillAddSub==='function')hideBillAddSub();
-  const bstg=document.getElementById('billSubTypeGroup');if(bstg)bstg.style.display='none';
+  const bstg=(document.getElementById('billSubTypeGroup')||{style:{display:'none'}});if(bstg)bstg.style.display='none';
   const bgt=document.getElementById('billGstToggle');if(bgt)bgt.checked=false;
   const bgf=document.getElementById('billGstField');if(bgf)bgf.classList.remove('visible');
   const bgl=document.getElementById('billGstToggleLabel');if(bgl)bgl.textContent='Not Registered under GST';
@@ -3538,7 +3517,7 @@ function openEditBillModal(id){
   document.getElementById('billSpecialService').value=b.specialService||'';
   document.getElementById('billType').value=b.type||'';
   onBillTypeChange();
-  if(b.subType) document.getElementById('billSubType').value=b.subType;
+  if(b.subType) (document.getElementById('billSubType')||{value:'',innerHTML:''}).value=b.subType;
   if(b.gstRegistered){
     document.getElementById('billGstToggle').checked=true;
     document.getElementById('billGstField').classList.add('visible');
@@ -3570,7 +3549,7 @@ function saveBill(){
     createdByUserId: _billIsAdmin?'':(_billSess.userId||_billSess.id||''),
     parentGroup:document.getElementById('billParentGroup').value||'',
     type: document.getElementById('billType').value,
-    subType: document.getElementById('billSubType').value,
+    subType: (document.getElementById('billSubType')||{value:'',innerHTML:''}).value,
     specialService: document.getElementById('billSpecialService').value.trim(),
     invoice: document.getElementById('billInvoice').value.trim(),
     contact: document.getElementById('billContact').value.trim(),
@@ -5263,7 +5242,7 @@ async function saveAgreement(){
     type:document.getElementById('agrType').value==='__email__'?'':document.getElementById('agrType').value,
     isEmail:document.getElementById('agrType').value==='__email__',
     elType:window._currentElType||'',
-    subType:document.getElementById('agrSubType').value,
+    subType:(document.getElementById('agrSubType')||{value:'',innerHTML:''}).value,
     amount:document.getElementById('agrAmount').value,
     specialService:document.getElementById('agrSpecialService').value.trim(),
     parentGroup:document.getElementById('agrParentGroup').value||'',
@@ -5411,7 +5390,7 @@ function resetForm(){
   window._currentElType='';
   document.getElementById('agrType').value='';
   document.getElementById('agrType').disabled=false;
-  document.getElementById('agrSubType').value='';
+  (document.getElementById('agrSubType')||{value:'',innerHTML:''}).value='';
   if(typeof hideAgrAddSub==='function')hideAgrAddSub();
   document.getElementById('agrAmount').value='';
   document.getElementById('agrSpecialService').value='';
@@ -5475,7 +5454,7 @@ function openEditModal(id){
   document.getElementById('agrType').value=a.type||'';
   window._currentElType=a.elType||'';
   onTypeChange();
-  if(a.subType){document.getElementById('agrSubType').value=a.subType||'';}
+  if(a.subType){(document.getElementById('agrSubType')||{value:'',innerHTML:''}).value=a.subType||'';}
   document.getElementById('agrAmount').value=a.amount||'';
   document.getElementById('agrSpecialService').value=a.specialService||'';
   populateParentGroupDropdown('agrParentGroup');
@@ -5499,7 +5478,7 @@ function openRenewModal(id){
   document.getElementById('agrName').value=a.name||'';document.getElementById('agrClient').value=a.client||'';
   document.getElementById('agrType').value=a.type||'';
   onTypeChange();
-  if(a.subType){document.getElementById('agrSubType').value=a.subType||'';}
+  if(a.subType){(document.getElementById('agrSubType')||{value:'',innerHTML:''}).value=a.subType||'';}
   document.getElementById('agrAmount').value=a.amount||'';
   document.getElementById('agrSpecialService').value=a.specialService||'';
   const _agrMon=document.getElementById('agrMonth');if(_agrMon)_agrMon.value=a.billingMonth||'';
