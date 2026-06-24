@@ -3946,7 +3946,7 @@ function saveChangePw(){
   if(pw!==pw2){errEl.style.display='block';errEl.textContent='Passwords do not match.';return}
   const users=getUsers();const u=users.find(x=>x.id===uid);
   if(!u){errEl.style.display='block';errEl.textContent='User not found.';return}
-  u.pwHash=hashPw(pw);saveUsers(users);{const _ppc=JSON.parse(localStorage.getItem('agrPendingPwChanges')||'{}');_ppc[u.id]=u.pwHash;localStorage.setItem('agrPendingPwChanges',JSON.stringify(_ppc));}closeChangePw();showToast('✅ Password changed for '+u.name);
+  u.pwHash=hashPw(pw);saveUsers(users);{const _ppc=JSON.parse(localStorage.getItem('agrPendingPwChanges')||'{}');_ppc[u.id]=u.pwHash;localStorage.setItem('agrPendingPwChanges',JSON.stringify(_ppc));}(async()=>{try{const _tok=await odGetActiveToken();if(!_tok)return;const _usrs=getUsers();const _url=GRAPH+'/me/drive/root:/'+encodePath(OD_USERS_FILE)+':/content';const _r=await fetch(_url,{method:'PUT',headers:{'Authorization':'Bearer '+_tok,'Content-Type':'application/json'},body:JSON.stringify(_usrs,null,2)});if(_r.ok)console.log('[PW] Users saved to OD');else console.warn('[PW] OD save failed:',_r.status);}catch(e){console.warn('[PW] OD save error:',e.message);}})();closeChangePw();showToast('✅ Password changed for '+u.name);
 }
 
 // ══════════════════════════════════════════════
@@ -5307,7 +5307,7 @@ async function deleteFile(agrId,fileId){
   if(!confirm('Remove this attachment?'))return;
   const agr=agreements.find(a=>a.id===agrId);if(!agr)return;
   agr.fileIds=(agr.fileIds||[]).filter(f=>f!==fileId);
-  await dbDelete('files',fileId);await dbPut('agreements',agr);
+  await dbDelete('files',fileId);await dbPut('agreements',agr);odSyncToOneDrive();(async()=>{try{const _ft=await dbGet('files',fileId);const _fn=(_ft&&_ft.name)||fileId;const _tok=await odGetActiveToken();if(_tok){const _du=GRAPH+'/me/drive/root:/'+encodePath(OD_ATTACHMENTS_FOLDER+'/'+agrId+'/'+_fn)+':/content';await fetch(_du,{method:'DELETE',headers:{'Authorization':'Bearer '+_tok}});}}catch(e){console.warn('[OD] att delete:',e.message);}})();
   agreements=await dbGetAll('agreements');renderAgreements();showToast('🗑️ Attachment removed');
 }
 
@@ -6270,7 +6270,7 @@ async function odSyncToOneDrive(){
   let payload;
   if(_isAdmin_sync){
     // Admin: full write -- owns all data
-    let _cFM={clientTasks:[]};try{const _mU=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));const _mR=await fetch(_mU,{headers:{'Authorization':'Bearer '+token}});if(_mR.ok)_cFM=await _mR.json();}catch(e){}const _cT=(_cFM.clientTasks||[]);const _lIds=new Set(clientTasks.map(t=>t.id));const _mT=[...clientTasks,..._cT.filter(t=>!_lIds.has(t.id))];payload={agreements,bills,clientTasks:_mT,lastUpdated:new Date().toISOString(),updatedBy:(_sess_sync||{}).username||'unknown'};
+    let _cFM={clientTasks:[]};try{const _mU=window._odSharedFileUrl||(await getOdFilePath(token,OD_FILE));const _mR=await fetch(_mU,{headers:{'Authorization':'Bearer '+token}});if(_mR.ok)_cFM=await _mR.json();}catch(e){}const _cT=(_cFM.clientTasks||[]);const _lIds=new Set(clientTasks.map(t=>t.id));const _mT=[...clientTasks,..._cT.filter(t=>!_lIds.has(t.id))];const _cAgrs=(_cFM.agreements||[]);const _cBills=(_cFM.bills||[]);const _lAIds=new Set(agreements.map(a=>a.id));const _lBIds=new Set(bills.map(b=>b.id));const _mAgrs=[...agreements,..._cAgrs.filter(a=>!_lAIds.has(a.id))];const _mBills=[...bills,..._cBills.filter(b=>!_lBIds.has(b.id))];agreements=_mAgrs;bills=_mBills;payload={agreements:_mAgrs,bills:_mBills,clientTasks:_mT,lastUpdated:new Date().toISOString(),updatedBy:(_sess_sync||{}).username||'unknown'};
   } else {
     // Manager: read-merge-write -- only replace own category records, never touch other managers' data
     const _myCats=getUserAllowedCats(_sess_sync.userId||_sess_sync.id||'');
@@ -6374,8 +6374,8 @@ async function odLoadWithToken(token){
     // Load agreements
     if(cloud.agreements&&Array.isArray(cloud.agreements)){
       const cloudIds=new Set(cloud.agreements.map(a=>a.id));
-      const localOnly=agreements.filter(a=>!cloudIds.has(a.id));
-      const merged=[...cloud.agreements,...localOnly];
+
+      const merged=cloud.agreements; // Cloud is authoritative; deleted items stay deleted
       for(const agr of merged)await dbPut('agreements',agr);
       agreements=await dbGetAll('agreements');
       renderAgreements();
