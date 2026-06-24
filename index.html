@@ -5763,65 +5763,46 @@ function renderMonthly(){
   const agrTable=document.getElementById('monthlyAgrTable');if(agrTable)agrTable.innerHTML='';
   const billTable=document.getElementById('monthlyBillTable');if(billTable)billTable.innerHTML='';
 
-  // Build clickable summary rows with expandable client detail
-  const rowStyle='display:flex;align-items:center;justify-content:space-between;padding:16px 20px;cursor:pointer;user-select:none;border-radius:12px;margin-bottom:8px;transition:background .15s';
-  const detailStyle='display:none;padding:0 8px 10px 8px';
-  const clientRowStyle='display:flex;justify-content:space-between;align-items:center;padding:9px 16px;border-bottom:1px solid var(--border-light);font-size:.82rem';
-
-  // EL client rows
-  const agrClients=agrData.map(a=>`<div style="${clientRowStyle}"><span style="color:var(--text)">${esc(a.client||'—')}</span><span style="font-weight:700;color:#3b82f6">${a.amount?fmt(parseFloat(a.amount)):'—'}</span></div>`).join('');
-
-  // Bill client rows
-  const billClients=billData.map(b=>`<div style="${clientRowStyle}"><span style="color:var(--text)">${esc(b.client||'—')}</span><span style="font-weight:700;color:#f59e0b">${b.amount?fmt(parseFloat(b.amount)):'—'}</span></div>`).join('');
-
-  const html=`
-  <div style="max-width:540px;margin:0 auto">
-    <!-- EL Row -->
-    <div style="border:1.5px solid #bfdbfe;border-radius:14px;margin-bottom:10px;overflow:hidden;background:#fff">
-      <div style="${rowStyle};background:#eff6ff" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.mth-arrow').style.transform=this.nextElementSibling.style.display==='block'?'rotate(180deg)':'rotate(0deg)'">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:1rem">📋</span>
+  // 3-column layout: EL | One Time Billing | Grand Total
+  const colCard=(bg,border,hdrBg,color,icon,label,count,total,clients,emptyMsg,footBg)=>`
+    <div style="border:1.5px solid ${border};border-radius:14px;overflow:hidden;background:#fff;display:flex;flex-direction:column">
+      <!-- Header (clickable) -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:${hdrBg};cursor:pointer;user-select:none"
+        onclick="const d=this.nextElementSibling;const open=d.style.display==='block';d.style.display=open?'none':'block';this.querySelector('.mth-arr').textContent=open?'▼':'▲'">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.1rem">${icon}</span>
           <div>
-            <div style="font-size:.7rem;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.06em">EL / Agreements</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-top:1px">${agrData.length} client${agrData.length!==1?'s':''}</div>
+            <div style="font-size:.68rem;font-weight:800;color:${color};text-transform:uppercase;letter-spacing:.07em">${label}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin-top:2px">${count} client${count!==1?'s':''}</div>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:1.25rem;font-weight:900;color:#3b82f6">${fmt(totalAgrAmt)}</span>
-          <span class="mth-arrow" style="font-size:.85rem;color:#3b82f6;transition:transform .2s">▼</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:1.2rem;font-weight:900;color:${color}">${total}</span>
+          <span class="mth-arr" style="font-size:.75rem;color:${color}">▼</span>
         </div>
       </div>
-      <div style="${detailStyle}">
-        ${agrData.length?agrClients:'<div style="padding:12px 16px;color:var(--muted);font-size:.82rem">No agreements this month</div>'}
-        <div style="display:flex;justify-content:space-between;padding:10px 16px;font-weight:800;font-size:.82rem;background:#eff6ff;border-top:1.5px solid #bfdbfe"><span>Total</span><span style="color:#3b82f6">${fmt(totalAgrAmt)}</span></div>
+      <!-- Expandable client list -->
+      <div style="display:none;flex:1;overflow-y:auto;max-height:320px">
+        ${clients||`<div style="padding:14px 16px;color:var(--muted);font-size:.8rem">${emptyMsg}</div>`}
+        <div style="display:flex;justify-content:space-between;padding:9px 16px;font-weight:800;font-size:.8rem;background:${footBg};border-top:1.5px solid ${border};position:sticky;bottom:0">
+          <span>Total</span><span style="color:${color}">${total}</span>
+        </div>
       </div>
-    </div>
+    </div>`;
 
-    <!-- Bills Row -->
-    <div style="border:1.5px solid #fde68a;border-radius:14px;margin-bottom:10px;overflow:hidden;background:#fff">
-      <div style="${rowStyle};background:#fffbeb" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block';this.querySelector('.mth-arrow').style.transform=this.nextElementSibling.style.display==='block'?'rotate(180deg)':'rotate(0deg)'">
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:1rem">🧾</span>
-          <div>
-            <div style="font-size:.7rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:.06em">One Time Billing</div>
-            <div style="font-size:.78rem;color:var(--muted);margin-top:1px">${billData.length} client${billData.length!==1?'s':''}</div>
-          </div>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:1.25rem;font-weight:900;color:#d97706">${fmt(totalBillAmt)}</span>
-          <span class="mth-arrow" style="font-size:.85rem;color:#d97706;transition:transform .2s">▼</span>
-        </div>
-      </div>
-      <div style="${detailStyle}">
-        ${billData.length?billClients:'<div style="padding:12px 16px;color:var(--muted);font-size:.82rem">No bills this month</div>'}
-        <div style="display:flex;justify-content:space-between;padding:10px 16px;font-weight:800;font-size:.82rem;background:#fffbeb;border-top:1.5px solid #fde68a"><span>Total</span><span style="color:#d97706">${fmt(totalBillAmt)}</span></div>
-      </div>
-    </div>
+  const cr=(client,amt,color)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border-light);font-size:.8rem"><span style="color:var(--text)">${esc(client||'—')}</span><span style="font-weight:700;color:${color}">${amt}</span></div>`;
 
-    <!-- Grand Total -->
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:linear-gradient(135deg,#f8a006,#f97316);border-radius:14px;color:#fff">
-      <span style="font-size:.85rem;font-weight:800;letter-spacing:.04em">GRAND TOTAL</span>
-      <span style="font-size:1.35rem;font-weight:900">${fmt(grandTotal)}</span>
+  const agrClients=agrData.map(a=>cr(a.client,a.amount?fmt(parseFloat(a.amount)):'—','#3b82f6')).join('');
+  const billClients=billData.map(b=>cr(b.client,b.amount?fmt(parseFloat(b.amount)):'—','#d97706')).join('');
+
+  const html=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start">
+    ${colCard('#fff','#bfdbfe','#eff6ff','#3b82f6','📋','EL / Agreements',agrData.length,fmt(totalAgrAmt),agrClients,'No agreements this month','#eff6ff')}
+    ${colCard('#fff','#fde68a','#fffbeb','#d97706','🧾','One Time Billing',billData.length,fmt(totalBillAmt),billClients,'No bills this month','#fffbeb')}
+    <!-- Grand Total column -->
+    <div style="border:1.5px solid #fed7aa;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;padding:24px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:100px">
+      <div style="font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.85">Grand Total</div>
+      <div style="font-size:1.8rem;font-weight:900;line-height:1">${fmt(grandTotal)}</div>
+      <div style="font-size:.75rem;opacity:.8;margin-top:2px">${agrData.length+billData.length} client${(agrData.length+billData.length)!==1?'s':''}</div>
     </div>
   </div>`;
 
