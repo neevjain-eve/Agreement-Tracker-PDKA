@@ -5885,8 +5885,17 @@ function downloadZohoExcel(){
 
   // Month label for EL description e.g. "Jun-25"
   const monthLabel=new Date(y,m-1,1).toLocaleString('en-US',{month:'short'})+'-'+String(y).slice(2);
-  // Tax code helper: Karnataka → GST18, any other state → IGST18 (based on state alone)
-  const taxCode=(rec)=>{const st=((rec.address&&rec.address.state)||'').trim().toLowerCase();return st==='karnataka'?'GST18':'IGST18';};
+  // Tax code: check address.state first, then GSTIN prefix (29 = Karnataka), default GST18
+  const taxCode=(rec)=>{
+    const st=(typeof rec.address==='object'&&rec.address?rec.address.state||'':'').trim().toLowerCase();
+    if(st==='karnataka') return 'GST18';
+    if(st&&st!=='karnataka') return 'IGST18';
+    // No state saved — check GSTIN prefix: 29 = Karnataka
+    const gstin=(rec.gst||'').trim();
+    if(gstin) return gstin.startsWith('29')?'GST18':'IGST18';
+    // No state, no GSTIN — default GST18 (Karnataka-based business)
+    return 'GST18';
+  };
 
   const rows=[];
 
