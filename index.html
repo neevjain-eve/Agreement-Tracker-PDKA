@@ -5862,71 +5862,83 @@ function downloadMonthlyExcel(){
 }
 
 function downloadZohoExcel(){
-  // Downloads an Excel file in Zoho Books Invoice Import format
-  // Import via Zoho Books → Invoices → Import → Upload this file
+  // Zoho Books invoice import format matching sample_invoices.xls
   if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded');return;}
   const{m,y,agrData,billData}=getMonthlyData();
   if(!agrData.length&&!billData.length){showToast('No data this month to export');return;}
 
-  // Zoho Books standard invoice import headers
+  // Exact column order from Zoho Books sample import file
   const headers=[
-    'Invoice Date','Invoice Number','Customer Name',
-    'Item Name','Item Description','Quantity','Rate','Item Total',
-    'GST Treatment','GST Identification Number (GSTIN)',
-    'Notes','Terms & Conditions'
+    'Invoice Number','Estimate Number','Invoice Date','Invoice Status',
+    'Customer Name','Account','Item Type','HSN/SAC',
+    'Quantity','Usage unit','Item Price','Is Inclusive Tax','Item Tax'
   ];
 
-  // Helper: format date as DD/MM/YYYY for Zoho
-  const zDate=d=>{if(!d)return new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});try{const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return'';}};
-  const invoiceMonth=new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'});
+  // Convert date string to Excel serial number (Zoho expects numeric date in xls)
+  const toSerial=d=>{
+    try{
+      const dt=new Date((d||new Date().toISOString().slice(0,10))+'T12:00:00');
+      // Excel serial: days since 1 Jan 1900 (with Lotus bug: +1)
+      return Math.floor((dt.getTime()-new Date('1899-12-30T00:00:00').getTime())/86400000);
+    }catch(e){return '';}
+  };
 
   const rows=[];
 
-  // EL / Agreements — one invoice row per agreement
+  // EL / Agreements
   agrData.forEach((a,i)=>{
     const invNo='EL-'+String(i+1).padStart(3,'0')+'-'+String(m).padStart(2,'0')+y;
     const rate=parseFloat(a.amount)||0;
+    const taxCode=a.gstRegistered?(a.gst&&a.gst.startsWith(a.pan?.slice(0,5)||'XX')?'GST18':'IGST18'):'';
     rows.push([
-      zDate(a.startDate),          // Invoice Date
-      invNo,                        // Invoice Number
-      a.client||'',                 // Customer Name
-      a.name||a.type||'Agreement',  // Item Name
-      (a.specialService||a.type||'')+(a.billingFreq?' | '+a.billingFreq:''), // Item Description
-      1,                            // Quantity
-      rate,                         // Rate
-      rate,                         // Item Total
-      a.gstRegistered?'business_gst':'business_none', // GST Treatment
-      a.gst||'',                    // GSTIN
-      'Period: '+fDate(a.startDate)+' to '+fDate(a.endDate), // Notes
-      ''                            // Terms
+      invNo,          // Invoice Number
+      '',             // Estimate Number
+      toSerial(a.startDate), // Invoice Date (serial)
+      'Draft',        // Invoice Status
+      a.client||'',  // Customer Name
+      'Sales',        // Account
+      'service',      // Item Type
+      '',             // HSN/SAC
+      1,              // Quantity
+      'count',        // Usage unit
+      rate,           // Item Price
+      0,              // Is Inclusive Tax
+      taxCode         // Item Tax
     ]);
   });
 
-  // One Time Bills — one invoice row per bill
+  // One Time Bills
   billData.forEach((b,i)=>{
     const invNo=b.invoice||('OTB-'+String(i+1).padStart(3,'0')+'-'+String(m).padStart(2,'0')+y);
     const rate=parseFloat(b.amount)||0;
-    const invDate=b.date?zDate(b.date.includes('|')?b.date.split('|')[0]:b.date.length===7?b.date+'-01':b.date):zDate('');
+    const rawDate=b.date?b.date.includes('|')?b.date.split('|')[0]:b.date.length===7?b.date+'-01':b.date:'';
+    const taxCode=b.gstRegistered?(b.gst?'GST18':'IGST18'):'';
     rows.push([
-      invDate,                      // Invoice Date
-      invNo,                        // Invoice Number
-      b.client||'',                 // Customer Name
-      b.specialService||b.type||'One Time Service', // Item Name
-      b.type||'',                   // Item Description
-      1,                            // Quantity
-      rate,                         // Rate
-      rate,                         // Item Total
-      b.gstRegistered?'business_gst':'business_none', // GST Treatment
-      b.gst||'',                    // GSTIN
-      b.notes||'',                  // Notes
-      ''                            // Terms
+      invNo,          // Invoice Number
+      '',             // Estimate Number
+      toSerial(rawDate), // Invoice Date (serial)
+      'Draft',        // Invoice Status
+      b.client||'',  // Customer Name
+      'Sales',        // Account
+      'service',      // Item Type
+      '',             // HSN/SAC
+      1,              // Quantity
+      'count',        // Usage unit
+      rate,           // Item Price
+      0,              // Is Inclusive Tax
+      taxCode         // Item Tax
     ]);
   });
 
   const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
-  ws['!cols']=[{wch:13},{wch:18},{wch:28},{wch:28},{wch:30},{wch:8},{wch:12},{wch:12},{wch:16},{wch:22},{wch:32},{wch:20}];
+  // Mark date column (col index 2) as date format so Excel shows it correctly
+  for(let r=1;r<=rows.length;r++){
+    const cellRef=XLSX.utils.encode_cell({r,c:2});
+    if(ws[cellRef]){ws[cellRef].t='n';ws[cellRef].z='DD/MM/YYYY';}
+  }
+  ws['!cols']=[{wch:18},{wch:14},{wch:13},{wch:13},{wch:28},{wch:10},{wch:10},{wch:10},{wch:8},{wch:10},{wch:12},{wch:16},{wch:12}];
   const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Invoices');
+  XLSX.utils.book_append_sheet(wb,ws,'Sample Data');
   const mn2=new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'}).replace(' ','-');
   XLSX.writeFile(wb,`Zoho_Invoice_Import_${mn2}.xlsx`);
   showToast('✅ Zoho invoice import file downloaded!');
