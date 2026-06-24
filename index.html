@@ -17,6 +17,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -3594,6 +3595,8 @@ function saveBill(){
   else { bills.unshift(bill); }
   saveBillsToStorage();
   odSyncToOneDrive();
+  // Upload bill PDF to OneDrive (non-blocking)
+  (async()=>{try{const _bpdf=await generateBillPdf(bill);if(_bpdf)await odUploadToPath(OD_BILL_PDF_FOLDER+'/'+bill.id+'.pdf',_bpdf,'application/pdf');}catch(e){console.warn('[OD BillPDF]',e.message);}})();
   closeModal('billModal');
   renderBills();
   showToast(editId?'✅ Bill updated!':'✅ Bill added!');
@@ -5290,12 +5293,18 @@ async function saveAgreement(){
     renewedTo:existing?.renewedTo||null,
     createdByUserId:editId?(existing?.createdByUserId||''):(session&&session.userId!=='admin'?(session.userId||session.id||''):'')
   };
+  const _savedPf=[...pendingFiles];
   for(const pf of pendingFiles){
     const fid=Date.now().toString()+Math.random().toString(36).slice(2);
     await dbPut('files',{fileId:fid,name:pf.name,size:pf.size,type:pf.type,data:pf.data,agrId:agr.id});
     agr.fileIds.push(fid);
   }
   pendingFiles=[];
+  // Upload attachments + PDF to OneDrive (non-blocking)
+  (async()=>{
+    for(const _pf of _savedPf){try{const _b=await fetch(_pf.data).then(r=>r.blob());await odUploadToPath(OD_ATTACHMENTS_FOLDER+'/'+agr.id+'/'+_pf.name,_b,_pf.type);}catch(e){console.warn('[OD Att]',e.message);}}
+    try{const _pdf=await generateAgreementPdf(agr);if(_pdf)await odUploadToPath(OD_AGR_PDF_FOLDER+'/'+agr.id+'.pdf',_pdf,'application/pdf');}catch(e){console.warn('[OD PDF]',e.message);}
+  })();
   if(renewFromId&&!editId){const oldAgr=agreements.find(a=>a.id===renewFromId);if(oldAgr){oldAgr.renewedTo=agr.id;await dbPut('agreements',oldAgr);}}
   await dbPut('agreements',agr);
   agreements=await dbGetAll('agreements');
@@ -5930,6 +5939,9 @@ const GRAPH='https://graph.microsoft.com/v1.0';
 function encodePath(path){return path.split('/').map(encodeURIComponent).join('/');}
 const OD_FILE='EL Tracker/el_tracker_data.json';
 const OD_USERS_FILE_PATH='EL Tracker/el_tracker_users.json';
+const OD_ATTACHMENTS_FOLDER='EL Tracker/Attachments';
+const OD_AGR_PDF_FOLDER='EL Tracker/Agreement PDFs';
+const OD_BILL_PDF_FOLDER='EL Tracker/Bill PDFs';
 
 // ── Get the correct drive path ──
 // Admin: uses their own drive (me/drive)
@@ -6048,6 +6060,57 @@ function initMSAL(){
 }
 
 // ── Cross-device config sync via GitHub ─────────────────────────────────────
+// OD token helper - works for admin (MSAL) and managers (master token)
+async function odGetActiveToken(){
+  if(msalApp&&msalApp.getAllAccounts().length>0){try{return await getAccessToken(false);}catch(e){}}
+  const mt=localStorage.getItem('elOdMasterToken');
+  const mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');
+  return (mt&&(Date.now()-mtt)<3300000)?mt:null;
+}
+// Upload any data to an arbitrary OD path using /me/drive (works with both MSAL and master token)
+async function odUploadToPath(path,data,contentType){
+  try{
+    const token=await odGetActiveToken();if(!token)return;
+    const url=GRAPH+'/me/drive/root:/'+encodePath(path)+':/content';
+    const r=await fetch(url,{method:'PUT',headers:{'Authorization':'Bearer '+token,'Content-Type':(contentType||'application/octet-stream')},body:data});
+    if(!r.ok){const e=await r.json().catch(()=>({}));console.warn('[OD Upload] '+path+' failed:',e?.error?.message||r.statusText);}
+    else console.log('[OD] Uploaded: '+path);
+  }catch(e){console.warn('[OD Upload] error:',e.message);}
+}
+// Generate PDF blob for an agreement
+async function generateAgreementPdf(agr){
+  if(!window.jspdf)return null;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const lm=15,tw=180;let y=20;
+  const row=(label,val)=>{doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text(label+':',lm,y);doc.setFont('helvetica','normal');doc.text(String(val||'-'),lm+52,y);y+=6.5;};
+  doc.setFillColor(240,248,255);doc.rect(0,0,210,18,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(30,80,160);doc.text('AGREEMENT DETAILS',lm,12);doc.setTextColor(0,0,0);y=26;
+  row('Agreement ID',agr.id);row('Client / Party',agr.client||agr.party||'');row('Type',agr.type||agr.agreementType||'');
+  row('Manager',agr.manager||'');row('Service',agr.service||agr.serviceType||'');
+  row('Start Date',agr.startDate||'');row('End Date',agr.endDate||'');row('Renewal Date',agr.renewalDate||'');
+  row('Amount','Rs '+(agr.amount||0));row('Status',agr.status||'');row('Contact Person',agr.contactPerson||'');
+  row('Contact Email',agr.contactEmail||'');row('Contact Phone',agr.contactPhone||'');
+  if(agr.notes){y+=3;doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('Notes:',lm,y);y+=6;doc.setFont('helvetica','normal');const ln=doc.splitTextToSize(agr.notes,tw);doc.text(ln,lm,y);y+=ln.length*5.5;}
+  doc.setFontSize(8);doc.setTextColor(150);doc.text('Generated: '+new Date().toLocaleString(),lm,285);
+  return doc.output('blob');
+}
+// Generate PDF blob for a bill
+async function generateBillPdf(bill){
+  if(!window.jspdf)return null;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const lm=15,tw=180;let y=20;
+  const row=(label,val)=>{doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text(label+':',lm,y);doc.setFont('helvetica','normal');doc.text(String(val||'-'),lm+52,y);y+=6.5;};
+  doc.setFillColor(255,248,235);doc.rect(0,0,210,18,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(160,80,20);doc.text('BILL DETAILS',lm,12);doc.setTextColor(0,0,0);y=26;
+  row('Bill ID',bill.id);row('Client / Party',bill.client||bill.party||'');row('Manager',bill.manager||'');
+  row('Service',bill.service||bill.serviceType||'');row('Date',bill.date||bill.billDate||'');
+  row('Amount','Rs '+(bill.amount||0));row('Status',bill.status||'');row('Description',bill.description||'');
+  if(bill.notes){y+=3;doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('Notes:',lm,y);y+=6;doc.setFont('helvetica','normal');const ln=doc.splitTextToSize(bill.notes,tw);doc.text(ln,lm,y);}
+  doc.setFontSize(8);doc.setTextColor(150);doc.text('Generated: '+new Date().toLocaleString(),lm,285);
+  return doc.output('blob');
+}
 async function loadCloudConfig(){
   try{
     const r=await fetch('https://raw.githubusercontent.com/neevjain-eve/Agreement-Tracker-PDKA/main/od_config.json?_='+Date.now());
