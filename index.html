@@ -1089,7 +1089,7 @@
             </select>
             <div style="flex:1"></div>
             <button onclick="downloadMonthlyExcel()" style="background:linear-gradient(135deg,#f8a006,#f8a006);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">📥 Export Excel</button>
-            <button onclick="zohoMonthlyPush()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">☁️ Push to Zoho</button>
+            <button onclick="downloadZohoExcel()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">📊 Zoho Excel</button>
           </div>
         </div>
 
@@ -5861,48 +5861,75 @@ function downloadMonthlyExcel(){
   showToast('✅ Monthly statement downloaded!');
 }
 
-async function zohoMonthlyPush(){
-  if(!isZohoConnected()){showToast('⚠️ Connect Zoho Books in Admin Settings first');return;}
-  const{agrData,billData}=getMonthlyData();
-  if(!agrData.length&&!billData.length){showToast('No data this month to push');return;}
-  showToast('🔄 Pushing to Zoho Books...');
-  let token;
-  try{token=await zohoGetToken();}
-  catch(e){showToast('❌ Zoho auth failed: '+e.message);return;}
-  const cfg=getZohoConfig();
-  const orgId=cfg.orgId;
-  let pushed=0,errors=0;
-  const today=new Date().toISOString().slice(0,10);
+function downloadZohoExcel(){
+  // Downloads an Excel file in Zoho Books Invoice Import format
+  // Import via Zoho Books → Invoices → Import → Upload this file
+  if(typeof XLSX==='undefined'){showToast('⚠️ Excel library not loaded');return;}
+  const{m,y,agrData,billData}=getMonthlyData();
+  if(!agrData.length&&!billData.length){showToast('No data this month to export');return;}
 
-  for(const a of agrData){
-    if(!a.client)continue;
-    try{
-      await zohoApi('POST','/contacts',{
-        contact_name:a.client,company_name:a.client,contact_type:'customer',
-        notes:'Agreement: '+(a.name||'')+(a.type?' | '+a.type:'')+(a.startDate?' | Start: '+a.startDate:'')+(a.endDate?' | End: '+a.endDate:''),
-        gst_no:a.gst||undefined,gst_treatment:a.gstRegistered?'business_gst':'business_none'
-      },token,orgId);
-      pushed++;
-    }catch(e){errors++;}
-  }
+  // Zoho Books standard invoice import headers
+  const headers=[
+    'Invoice Date','Invoice Number','Customer Name',
+    'Item Name','Item Description','Quantity','Rate','Item Total',
+    'GST Treatment','GST Identification Number (GSTIN)',
+    'Notes','Terms & Conditions'
+  ];
 
-  for(const b of billData){
-    if(!b.client||!b.amount)continue;
-    try{
-      const cr=await zohoApi('POST','/contacts',{contact_name:b.client,company_name:b.client,contact_type:'customer'},token,orgId);
-      const cid=cr?.contact?.contact_id;
-      if(cid){
-        await zohoApi('POST','/invoices',{
-          customer_id:cid,date:today,
-          reference_number:b.invoice||undefined,
-          notes:(b.specialService||b.type||'One Time Bill')+(b.subType?' – '+b.subType:''),
-          line_items:[{name:(b.specialService||b.type||'Service'),rate:parseFloat(b.amount)||0,quantity:1,product_type:'service'}]
-        },token,orgId);
-        pushed++;
-      }
-    }catch(e){errors++;}
-  }
-  showToast(errors?`⚠️ Done — ${pushed} pushed, ${errors} errors`:`✅ ${pushed} records pushed to Zoho Books!`);
+  // Helper: format date as DD/MM/YYYY for Zoho
+  const zDate=d=>{if(!d)return new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});try{const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return'';}};
+  const invoiceMonth=new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'});
+
+  const rows=[];
+
+  // EL / Agreements — one invoice row per agreement
+  agrData.forEach((a,i)=>{
+    const invNo='EL-'+String(i+1).padStart(3,'0')+'-'+String(m).padStart(2,'0')+y;
+    const rate=parseFloat(a.amount)||0;
+    rows.push([
+      zDate(a.startDate),          // Invoice Date
+      invNo,                        // Invoice Number
+      a.client||'',                 // Customer Name
+      a.name||a.type||'Agreement',  // Item Name
+      (a.specialService||a.type||'')+(a.billingFreq?' | '+a.billingFreq:''), // Item Description
+      1,                            // Quantity
+      rate,                         // Rate
+      rate,                         // Item Total
+      a.gstRegistered?'business_gst':'business_none', // GST Treatment
+      a.gst||'',                    // GSTIN
+      'Period: '+fDate(a.startDate)+' to '+fDate(a.endDate), // Notes
+      ''                            // Terms
+    ]);
+  });
+
+  // One Time Bills — one invoice row per bill
+  billData.forEach((b,i)=>{
+    const invNo=b.invoice||('OTB-'+String(i+1).padStart(3,'0')+'-'+String(m).padStart(2,'0')+y);
+    const rate=parseFloat(b.amount)||0;
+    const invDate=b.date?zDate(b.date.includes('|')?b.date.split('|')[0]:b.date.length===7?b.date+'-01':b.date):zDate('');
+    rows.push([
+      invDate,                      // Invoice Date
+      invNo,                        // Invoice Number
+      b.client||'',                 // Customer Name
+      b.specialService||b.type||'One Time Service', // Item Name
+      b.type||'',                   // Item Description
+      1,                            // Quantity
+      rate,                         // Rate
+      rate,                         // Item Total
+      b.gstRegistered?'business_gst':'business_none', // GST Treatment
+      b.gst||'',                    // GSTIN
+      b.notes||'',                  // Notes
+      ''                            // Terms
+    ]);
+  });
+
+  const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
+  ws['!cols']=[{wch:13},{wch:18},{wch:28},{wch:28},{wch:30},{wch:8},{wch:12},{wch:12},{wch:16},{wch:22},{wch:32},{wch:20}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Invoices');
+  const mn2=new Date(y,m-1,1).toLocaleString('en-IN',{month:'short',year:'numeric'}).replace(' ','-');
+  XLSX.writeFile(wb,`Zoho_Invoice_Import_${mn2}.xlsx`);
+  showToast('✅ Zoho invoice import file downloaded!');
 }
 
 function downloadReport(){
