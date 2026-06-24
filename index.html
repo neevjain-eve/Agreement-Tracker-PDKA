@@ -2510,18 +2510,19 @@ function onAgrSubChange(){
     const type=document.getElementById('agrType').value;
     if(!type){showToast('Please select a service type first');return;}
     (document.getElementById('agrAddSubRow')||{style:{}}).style.display='flex';
-    setTimeout(()=>document.getElementById('agrNewSubInput').focus(),50);
+    setTimeout(()=>{const _e=document.getElementById('agrNewSubInput');if(_e)_e.focus();},50);
   }
 }
 function hideAgrAddSub(){
   (document.getElementById('agrAddSubRow')||{style:{}}).style.display='none';
-  document.getElementById('agrNewSubInput').value='';
+  const _ani=document.getElementById('agrNewSubInput');if(_ani)_ani.value='';
   const sel=(document.getElementById('agrSubType')||{value:'',innerHTML:''});
   if(sel.value==='__add_new__')sel.value='';
 }
 function saveAgrSubCategory(){
   const type=document.getElementById('agrType').value;
-  const n=document.getElementById('agrNewSubInput').value.trim();
+  const _asiEl=document.getElementById('agrNewSubInput');
+  const n=_asiEl?_asiEl.value.trim():'';
   if(!n){showToast('Enter a name');return;}
   const all=[...(SUB_SERVICES[type]||[]),...(getApprovedSubs()[type]||[])];
   if(all.includes(n)){showToast('Already exists');return;}
@@ -2541,13 +2542,13 @@ function onBillSubChange(){
     sel.value='';
     const type=document.getElementById('billType').value;
     if(!type){showToast('Please select a service type first');return;}
-    document.getElementById('billAddSubRow').style.display='flex';
-    setTimeout(()=>document.getElementById('billNewSubInput').focus(),50);
+    (document.getElementById('billAddSubRow')||{style:{}}).style.display='flex';
+    setTimeout(()=>{const _e=document.getElementById('billNewSubInput');if(_e)_e.focus();},50);
   }
 }
 function hideBillAddSub(){
-  document.getElementById('billAddSubRow').style.display='none';
-  document.getElementById('billNewSubInput').value='';
+  (document.getElementById('billAddSubRow')||{style:{}}).style.display='none';
+  const _bni=document.getElementById('billNewSubInput');if(_bni)_bni.value='';
   const sel=(document.getElementById('billSubType')||{value:'',innerHTML:''});
   if(sel.value==='__add_new__')sel.value='';
 }
@@ -2841,7 +2842,8 @@ function onBillInvoiceInput(){
 
 function saveBillSubCategory(){
   const type=document.getElementById('billType').value;
-  const n=document.getElementById('billNewSubInput').value.trim();
+  const _bsiEl=document.getElementById('billNewSubInput');
+  const n=_bsiEl?_bsiEl.value.trim():'';
   if(!n){showToast('Enter a name');return;}
   const all=[...(SUB_SERVICES[type]||[]),...(getApprovedSubs()[type]||[])];
   if(all.includes(n)){showToast('Already exists');return;}
