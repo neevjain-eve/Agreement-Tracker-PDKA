@@ -2542,9 +2542,9 @@ function renderFinanceDashboard(){
       return d===_ym;
     });
     const _monthAmt=_monthBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
-    const _bBilled=bills.filter(b=>b.status==='billed').length;
-    const _bInProg=bills.filter(b=>b.status==='in_progress').length;
-    const _bDone=bills.filter(b=>b.status==='completed').length;
+    const _bBilled=bills.filter(b=>!!(b.invoice||'').toString().trim()).length;
+    const _bInProg=bills.filter(b=>b.taskStatus==='in_progress').length;
+    const _bDone=bills.filter(b=>b.taskStatus==='completed').length;
     set('dashBillCount',bills.length);
     set('dashBillMonthCount',_monthBills.length);
     set('dashBillTotal','₹'+_billTotal.toLocaleString('en-IN'));
@@ -2837,13 +2837,22 @@ function renderClientTasks(){
     const blTotal=cl.bills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
     const active=cl.agreements.filter(a=>{try{return new Date(a.endDate)>=new Date();}catch(e){return false;}}).length;
     const latestAgr=[...cl.agreements].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
-    const billRows=cl.bills.map(b=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#fffbeb;border-radius:7px;margin-top:4px;font-size:.72rem">
-      <div style="min-width:0;flex:1">
-        <span style="font-weight:600">${esc(b.service||b.description||'Bill')}</span>
-        ${b.status?`<span style="margin-left:6px;font-size:.65rem;padding:1px 6px;border-radius:8px;background:${b.status==='completed'?'#dcfce7':b.status==='billed'?'#fef9c3':'#ffedd5'};color:${b.status==='completed'?'#15803d':b.status==='billed'?'#a16207':'#c2410c'}">${b.status==='in_progress'?'🔄 In Progress':b.status==='billed'?'🧾 Billed':'✅ Done'}</span>`:''}
-      </div>
-      <span style="font-weight:700;color:#d97706;flex-shrink:0;margin-left:8px">${b.amount?'₹'+parseFloat(b.amount).toLocaleString('en-IN'):''}</span>
-    </div>`).join('');
+    const billRows=cl.bills.map(b=>{
+      const _bSvc=esc(b.specialService||b.name||'Bill');
+      const _bAmt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—';
+      const _bHasInv=!!(b.invoice||'').toString().trim();
+      const _bSt=_bHasInv?'billed':(b.taskStatus||'');
+      const _stBg=_bSt==='billed'?'#fef9c3':_bSt==='completed'?'#dcfce7':'#ffedd5';
+      const _stCol=_bSt==='billed'?'#a16207':_bSt==='completed'?'#15803d':'#c2410c';
+      const _stLabel=_bSt==='billed'?'🧾 Billed':_bSt==='completed'?'✅ Done':_bSt==='in_progress'?'🔄 In Progress':'';
+      return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#fffbeb;border-radius:7px;margin-top:4px;font-size:.72rem">
+        <div style="min-width:0;flex:1">
+          <span style="font-weight:600">${_bSvc}</span>
+          ${_stLabel?`<span style="margin-left:6px;font-size:.65rem;padding:1px 6px;border-radius:8px;background:${_stBg};color:${_stCol}">${_stLabel}</span>`:''}
+        </div>
+        <span style="font-weight:700;color:#d97706;flex-shrink:0;margin-left:8px">${_bAmt}</span>
+      </div>`;
+    }).join('');
     return`<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid #fed7aa">
       <div style="font-weight:700;font-size:.88rem;margin-bottom:6px">🏢 ${esc(cl.name)}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.74rem;color:#555;margin-bottom:${blCount?'6px':'2px'}">
