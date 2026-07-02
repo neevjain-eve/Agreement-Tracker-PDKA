@@ -1112,6 +1112,13 @@
         <button onclick="openAddClientTask()" style="background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:12px;padding:10px 18px;font-size:.82rem;font-weight:700;cursor:pointer">+ Add Task</button>
       </div>
       <div style="padding:0 16px">
+        <!-- Manager filter -->
+        <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:.78rem;font-weight:700;color:#888">Manager:</span>
+          <select id="ctManagerFilter" onchange="setCtManagerFilter(this.value)" style="font-family:inherit;font-size:.8rem;padding:5px 10px;border:1.5px solid #fed7aa;border-radius:9px;background:#fff7ed;outline:none;cursor:pointer">
+            <option value="">All Managers</option>
+          </select>
+        </div>
         <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
           <button class="filter-btn active" onclick="setClientTaskFilter('all')" id="ct-filter-all">All</button>
           <button class="filter-btn" onclick="setClientTaskFilter('pending')" id="ct-filter-pending" style="background:#ffedd5;border-color:#f97316">⏳ Pending</button>
@@ -1127,7 +1134,18 @@
     <div class="modal-overlay" id="clientTaskModal">
       <div class="modal-card" style="max-width:520px">
         <div class="modal-title">Add Client Task</div>
-        <div class="form-group"><label>Client Name *</label><input type="text" id="ctClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
+        <div class="form-group"><label>Client Name *</label>
+          <div style="position:relative">
+            <input type="text" id="ctClient" placeholder="e.g. TechCorp Pvt. Ltd." autocomplete="off" oninput="showClientDrop('ctClient','ctClientDrop','ct')" onfocus="showClientDrop('ctClient','ctClientDrop','ct')" onblur="setTimeout(()=>{const d=document.getElementById('ctClientDrop');if(d)d.style.display='none';},180)"/>
+            <div id="ctClientDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #fed7aa;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.13);z-index:2999;max-height:210px;overflow-y:auto;margin-top:2px"></div>
+          </div>
+        </div>
+        <div class="form-group"><label>Assigned Manager</label>
+          <div style="display:flex;gap:6px">
+            <select id="ctManagerSel" style="font-family:inherit;flex:1" onchange="const _ctmf=document.getElementById('ctManager');if(_ctmf)_ctmf.value=this.value"></select>
+            <input type="text" id="ctManager" placeholder="Or type name..." style="flex:1" oninput="const _s=document.getElementById('ctManagerSel');if(_s)_s.value=''"/>
+          </div>
+        </div>
         <div class="form-group"><label>Task Description *</label><textarea id="ctDesc" rows="2" placeholder="e.g. Monthly GST Filing, Quarterly TDS Return..."></textarea></div>
         <div class="form-group"><label>Service Category</label>
           <select id="ctCategory" style="font-family:inherit">
@@ -1641,7 +1659,12 @@
       <!-- RIGHT: Client + Email Details -->
       <div>
         <div class="form-section-title">👤 Party / Client / Vendor Details</div>
-        <div class="form-group"><label>Party / Vendor / Client Name *</label><input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd." oninput="onAgrClientInput()"/></div>
+        <div class="form-group"><label>Party / Vendor / Client Name *</label>
+          <div style="position:relative">
+            <input type="text" id="agrClient" placeholder="e.g. TechCorp Pvt. Ltd." oninput="onAgrClientInput()" autocomplete="off" onfocus="showClientDrop('agrClient','agrClientDrop','agr')" onblur="setTimeout(()=>{const d=document.getElementById('agrClientDrop');if(d)d.style.display='none';},180)"/>
+            <div id="agrClientDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #fed7aa;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.13);z-index:1999;max-height:210px;overflow-y:auto;margin-top:2px"></div>
+          </div>
+        </div>
         <div class="form-group">
           <label>Parent Group <span style="font-size:.7rem;color:var(--muted)">(optional — select from dashboard parent companies)</span></label>
           <select id="agrParentGroup" style="font-family:inherit">
@@ -1793,7 +1816,12 @@
       <!-- RIGHT: Client Details -->
       <div>
         <div class="form-section-title">👤 Client Details</div>
-        <div class="form-group"><label>Client Name *</label><input type="text" id="billClient" placeholder="e.g. TechCorp Pvt. Ltd."/></div>
+        <div class="form-group"><label>Client Name *</label>
+          <div style="position:relative">
+            <input type="text" id="billClient" placeholder="e.g. TechCorp Pvt. Ltd." autocomplete="off" oninput="showClientDrop('billClient','billClientDrop','bill')" onfocus="showClientDrop('billClient','billClientDrop','bill')" onblur="setTimeout(()=>{const d=document.getElementById('billClientDrop');if(d)d.style.display='none';},180)"/>
+            <div id="billClientDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #fed7aa;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.13);z-index:1999;max-height:210px;overflow-y:auto;margin-top:2px"></div>
+          </div>
+        </div>
         <div class="form-group">
           <label>Parent Group <span style="font-size:.7rem;color:var(--muted)">(optional)</span></label>
           <select id="billParentGroup" style="font-family:inherit">
@@ -2498,13 +2526,83 @@ function populateParentGroupDropdown(selectId){
 function onAgrClientInput(){
   // Auto-suggest parent group based on client name matching sub-company
   const client=document.getElementById('agrClient').value.trim().toLowerCase();
-  if(!client)return;
-  const pcs=getParentCompanies();
-  const match=pcs.find(p=>p.subs&&p.subs.some(s=>s.toLowerCase().includes(client)||client.includes(s.toLowerCase())));
-  if(match){
-    const sel=document.getElementById('agrParentGroup');
-    if(sel&&!sel.value){sel.value=match.id;}
+  if(client){const pcs=getParentCompanies();const match=pcs.find(p=>p.subs&&p.subs.some(s=>s.toLowerCase().includes(client)||client.includes(s.toLowerCase())));if(match){const sel=document.getElementById('agrParentGroup');if(sel&&!sel.value){sel.value=match.id;}}}
+  showClientDrop('agrClient','agrClientDrop','agr');
+}
+
+// ── CLIENT AUTOCOMPLETE ──────────────────────────────
+function getUniqueClients(){
+  const map={};
+  const addRec=(name,rec)=>{
+    const k=name.toLowerCase();
+    if(!map[k]||new Date(rec.createdAt||0)>new Date(map[k].createdAt||0))
+      map[k]={name,pan:rec.pan||'',gst:rec.gst||'',gstRegistered:!!rec.gstRegistered,contact:rec.contact||'',contactInfo:rec.contactInfo||'',address:rec.address||{},createdAt:rec.createdAt||''};
+  };
+  agreements.forEach(a=>{if((a.client||'').trim())addRec(a.client.trim(),a);});
+  bills.forEach(b=>{if((b.client||'').trim())addRec(b.client.trim(),b);});
+  return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name));
+}
+
+function showClientDrop(inputId,dropId,prefix){
+  const inp=document.getElementById(inputId);const drop=document.getElementById(dropId);if(!inp||!drop)return;
+  const q=(inp.value||'').trim().toLowerCase();
+  const all=getUniqueClients();
+  const matches=q?all.filter(c=>c.name.toLowerCase().includes(q)):all;
+  if(!matches.length){drop.style.display='none';return;}
+  drop.innerHTML=matches.map(c=>`<div onmousedown="fillClientData('${c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${prefix}')" style="padding:8px 12px;cursor:pointer;font-size:.82rem;border-bottom:1px solid #ffedd5;display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''"><span style="font-weight:600">${esc(c.name)}</span>${c.pan?`<span style="font-size:.7rem;color:#888">PAN: ${c.pan}</span>`:''}</div>`).join('');
+  drop.style.display='block';
+}
+
+function fillClientData(clientName,prefix){
+  const all=getUniqueClients();
+  const c=all.find(x=>x.name.toLowerCase()===clientName.toLowerCase());
+  if(!c)return;
+  // Set name
+  const nameEl=document.getElementById(prefix==='agr'?'agrClient':prefix==='bill'?'billClient':'ctClient');
+  if(nameEl)nameEl.value=c.name;
+  // Hide dropdown
+  const dropId=prefix+'ClientDrop';const drop=document.getElementById(dropId);if(drop)drop.style.display='none';
+  // ct form only needs name
+  if(prefix==='ct')return;
+  // PAN
+  const panEl=document.getElementById(prefix+'Pan');if(panEl&&!panEl.value)panEl.value=c.pan||'';
+  // Contact
+  const conEl=document.getElementById(prefix+'Contact');if(conEl&&!conEl.value)conEl.value=c.contact||'';
+  const cinEl=document.getElementById(prefix+'ContactInfo');if(cinEl&&!cinEl.value)cinEl.value=c.contactInfo||'';
+  // GST
+  if(c.gstRegistered){
+    const gstTog=document.getElementById(prefix==='agr'?'gstToggle':'billGstToggle');
+    if(gstTog&&!gstTog.checked){gstTog.checked=true;gstTog.dispatchEvent(new Event('change'));}
+    const gstEl=document.getElementById(prefix+'Gst');if(gstEl&&!gstEl.value)gstEl.value=c.gst||'';
   }
+  // Address
+  if(c.address&&typeof c.address==='object'){
+    const a=c.address;
+    const l1=document.getElementById(prefix+'AddrLine1');if(l1&&!l1.value)l1.value=a.line1||'';
+    const ar=document.getElementById(prefix+'AddrArea');if(ar&&!ar.value)ar.value=a.area||'';
+    const pn=document.getElementById(prefix+'AddrPin');if(pn&&!pn.value)pn.value=a.pin||'';
+    if(a.country){
+      const cEl=document.getElementById(prefix+'AddrCountry');if(cEl&&!cEl.value){cEl.value=a.country;try{onAddrCountryChange(prefix,a.state,a.city);}catch(e){}}
+    }
+  }
+  // Trigger parent group suggestion for agr
+  if(prefix==='agr')onAgrClientInput&&setTimeout(onAgrClientInput,0);
+}
+
+// ── CLIENT MANAGEMENT — MANAGER FILTER ──────────────
+let _ctManagerFilter='';
+function setCtManagerFilter(mgr){_ctManagerFilter=mgr;renderClientTasks();}
+function populateCtManagerFilter(){
+  const sel=document.getElementById('ctManagerFilter');if(!sel)return;
+  const sess=getSession();const isAdmin=sess&&(sess.userId==='admin'||(!getUserAllowedCats(sess.userId||'').length&&sess.role==='admin'));
+  if(!isAdmin){sel.parentElement.style.display='none';return;}
+  sel.parentElement.style.display='flex';
+  const mgrs=new Set();
+  clientTasks.forEach(t=>{if(t.manager)mgrs.add(t.manager);});
+  agreements.forEach(a=>{if(a.manager)mgrs.add(a.manager);});
+  bills.forEach(b=>{if(b.manager)mgrs.add(b.manager);});
+  const sorted=[...mgrs].sort();
+  sel.innerHTML='<option value="">All Managers</option>'+sorted.map(m=>`<option value="${esc(m)}"${_ctManagerFilter===m?' selected':''}>${esc(m)}</option>`).join('');
 }
 
 function onAgrNameSelect(){
@@ -2643,20 +2741,55 @@ function setClientTaskFilter(f){
 
 function renderClientTasks(){
   const el=document.getElementById('clientTaskList');if(!el)return;
+  populateCtManagerFilter();
   const sess=getSession();const isAdmin=sess&&(sess.userId==='admin'||(!getUserAllowedCats(sess.userId||'').length&&sess.role==='admin'));
   let list=isAdmin?clientTasks:clientTasks.filter(t=>{
     const _ctUid=sess.userId||sess.id||'';
     if(t.createdByUserId)return t.createdByUserId===_ctUid;
     return false;
   });
+  // Manager filter
+  if(_ctManagerFilter){
+    list=list.filter(t=>(t.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
+  }
+  // If a manager is selected, show a client overview panel above the tasks
+  let overviewHtml='';
+  if(_ctManagerFilter&&isAdmin){
+    const mgrAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
+    const mgrBills=bills.filter(b=>(b.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
+    const clientMap={};
+    mgrAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(!k)return;if(!clientMap[k])clientMap[k]={name:a.client.trim(),agreements:[],bills:[]};clientMap[k].agreements.push(a);});
+    mgrBills.forEach(b=>{const k=(b.client||'').trim().toLowerCase();if(!k)return;if(!clientMap[k])clientMap[k]={name:b.client.trim(),agreements:[],bills:[]};clientMap[k].bills.push(b);});
+    if(Object.keys(clientMap).length){
+      overviewHtml=`<div style="margin-bottom:16px">
+        <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 Clients for ${esc(_ctManagerFilter)}</div>
+        ${Object.values(clientMap).map(cl=>{
+          const agCount=cl.agreements.length;
+          const blTotal=cl.bills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+          const active=cl.agreements.filter(a=>{try{return new Date(a.endDate)>=new Date();}catch(e){return false;}}).length;
+          const latestAgr=cl.agreements.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
+          return`<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid #fed7aa">
+            <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">🏢 ${esc(cl.name)}</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:.74rem;color:#555">
+              <span>📄 <b>${agCount}</b> agreement${agCount!==1?'s':''} (${active} active)</span>
+              ${blTotal?`<span>💰 Bills: ₹${blTotal.toLocaleString('en-IN')}</span>`:''}
+              ${latestAgr?`<span>📋 ${esc(latestAgr.type||'')} | ${latestAgr.startDate?fDate(latestAgr.startDate)+' → '+fDate(latestAgr.endDate):''}</span>`:''}
+              ${latestAgr?.pan?`<span>PAN: ${esc(latestAgr.pan)}</span>`:''}
+              ${latestAgr?.gst&&latestAgr?.gstRegistered?`<span>GST: ${esc(latestAgr.gst)}</span>`:''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }
+  }
   if(_ctFilter==='pending') list=list.filter(t=>t.status==='pending');
   else if(_ctFilter==='in_progress') list=list.filter(t=>t.status==='in_progress');
   else if(_ctFilter==='completed') list=list.filter(t=>t.status==='completed');
   else if(_ctFilter==='billed') list=list.filter(t=>t.markBilling);
-  if(!list.length){el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div><div style="font-size:.82rem;margin-top:4px">Click + Add Task to create one</div></div>';return;}
+  if(!list.length){el.innerHTML=overviewHtml+'<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div><div style="font-size:.82rem;margin-top:4px">Click + Add Task to create one</div></div>';return;}
   const stColors={pending:'#f97316',in_progress:'#f8a006',completed:'#16a34a'};
   const stLabels={pending:'⏳ Pending',in_progress:'🔄 In Progress',completed:'✅ Completed'};
-  el.innerHTML=list.map(t=>`<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid ${stColors[t.status]||'#fed7aa'}">
+  el.innerHTML=overviewHtml+list.map(t=>`<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid ${stColors[t.status]||'#fed7aa'}">
     <div style="display:flex;align-items:flex-start;gap:10px">
       <input type="checkbox" ${t.markBilling?'checked':''} onchange="toggleClientTaskBilling('${t.id}',this.checked)"
         style="width:18px;height:18px;accent-color:#f97316;flex-shrink:0;margin-top:2px" title="Mark for billing"/>
@@ -2695,6 +2828,10 @@ function openAddClientTask(){
   document.getElementById('ctMarkBilling').checked=false;
   document.getElementById('ctNotes').value='';
   document.getElementById('ctEditId').value='';
+  populateManagerDropdown('ctManagerSel');
+  const _ctmEl=document.getElementById('ctManager');if(_ctmEl)_ctmEl.value='';
+  // Pre-select manager filter if one is active
+  if(_ctManagerFilter){const _s=document.getElementById('ctManagerSel');if(_s)_s.value=_ctManagerFilter;const _m=document.getElementById('ctManager');if(_m)_m.value='';}
   document.getElementById('clientTaskModal').classList.add('open');
 }
 
@@ -2709,6 +2846,9 @@ function openEditClientTask(id){
   document.getElementById('ctMarkBilling').checked=!!t.markBilling;
   document.getElementById('ctNotes').value=t.notes||'';
   document.getElementById('ctEditId').value=t.id;
+  populateManagerDropdown('ctManagerSel');
+  const _s=document.getElementById('ctManagerSel');if(_s&&t.manager){const _o=[..._s.options].find(o=>o.value===t.manager);if(_o)_s.value=t.manager;}
+  const _m=document.getElementById('ctManager');if(_m)_m.value=t.manager||'';
   document.getElementById('clientTaskModal').classList.add('open');
 }
 
@@ -2717,9 +2857,11 @@ function saveClientTask(){
   const desc=document.getElementById('ctDesc').value.trim();
   if(!client||!desc){showToast('⚠️ Client name and description are required');return;}
   const editId=document.getElementById('ctEditId').value;
+  const _ctMgrVal=(document.getElementById('ctManager')||{value:''}).value.trim()||(document.getElementById('ctManagerSel')||{value:''}).value||'';
   const task={
     id:editId||'ct'+Date.now(),
     client,desc,
+    manager:_ctMgrVal,
     category:document.getElementById('ctCategory').value,
     frequency:document.getElementById('ctFrequency').value,
     dueDate:document.getElementById('ctDueDate').value,
@@ -2727,7 +2869,7 @@ function saveClientTask(){
     markBilling:document.getElementById('ctMarkBilling').checked,
     notes:document.getElementById('ctNotes').value.trim(),
     createdAt:editId?(clientTasks.find(x=>x.id===editId)||{}).createdAt||new Date().toISOString():new Date().toISOString(),
-    createdByUserId:editId?(clientTasks.find(x=>x.id===editId)||{}).createdByUserId||(function(){const _cts=getSession();return _cts?(_cts.userId||_cts.id||''):'';})():(function(){const _cts=getSession();return _cts?(_cts.userId||_cts.id||''):'';})() 
+    createdByUserId:editId?(clientTasks.find(x=>x.id===editId)||{}).createdByUserId||(function(){const _cts=getSession();return _cts?(_cts.userId||_cts.id||''):'';})():(function(){const _cts=getSession();return _cts?(_cts.userId||_cts.id||''):'';})()
   };
   if(editId){const i=clientTasks.findIndex(x=>x.id===editId);if(i>-1)clientTasks[i]=task;else clientTasks.unshift(task);}
   else clientTasks.unshift(task);
