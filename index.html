@@ -2873,9 +2873,9 @@ function renderClientTasks(){
     filtBills.forEach(b=>{const k=(b.client||'').trim().toLowerCase();if(!k)return;if(!cm[k])cm[k]={name:b.client.trim(),agreements:[],bills:[]};cm[k].bills.push(b);});
     return cm;
   };
-  // ── Client overview panel ──
+  // ── Client overview panel (only when no task filter active) ──
   let overviewHtml='';
-  if(isAdmin&&!_ctManagerFilter){
+  if(_ctFilter==='all'&&isAdmin&&!_ctManagerFilter){
     // SHOW ALL MANAGERS grouped
     const allMgrNames=new Set();
     agreements.forEach(a=>{if(a.manager)allMgrNames.add(a.manager);});
@@ -2908,7 +2908,7 @@ function renderClientTasks(){
         }).join('')}
       </div>`;
     }
-  } else if(isAdmin&&_ctManagerFilter){
+  } else if(_ctFilter==='all'&&isAdmin&&_ctManagerFilter){
     // SELECTED MANAGER detailed view
     const mLow=_ctManagerFilter.toLowerCase();
     const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
@@ -2921,7 +2921,7 @@ function renderClientTasks(){
         ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
       </div>`;
     }
-  } else if(!isAdmin){
+  } else if(_ctFilter==='all'&&!isAdmin){
     // MANAGER's own clients
     const _ovMgrId=sess?sess.userId||sess.id||'':'';
     const _ovMgrLow=sess?(sess.name||sess.username||'').toLowerCase():'';
