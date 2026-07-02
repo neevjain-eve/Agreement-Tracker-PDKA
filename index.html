@@ -3736,6 +3736,8 @@ function saveBill(){
   const amount=document.getElementById('billAmount').value;
   const _billSess=getSession();const _billIsAdmin=_billSess&&_billSess.role==='admin';
   if(!client){showToast('⚠️ Please enter client name');return;}
+  const _billMgrVal=_billIsAdmin?(document.getElementById('billManager').value||document.getElementById('billManagerSel').value||''):(_billSess.name||_billSess.username||'');
+  if(_billIsAdmin&&!_billMgrVal){showToast('⚠️ Please assign a manager');return;}
   if(_billIsAdmin&&(!date||!amount)){showToast('⚠️ Please fill billed date and amount');return;}
   const pan=document.getElementById('billPan').value.trim().toUpperCase();
   if(pan&&!validatePAN(pan)){showToast('⚠️ Invalid PAN format');return;}
@@ -3747,7 +3749,7 @@ function saveBill(){
     id: editId||Date.now().toString(),
     name: desc, client, date, amount,
     quoteAmount: document.getElementById('billQuoteAmount').value||'',
-    manager: _billIsAdmin?(document.getElementById('billManager').value||document.getElementById('billManagerSel').value||''):(_billSess.name||_billSess.username||''),
+    manager: _billMgrVal,
     createdByUserId: _billIsAdmin?'':(_billSess.userId||_billSess.id||''),
     parentGroup:document.getElementById('billParentGroup').value||'',
     type: document.getElementById('billType').value,
@@ -4361,8 +4363,10 @@ function renderManagerList(){
     const _uId=u.id||'';const _uName=(u.name||'').toLowerCase();
     const _uCatNames=(u.allowedCats||[]).map(catDisplayName);const _uAllCats=[...(u.allowedCats||[]),..._uCatNames];const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_uId:_uAllCats.includes(t.category||''));
     const uAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_uId:(_uName&&(a.manager||'').toLowerCase()===_uName));
+    const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const cat=(u.allowedCats||[]).map(catDisplayName).join(', ')||'—';
     const agrAmt=uAgrs.reduce((s,a)=>s+(parseFloat(a.amount||0)),0);
+    const billAmt=uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
     const _now=new Date();_now.setHours(0,0,0,0);
     const _soon=new Date(_now);_soon.setDate(_soon.getDate()+30);
     const uActive=uAgrs.filter(a=>{if(!a.endDate)return true;const d=new Date(a.endDate);return d>=_now;}).length;
@@ -4378,17 +4382,19 @@ function renderManagerList(){
       <td style="${td};text-align:center"><span style="background:#fef2f2;color:#dc2626;font-weight:700;padding:2px 10px;border-radius:20px">${uExpired}</span></td>
       <td style="${td};text-align:center"><span style="background:#eff6ff;color:#2563eb;font-weight:700;padding:2px 10px;border-radius:20px">${uRenewed}</span></td>
       <td style="${td};font-weight:700">&#8377;${agrAmt.toLocaleString('en-IN')}</td>
+      <td style="${td};font-weight:700;color:${billAmt>0?'#059669':'#aaa'}">&#8377;${billAmt.toLocaleString('en-IN')}</td>
       <td style="${td}"><button onclick="downloadManagerExcel('${_uId}','${u.name.replace(/[']/g,String.fromCharCode(96))}') " style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:7px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer">&#11015;</button></td>
     </tr>`;
   }).join('');
   const html=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr><th style="${th}">Manager</th><th style="${th}">Service</th><th style="${th};text-align:center">Active</th><th style="${th};text-align:center">Expiring</th><th style="${th};text-align:center">Expired</th><th style="${th};text-align:center">Renewed</th><th style="${th}">Agr. Amount</th><th style="${th}"></th></tr></thead>
+    <thead><tr><th style="${th}">Manager</th><th style="${th}">Service</th><th style="${th};text-align:center">Active</th><th style="${th};text-align:center">Expiring</th><th style="${th};text-align:center">Expired</th><th style="${th};text-align:center">Renewed</th><th style="${th}">Agr. Amount</th><th style="${th}">Bill Amount</th><th style="${th}"></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
   targets.forEach(t=>t.innerHTML=html);
 }
 function downloadManagerExcel(userId,userName){
-  const uTasks=clientTasks.filter(t=>t.createdByUserId===userId);
-  const uBills=bills.filter(b=>b.createdByUserId===userId);
+  const _dmName=userName.toLowerCase();
+  const uTasks=clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===userId:(_dmName&&(t.manager||'').toLowerCase()===_dmName));
+  const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===userId:(_dmName&&(b.manager||'').toLowerCase()===_dmName));
   const wb=XLSX.utils.book_new();
   const tHdr=['Client','Description','Category','Frequency','Due Date','Status','Mark Billing','Notes'];
   const tRows=uTasks.map(t=>[t.client||'',t.desc||'',t.category||'',t.frequency||'',t.dueDate||'',t.status||'',t.markBilling?'Yes':'No',t.notes||'']);
