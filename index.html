@@ -3633,6 +3633,7 @@ function saveBill(){
   if(editId){ const idx=bills.findIndex(b=>b.id===editId); if(idx>-1)bills[idx]=bill; else bills.unshift(bill); }
   else { bills.unshift(bill); }
   saveBillsToStorage();
+  dbPut('bills',bill).catch(()=>{});
   odSyncToOneDrive();
   // Upload bill PDF to OneDrive (non-blocking)
   (async()=>{try{const _bpdf=await generateBillPdf(bill);if(_bpdf)await odUploadToPath(OD_BILL_PDF_FOLDER+'/'+bill.id+'.pdf',_bpdf,'application/pdf');}catch(e){console.warn('[OD BillPDF]',e.message);}})();
@@ -3645,6 +3646,7 @@ function deleteBill(id){
   if(!confirm('Delete this bill?'))return;
   bills=bills.filter(b=>b.id!==id);
   saveBillsToStorage();
+  dbDelete('bills',id).catch(()=>{});
   odSyncToOneDrive();
   renderBills();
   showToast('🗑️ Bill deleted');
@@ -4299,11 +4301,12 @@ function downloadAllManagersExcel(){
 let db;
 function openDB(){
   return new Promise((res,rej)=>{
-    const req=indexedDB.open('AgreementTrackerDB',3);
+    const req=indexedDB.open('AgreementTrackerDB',4);
     req.onupgradeneeded=e=>{
       const d=e.target.result;
       if(!d.objectStoreNames.contains('agreements'))d.createObjectStore('agreements',{keyPath:'id'});
       if(!d.objectStoreNames.contains('files'))d.createObjectStore('files',{keyPath:'fileId'});
+      if(!d.objectStoreNames.contains('bills'))d.createObjectStore('bills',{keyPath:'id'});
     };
     req.onsuccess=e=>{db=e.target.result;res(db)};
     req.onerror=rej;
@@ -6547,6 +6550,13 @@ async function odLoadWithToken(token){
     if(cloud.bills&&Array.isArray(cloud.bills)){
       bills=cloud.bills;
       saveBillsToStorage();
+      // Mirror bills in IndexedDB (cloud-authoritative: purge any deleted records)
+      try{
+        const _cloudBillIds=new Set(cloud.bills.map(b=>b.id));
+        for(const _cb of cloud.bills) await dbPut('bills',_cb).catch(()=>{});
+        const _localIdbBills=await dbGetAll('bills').catch(()=>[]);
+        for(const _lb of _localIdbBills){if(!_cloudBillIds.has(_lb.id)) await dbDelete('bills',_lb.id).catch(()=>{});}
+      }catch(e){}
       renderBills();
     }
     // Load client tasks
@@ -6869,6 +6879,13 @@ function showComposeError(msg){const el=document.getElementById('composeError');
 
 openDB().then(async()=>{
   agreements=await dbGetAll('agreements');
+  // Load bills from IndexedDB if localStorage is empty (cross-device/session fallback)
+  if(!bills.length){
+    try{const _idbBills=await dbGetAll('bills');if(_idbBills.length){bills=_idbBills;saveBillsToStorage();renderBills();}}catch(e){}
+  } else {
+    // Sync localStorage bills into IndexedDB for future cross-device use
+    try{for(const _b of bills) await dbPut('bills',_b).catch(()=>{});}catch(e){}
+  }
   if(odConfig.clientId){
     const _sess_init=getSession();
     if(_sess_init&&_sess_init.role==='admin'){
