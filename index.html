@@ -1020,6 +1020,43 @@
               </div>
               <button class="fd-btn-primary" style="width:100%;padding:14px;margin-top:8px" onclick="downloadReport()">Export Excel</button>
             </div>
+            <!-- ── ONE-TIME BILLING STATS ── -->
+            <div class="fd-card" id="dashBillCard" style="margin-top:8px">
+              <h3 class="fd-chart-title" style="margin-bottom:10px">💰 One-Time Billing</h3>
+              <div class="fd-stat-pills" style="gap:6px;margin-bottom:8px">
+                <div class="fd-stat-pill" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;flex:1;min-width:0;cursor:default" onclick="showSection('billing')">
+                  <div class="n" id="dashBillCount" style="color:#16a34a">0</div>
+                  <div class="l" style="color:#15803d">Total Bills</div>
+                </div>
+                <div class="fd-stat-pill" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1.5px solid #fcd34d;flex:1;min-width:0;cursor:default">
+                  <div class="n" id="dashBillMonthCount" style="color:#d97706">0</div>
+                  <div class="l" style="color:#b45309">This Month</div>
+                </div>
+              </div>
+              <div style="padding:10px 12px;background:linear-gradient(135deg,#faf5ff,#f3e8ff);border-radius:10px;border:1px solid #d8b4fe;margin-bottom:8px">
+                <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:#7c3aed;font-weight:700;margin-bottom:3px">Total Billed Amount</div>
+                <div style="font-size:1.35rem;font-weight:900;color:#6d28d9" id="dashBillTotal">₹0</div>
+              </div>
+              <div style="padding:10px 12px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border-radius:10px;border:1px solid #fed7aa;margin-bottom:8px">
+                <div style="font-size:.63rem;text-transform:uppercase;letter-spacing:.06em;color:#ea580c;font-weight:700;margin-bottom:3px">This Month Amount</div>
+                <div style="font-size:1.15rem;font-weight:900;color:#c2410c" id="dashBillMonthAmt">₹0</div>
+              </div>
+              <div class="fd-stat-pills" style="gap:5px;margin-bottom:8px">
+                <div style="flex:1;text-align:center;padding:6px 4px;background:#fff3d6;border-radius:8px;border:1px solid #fcd34d;cursor:pointer" onclick="showSection('billing');setBillFilter('billed')">
+                  <div style="font-size:.9rem;font-weight:800;color:#d97706" id="dashBillBilled">0</div>
+                  <div style="font-size:.58rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em">Billed</div>
+                </div>
+                <div style="flex:1;text-align:center;padding:6px 4px;background:#fff7ed;border-radius:8px;border:1px solid #fed7aa;cursor:pointer" onclick="showSection('billing');setBillFilter('in_progress')">
+                  <div style="font-size:.9rem;font-weight:800;color:#ea580c" id="dashBillInProgress">0</div>
+                  <div style="font-size:.58rem;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:.04em">In Progress</div>
+                </div>
+                <div style="flex:1;text-align:center;padding:6px 4px;background:#f0fdf4;border-radius:8px;border:1px solid #86efac;cursor:pointer" onclick="showSection('billing');setBillFilter('completed')">
+                  <div style="font-size:.9rem;font-weight:800;color:#16a34a" id="dashBillCompleted">0</div>
+                  <div style="font-size:.58rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.04em">Completed</div>
+                </div>
+              </div>
+              <button class="fd-btn-primary" style="width:100%;padding:11px;background:linear-gradient(135deg,#7c3aed,#6d28d9)" onclick="showSection('billing')">View Bills →</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2493,6 +2530,29 @@ function renderFinanceDashboard(){
       const ini=(a.client||'?').split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
       return'<div class="fd-activity-item"><div class="fd-activity-left"><div class="fd-table-avatar">'+ini+'</div><div class="fd-activity-meta"><div class="fd-activity-name">'+esc(a.name)+'</div><div class="fd-activity-sub">'+esc(a.client)+'</div></div></div><div><div class="fd-activity-amt '+cls+'">'+({active:'✅ Active',expiring:'⚠️ Expiring',expired:'❌ Expired',renewed:'🔄 Renewed'}[st])+'</div><div class="fd-activity-date">'+fDate(a.endDate)+'</div></div></div>';
     }).join(''):'<div class="fd-empty">No agreements yet</div>';
+  }
+
+  // ── One-time billing stats ──
+  if(typeof bills!=='undefined'&&Array.isArray(bills)){
+    const _now=new Date();
+    const _ym=_now.getFullYear()+'-'+String(_now.getMonth()+1).padStart(2,'0');
+    const _billTotal=bills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
+    const _monthBills=bills.filter(b=>{
+      const d=(b.createdAt||b.date||'').substring(0,7);
+      return d===_ym;
+    });
+    const _monthAmt=_monthBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
+    const _bBilled=bills.filter(b=>b.status==='billed').length;
+    const _bInProg=bills.filter(b=>b.status==='in_progress').length;
+    const _bDone=bills.filter(b=>b.status==='completed').length;
+    set('dashBillCount',bills.length);
+    set('dashBillMonthCount',_monthBills.length);
+    set('dashBillTotal','₹'+_billTotal.toLocaleString('en-IN'));
+    set('dashBillMonthAmt','₹'+_monthAmt.toLocaleString('en-IN'));
+    set('dashBillBilled',_bBilled);
+    set('dashBillInProgress',_bInProg);
+    set('dashBillCompleted',_bDone);
+    if(ws)ws.textContent=active+' active · '+expiring+' expiring · '+bills.length+' bills';
   }
 }
 
