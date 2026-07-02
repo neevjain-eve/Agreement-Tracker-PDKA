@@ -2598,8 +2598,26 @@ function getUniqueClients(){
     if(!map[k]||new Date(rec.createdAt||0)>new Date(map[k].createdAt||0))
       map[k]={name,pan:rec.pan||'',gst:rec.gst||'',gstRegistered:!!rec.gstRegistered,contact:rec.contact||'',contactInfo:rec.contactInfo||'',address:rec.address||{},createdAt:rec.createdAt||''};
   };
-  agreements.forEach(a=>{if((a.client||'').trim())addRec(a.client.trim(),a);});
-  bills.forEach(b=>{if((b.client||'').trim())addRec(b.client.trim(),b);});
+  const _gcSess=getSession();
+  const _gcAdmin=_gcSess&&(_gcSess.userId==='admin'||(!getUserAllowedCats(_gcSess.userId||'').length&&_gcSess.role==='admin'));
+  const _gcUid=_gcSess?(_gcSess.userId||_gcSess.id||''):'';
+  const _gcName=_gcSess?(_gcSess.name||_gcSess.username||'').toLowerCase():'';
+  agreements.forEach(a=>{
+    if(!(a.client||'').trim())return;
+    if(!_gcAdmin){
+      const ok=a.createdByUserId?a.createdByUserId===_gcUid:(_gcName&&(a.manager||'').toLowerCase()===_gcName);
+      if(!ok)return;
+    }
+    addRec(a.client.trim(),a);
+  });
+  bills.forEach(b=>{
+    if(!(b.client||'').trim())return;
+    if(!_gcAdmin){
+      const ok=b.createdByUserId?b.createdByUserId===_gcUid:(_gcName&&(b.manager||'').toLowerCase()===_gcName);
+      if(!ok)return;
+    }
+    addRec(b.client.trim(),b);
+  });
   return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name));
 }
 
@@ -2812,31 +2830,52 @@ function renderClientTasks(){
   if(_ctManagerFilter){
     list=list.filter(t=>(t.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
   }
-  // If a manager is selected, show a client overview panel above the tasks
+  // Client overview panel — show for admin-with-filter OR any manager
   let overviewHtml='';
-  if(_ctManagerFilter&&isAdmin){
-    const mgrAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
-    const mgrBills=bills.filter(b=>(b.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
+  const _showOverview=(_ctManagerFilter&&isAdmin)||(!isAdmin);
+  if(_showOverview){
+    const _ovMgrName=isAdmin?_ctManagerFilter:(sess?sess.name||sess.username||'':'');
+    const _ovMgrId=isAdmin?'':(sess?sess.userId||sess.id||'':'');
+    const _ovMgrLow=(_ovMgrName||'').toLowerCase();
+    const mgrAgrs=isAdmin&&_ctManagerFilter
+      ? agreements.filter(a=>(a.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase())
+      : !isAdmin
+        ? agreements.filter(a=>a.createdByUserId?a.createdByUserId===_ovMgrId:(_ovMgrLow&&(a.manager||'').toLowerCase()===_ovMgrLow))
+        : agreements;
+    const mgrBills=isAdmin&&_ctManagerFilter
+      ? bills.filter(b=>(b.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase())
+      : !isAdmin
+        ? bills.filter(b=>b.createdByUserId?b.createdByUserId===_ovMgrId:(_ovMgrLow&&(b.manager||'').toLowerCase()===_ovMgrLow))
+        : bills;
     const clientMap={};
     mgrAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(!k)return;if(!clientMap[k])clientMap[k]={name:a.client.trim(),agreements:[],bills:[]};clientMap[k].agreements.push(a);});
     mgrBills.forEach(b=>{const k=(b.client||'').trim().toLowerCase();if(!k)return;if(!clientMap[k])clientMap[k]={name:b.client.trim(),agreements:[],bills:[]};clientMap[k].bills.push(b);});
     if(Object.keys(clientMap).length){
+      const _ovTitle=isAdmin&&_ctManagerFilter?`📊 Clients for ${esc(_ctManagerFilter)}`:'📊 My Clients';
       overviewHtml=`<div style="margin-bottom:16px">
-        <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 Clients for ${esc(_ctManagerFilter)}</div>
-        ${Object.values(clientMap).map(cl=>{
+        <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">${_ovTitle}</div>
+        ${Object.values(clientMap).sort((a,b)=>a.name.localeCompare(b.name)).map(cl=>{
           const agCount=cl.agreements.length;
+          const blCount=cl.bills.length;
           const blTotal=cl.bills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
           const active=cl.agreements.filter(a=>{try{return new Date(a.endDate)>=new Date();}catch(e){return false;}}).length;
-          const latestAgr=cl.agreements.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
-          return`<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid #fed7aa">
-            <div style="font-weight:700;font-size:.88rem;margin-bottom:4px">🏢 ${esc(cl.name)}</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:.74rem;color:#555">
-              <span>📄 <b>${agCount}</b> agreement${agCount!==1?'s':''} (${active} active)</span>
-              ${blTotal?`<span>💰 Bills: ₹${blTotal.toLocaleString('en-IN')}</span>`:''}
-              ${latestAgr?`<span>📋 ${esc(latestAgr.type||'')} | ${latestAgr.startDate?fDate(latestAgr.startDate)+' → '+fDate(latestAgr.endDate):''}</span>`:''}
-              ${latestAgr?.pan?`<span>PAN: ${esc(latestAgr.pan)}</span>`:''}
-              ${latestAgr?.gst&&latestAgr?.gstRegistered?`<span>GST: ${esc(latestAgr.gst)}</span>`:''}
+          const latestAgr=[...cl.agreements].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
+          const billRows=cl.bills.map(b=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#fffbeb;border-radius:7px;margin-top:4px;font-size:.72rem">
+            <div>
+              <span style="font-weight:600">${esc(b.service||b.description||'Bill')}</span>
+              ${b.status?`<span style="margin-left:6px;font-size:.65rem;padding:1px 6px;border-radius:8px;background:${b.status==='completed'?'#dcfce7':b.status==='billed'?'#fef9c3':'#ffedd5'};color:${b.status==='completed'?'#15803d':b.status==='billed'?'#a16207':'#c2410c'}">${b.status==='in_progress'?'🔄 In Progress':b.status==='billed'?'🧾 Billed':'✅ Done'}</span>`:''}
             </div>
+            <span style="font-weight:700;color:#d97706">${b.amount?'₹'+parseFloat(b.amount).toLocaleString('en-IN'):''}</span>
+          </div>`).join('');
+          return`<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid #fed7aa">
+            <div style="font-weight:700;font-size:.88rem;margin-bottom:6px">🏢 ${esc(cl.name)}</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:.74rem;color:#555;margin-bottom:${billRows?'6px':'0'}">
+              <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 <b>${agCount}</b> agr${agCount!==1?'s':''} · <b>${active}</b> active</span>
+              ${blCount?`<span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 <b>${blCount}</b> bill${blCount!==1?'s':''} · ₹<b>${blTotal.toLocaleString('en-IN')}</b></span>`:'<span style="background:#f0fdf4;padding:2px 8px;border-radius:8px;border:1px solid #86efac;font-size:.68rem;color:#15803d">No bills yet</span>'}
+              ${latestAgr?.pan?`<span style="background:#f5f5f5;padding:2px 8px;border-radius:8px">PAN: ${esc(latestAgr.pan)}</span>`:''}
+              ${latestAgr?.gst&&latestAgr?.gstRegistered?`<span style="background:#f5f5f5;padding:2px 8px;border-radius:8px">GST: ${esc(latestAgr.gst)}</span>`:''}
+            </div>
+            ${billRows?`<div style="border-top:1px solid #ffedd5;padding-top:4px"><div style="font-size:.65rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Bills</div>${billRows}</div>`:''}
           </div>`;
         }).join('')}
       </div>`;
