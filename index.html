@@ -2201,6 +2201,56 @@ function downloadAgrPdf(id){
   const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();}
 }
 
+function openBillDetail(id){
+  const b=bills.find(x=>x.id===id);if(!b)return;
+  const addr=fmtAddr(b.address);
+  const approvalLabel=b.clientApproval==='yes'?'✅ Yes — Approved':b.clientApproval==='no'?'❌ No':'⏳ Pending';
+  const taskLabel=b.taskStatus==='completed'?'✅ Completed':b.taskStatus==='in_progress'?'🔄 In Progress':'—';
+  const fmt=v=>v?'₹'+Number(v).toLocaleString('en-IN'):'—';
+  const rows=[
+    ['Client / Vendor',esc(b.client||'')],
+    ['Service Type',esc(b.type||'—')],
+    ['Sub-Service',esc(b.subType||'—')],
+    ['Description',esc(b.specialService||'—')],
+    ['Task Status',taskLabel],
+    ['Client Approval',approvalLabel],
+    ['Quote Amount',fmt(b.quoteAmount)],
+    ['Billed Amount',fmt(b.amount)],
+    ['Billed Date',b.date?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}):'—'],
+    ['Invoice / Ref No.',esc(b.invoice||'—')],
+    ['Manager',esc(b.manager||'—')],
+    ['PAN',b.pan||'—'],
+    ['GST',b.gstRegistered?(b.gst||'Registered'):'Not Registered'],
+    ['Contact Person',esc(b.contact||'—')],
+    ['Contact Info',esc(b.contactInfo||'—')],
+    ['Address',addr||'—'],
+    ['Notes',esc(b.notes||'—')],
+  ];
+  let attachHtml='';
+  if(b.approvalFileName&&b.approvalFileData){
+    attachHtml=`<div style="margin-top:12px;padding:10px 14px;background:#fff7ed;border-radius:10px;border:1px solid #fed7aa;display:flex;align-items:center;gap:10px">
+      <span style="font-size:1.1rem">📎</span>
+      <span style="font-size:.82rem;font-weight:600;flex:1">${esc(b.approvalFileName)}</span>
+      <button onclick="const a=document.createElement('a');a.href='${b.approvalFileData}';a.download='${esc(b.approvalFileName)}';a.click()" style="background:#f97316;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:.75rem;font-weight:700;cursor:pointer">⬇️ Download</button>
+    </div>`;
+  }
+  const existing=document.getElementById('billDetailModal');if(existing)existing.remove();
+  const modal=document.createElement('div');
+  modal.id='billDetailModal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML=`<div style="background:#fff;border-radius:18px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:24px;position:relative">
+    <button onclick="document.getElementById('billDetailModal').remove()" style="position:absolute;top:12px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:#888">&times;</button>
+    <div style="font-size:1.05rem;font-weight:800;margin-bottom:14px">📋 Bill Details</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.83rem">${rows.map(([l,v])=>`<tr><td style="padding:6px 10px 6px 0;color:#888;font-weight:600;white-space:nowrap;vertical-align:top;width:38%">${l}</td><td style="padding:6px 0;color:#111;vertical-align:top">${v}</td></tr>`).join('')}</table>
+    ${attachHtml}
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="document.getElementById('billDetailModal').remove();openEditBillModal('${id}')" style="background:#ffedd5;border:1.5px solid #fed7aa;color:#111;border-radius:10px;padding:8px 16px;font-size:.8rem;font-weight:700;cursor:pointer">✏️ Edit</button>
+      <button onclick="downloadBillPdf('${id}')" style="background:#fff3d6;border:1.5px solid #f8a006;color:#111;border-radius:10px;padding:8px 16px;font-size:.8rem;font-weight:700;cursor:pointer">📄 PDF</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
+}
 function downloadBillPdf(id){
   const b=bills.find(x=>x.id===id);if(!b)return;
   const addr=fmtAddr(b.address);
@@ -3527,6 +3577,13 @@ function openEditBillModal(id){
     document.getElementById('billGstToggleLabel').textContent='Registered under GST';
     document.getElementById('billGst').value=b.gst||'';
   }
+  // Restore approval attachment name
+  if(b.approvalFileName){
+    const _bfn=document.getElementById('billApprovalFileName');if(_bfn)_bfn.textContent=b.approvalFileName;
+    const _bfc=document.getElementById('billApprovalClear');if(_bfc)_bfc.style.display='inline';
+    const _bfi=document.getElementById('billApprovalFile');
+    if(_bfi){_bfi.dataset.fname=b.approvalFileName;_bfi.dataset.b64=b.approvalFileData||'';}
+  }
   document.getElementById('billModal').classList.add('open');
 }
 
@@ -3658,6 +3715,7 @@ function renderBills(){
       </div>
       ${b.notes?`<div class="card-notes" style="margin-top:6px;font-size:.74rem;color:var(--muted);padding-top:6px;border-top:1px solid var(--border-light)">📝 ${esc(b.notes)}</div>`:''}
       <div class="card-actions" style="margin-top:8px;display:flex;gap:8px">
+        <button class="btn-action btn-view" onclick="openBillDetail('${b.id}')">👁️ Open</button>
         <button class="btn-action btn-edit" onclick="openEditBillModal('${b.id}')">✏️ Edit</button>
         <button class="btn-action btn-history" onclick="downloadBillPdf('${b.id}')" style="background:#fff3d6;color:#111111;border:none;border-radius:10px;padding:8px 6px;font-size:.76rem;font-weight:700;cursor:pointer">📄 PDF</button>
         <button class="btn-action btn-danger" onclick="deleteBill('${b.id}')">🗑️ Delete</button>
