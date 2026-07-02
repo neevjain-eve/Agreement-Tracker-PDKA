@@ -2834,12 +2834,14 @@ function renderClientTasks(){
   const _buildClientCard=(cl)=>{
     const agCount=cl.agreements.length;
     const blCount=cl.bills.length;
-    const blTotal=cl.bills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+    const blTotal=cl.bills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
     const active=cl.agreements.filter(a=>{try{return new Date(a.endDate)>=new Date();}catch(e){return false;}}).length;
     const latestAgr=[...cl.agreements].sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0))[0];
     const billRows=cl.bills.map(b=>{
       const _bSvc=esc(b.specialService||b.name||'Bill');
-      const _bAmt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—';
+      const _bActual=b.amount&&parseFloat(b.amount)?'₹'+Number(b.amount).toLocaleString('en-IN'):'';
+      const _bQuote=b.quoteAmount&&parseFloat(b.quoteAmount)?'Quote: ₹'+Number(b.quoteAmount).toLocaleString('en-IN'):'';
+      const _bAmt=_bActual||(_bQuote?_bQuote:'—');
       const _bHasInv=!!(b.invoice||'').toString().trim();
       const _bSt=_bHasInv?'billed':(b.taskStatus||'');
       const _stBg=_bSt==='billed'?'#fef9c3':_bSt==='completed'?'#dcfce7':'#ffedd5';
@@ -2889,7 +2891,7 @@ function renderClientTasks(){
           const cm=_buildClientMap(mAgrs,mBills);
           const clients=Object.values(cm);
           if(!clients.length)return'';
-          const totalAmt=mBills.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+          const totalAmt=mBills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
           return`<details style="margin-bottom:10px;border-radius:12px;overflow:hidden;border:1.5px solid #fed7aa" open>
             <summary style="background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:10px 14px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.85rem">
               <span>👤 ${esc(mgr)}</span>
