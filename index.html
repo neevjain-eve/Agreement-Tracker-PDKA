@@ -3497,6 +3497,7 @@ function openEditBillModal(id){
     document.getElementById('billPeriodYear').value='';
   }
   document.getElementById('billAmount').value=b.amount||'';
+  const _bqa=document.getElementById('billQuoteAmount');if(_bqa)_bqa.value=b.quoteAmount||'';
   document.getElementById('billInvoice').value=b.invoice||'';
   document.getElementById('billClient').value=b.client||'';
   const _bAppr=b.clientApproval||'';
