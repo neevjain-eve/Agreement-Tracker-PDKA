@@ -4051,47 +4051,93 @@ function renderBills(){
     if(b.date.length===7)return new Date(b.date+'-01T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'});
     return new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
   };
+  // ── ADMIN: grouped by category boxes ──
+  if(_bAdmin){
+    const _catIcons={'Tax Services':'🧾','Accounting Retainer Services':'📊','Advisory Services':'💼','Audit & Assurance Services':'🔍','CS Retainer Services':'📋'};
+    const _catColors={'Tax Services':'#0ea5e9','Accounting Retainer Services':'#16a34a','Advisory Services':'#7c3aed','Audit & Assurance Services':'#dc2626','CS Retainer Services':'#d97706'};
+    // Group bills by type
+    const _groups={};
+    list.forEach(b=>{const k=b.type||'Other';if(!_groups[k])_groups[k]=[];_groups[k].push(b);});
+    // Sort groups: known cats first in order, then others
+    const _catOrder=['Tax Services','Accounting Retainer Services','Advisory Services','Audit & Assurance Services','CS Retainer Services'];
+    const _sortedKeys=[..._catOrder.filter(k=>_groups[k]),...Object.keys(_groups).filter(k=>!_catOrder.includes(k))];
+    el.innerHTML=_sortedKeys.map(catKey=>{
+      const catBills=_groups[catKey];
+      const label=catDisplayName(catKey);
+      const icon=_catIcons[catKey]||'📁';
+      const color=_catColors[catKey]||'#f97316';
+      const billed=catBills.filter(b=>!!(b.invoice||'').toString().trim()).length;
+      const pending=catBills.filter(b=>!b.taskStatus||b.taskStatus==='pending').length;
+      const inProg=catBills.filter(b=>b.taskStatus==='in_progress').length;
+      const done=catBills.filter(b=>b.taskStatus==='completed').length;
+      const billRows=catBills.map(b=>{
+        const ini=(b.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
+        const amt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):(b.quoteAmount?'Q:₹'+Number(b.quoteAmount).toLocaleString('en-IN'):'—');
+        const dt=_fmtBillDate(b);
+        const sub=[b.subType,b.specialService].filter(Boolean).join(' › ');
+        const _createdStr=b.createdAt?new Date(b.createdAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
+        const _stBg=b.taskStatus==='completed'?'#fff3d6':b.taskStatus==='in_progress'?'#e0f2fe':'#f5f5f5';
+        const _stCol=b.taskStatus==='completed'?'#92400e':b.taskStatus==='in_progress'?'#0369a1':'#555';
+        const _stLabel=b.taskStatus==='completed'?'✅ Completed':b.taskStatus==='in_progress'?'🔄 In Progress':'⏳ Pending';
+        const _hasInv=!!(b.invoice||'').toString().trim();
+        return`<div id="bill-card-${b.id}" style="border-radius:10px;border:1.5px solid #e5e7eb;margin-bottom:6px;overflow:hidden;background:#fff">
+          <div onclick="toggleBillCard('${b.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;user-select:none">
+            <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:800;font-size:.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.name)}</div>
+              <div style="font-size:.7rem;color:#555;margin-top:1px">👤 ${esc(b.client)}${b.manager?` · Mgr: ${esc(b.manager)}`:''}${sub?` · ${esc(sub)}`:''}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0">
+              <span style="font-size:.63rem;font-weight:700;padding:1px 6px;border-radius:20px;background:${_stBg};color:${_stCol}">${_stLabel}</span>
+              ${_hasInv?`<span style="font-size:.6rem;background:#ffedd5;color:#c2410c;padding:1px 6px;border-radius:20px;font-weight:700">🧾 ${esc(b.invoice)}</span>`:b.taskStatus==='completed'?`<span style="font-size:.6rem;background:#fff3d6;color:#b45309;padding:1px 6px;border-radius:20px;font-weight:700">⏳ Awaiting Invoice</span>`:''}
+              <span style="font-size:.6rem;color:#aaa">🕐 ${_createdStr}</span>
+            </div>
+            <span id="bill-chevron-${b.id}" style="font-size:.65rem;color:${color};margin-left:2px">▼</span>
+          </div>
+          <div id="bill-detail-${b.id}" style="display:none;padding:0 12px 10px;border-top:1px solid #f3f4f6">
+            <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:.76rem;margin:6px 0 8px">
+              <span><b>Amount:</b> ${amt}</span>
+              <span><b>Period:</b> ${dt}</span>
+              ${b.clientApproval==='yes'?'<span style="background:#fff3d6;padding:1px 6px;border-radius:20px;font-weight:700;font-size:.7rem">👍 Approved</span>':''}
+            </div>
+            ${b.notes?`<div style="font-size:.72rem;color:var(--muted);margin-bottom:8px">📝 ${esc(b.notes)}</div>`:''}
+            <div style="display:flex;gap:6px">
+              <button class="btn-action btn-view" onclick="openBillDetail('${b.id}')">👁️ Open</button>
+              <button class="btn-action btn-edit" onclick="openEditBillModal('${b.id}')">✏️ Edit</button>
+              <button class="btn-action btn-history" onclick="downloadBillPdf('${b.id}')" style="background:#fff3d6;color:#111;border:none;border-radius:10px;padding:7px 6px;font-size:.74rem;font-weight:700;cursor:pointer">📄 PDF</button>
+              <button class="btn-action btn-danger" onclick="deleteBill('${b.id}')">🗑️ Delete</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      return`<div style="border-radius:14px;overflow:hidden;border:2px solid ${color}22;margin-bottom:14px">
+        <div onclick="toggleBillCat('${catKey.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,${color}18,${color}08);padding:12px 16px;cursor:pointer;display:flex;align-items:center;gap:10px;user-select:none">
+          <span style="font-size:1.2rem">${icon}</span>
+          <div style="flex:1">
+            <div style="font-weight:800;font-size:.92rem;color:${color}">${label}</div>
+            <div style="font-size:.7rem;color:#555;margin-top:2px">
+              ${catBills.length} bill${catBills.length!==1?'s':''}
+              ${billed?` · 🧾 ${billed} billed`:''}
+              ${done?` · ✅ ${done} done`:''}
+              ${inProg?` · 🔄 ${inProg} in progress`:''}
+              ${pending?` · ⏳ ${pending} pending`:''}
+            </div>
+          </div>
+          <span id="billcat-chev-${catKey}" style="font-size:.8rem;color:${color}">▼</span>
+        </div>
+        <div id="billcat-body-${catKey}" style="display:none;padding:10px 10px 4px;background:#fafafa">
+          ${billRows}
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
   el.innerHTML=list.map(b=>{
     const amt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—';
     const dt=_fmtBillDate(b);
     const ini=(b.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
     const sub=[b.type,b.subType,b.specialService].filter(Boolean).join(' › ');
-    if(_bAdmin){
-      // ── ADMIN: collapsed card, click to expand ──
-      const _createdStr=b.createdAt?new Date(b.createdAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
-      const _stBg=b.taskStatus==='completed'?'#fff3d6':b.taskStatus==='in_progress'?'#ffedd5':'#f5f5f5';
-      const _stLabel=b.taskStatus==='completed'?'✅ Completed':b.taskStatus==='in_progress'?'🔄 In Progress':'⏳ Pending';
-      return`<div class="agr-card" id="bill-card-${b.id}" style="margin-bottom:6px;padding:0;overflow:hidden">
-        <div onclick="toggleBillCard('${b.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;user-select:none">
-          <div class="card-avatar" style="background:linear-gradient(135deg,#0ea5e9,#0369a1);flex-shrink:0">${ini}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-weight:700;font-size:.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.name)}</div>
-            <div style="font-size:.72rem;color:#555;margin-top:1px">👤 ${esc(b.client)}${b.manager?` · Mgr: ${esc(b.manager)}`:''}${sub?` · 🏷️ ${esc(sub)}`:''}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
-            <span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${_stBg};color:#111111;border:1px solid #fed7aa">${_stLabel}</span>
-            ${b.invoice?`<span style="font-size:.63rem;background:#ffedd5;color:#111111;padding:1px 6px;border-radius:20px;font-weight:700">🧾 ${esc(b.invoice)}</span>`
-              :b.taskStatus==='completed'?`<span style="font-size:.63rem;background:#fff3d6;color:#b45309;padding:1px 6px;border-radius:20px;font-weight:700;border:1px solid #f8a006">⏳ Awaiting Invoice</span>`:''}
-            <span style="font-size:.62rem;color:#aaa">🕐 ${_createdStr}</span>
-          </div>
-          <span id="bill-chevron-${b.id}" style="font-size:.7rem;color:#f97316;margin-left:4px">▼</span>
-        </div>
-        <div id="bill-detail-${b.id}" style="display:none;padding:0 14px 12px;border-top:1px solid #ffedd5">
-          <div style="display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;margin-bottom:8px;padding-top:8px">
-            <span><b>Amount:</b> ${amt}</span>
-            <span><b>Period:</b> ${dt}</span>
-            ${b.clientApproval==='yes'?'<span style="background:#fff3d6;padding:1px 7px;border-radius:20px;font-weight:700;border:1px solid #f8a006">👍 Approved</span>':''}
-          </div>
-          ${b.notes?`<div style="font-size:.74rem;color:var(--muted);margin-bottom:8px">📝 ${esc(b.notes)}</div>`:''}
-          <div style="display:flex;gap:8px">
-            <button class="btn-action btn-view" onclick="openBillDetail('${b.id}')">👁️ Open</button>
-            <button class="btn-action btn-edit" onclick="openEditBillModal('${b.id}')">✏️ Edit</button>
-            <button class="btn-action btn-history" onclick="downloadBillPdf('${b.id}')" style="background:#fff3d6;color:#111111;border:none;border-radius:10px;padding:8px 6px;font-size:.76rem;font-weight:700;cursor:pointer">📄 PDF</button>
-            <button class="btn-action btn-danger" onclick="deleteBill('${b.id}')">🗑️ Delete</button>
-          </div>
-        </div>
-      </div>`;
-    }
+    if(false){return'';}
     // ── NON-ADMIN: original expanded card ──
     return`<div class="agr-card" style="margin-bottom:12px">
       <div class="card-top">
@@ -4132,6 +4178,14 @@ function toggleBillCard(id){
   det.style.display=open?'block':'none';
   if(chev)chev.textContent=open?'▲':'▼';
   if(card)card.style.background=open?'#fffbeb':'';
+}
+function toggleBillCat(catKey){
+  const body=document.getElementById('billcat-body-'+catKey);
+  const chev=document.getElementById('billcat-chev-'+catKey);
+  if(!body)return;
+  const open=body.style.display==='none';
+  body.style.display=open?'block':'none';
+  if(chev)chev.textContent=open?'▲':'▼';
 }
 
 // ══════════════════════════════════════════════════
