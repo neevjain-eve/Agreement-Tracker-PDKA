@@ -4596,7 +4596,7 @@ function downloadAllManagersExcel(){
       [],
       [u.name+' - Bills'],
       ['Client','Service','Category','Date','Amount','Invoice','Status','Notes'],
-      ...uBills.map(b=>[b.client||'',b.name||b.specialService||'',catDisplayName(b.type||''),b.date||'',parseFloat(b.amount||0)||0,b.invoice||'',b.taskStatus||'',b.notes||''])
+      ...uBills.map(b=>[b.client||'',b.name||b.specialService||'',catDisplayName(b.type||''),b.date||'',parseFloat(b.amount||b.quoteAmount||0)||0,b.invoice||'',b.taskStatus||'',b.notes||''])
     ];
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),sn||'Manager');
   });
@@ -5140,7 +5140,7 @@ function aiBillsExcel(label){
   const list=aiScopeBills();
   if(!list.length){aiBot('No bills found to export.');return;}
   const headers=['Client','Service Type','Sub-Service','Description','Period','Invoice No.','Amount','Contact'];
-  const rows=list.map(b=>[b.client||'',b.type||'',b.subType||'',b.specialService||'',b.date||'',b.invoice||'',b.amount?'Rs.'+Number(b.amount).toLocaleString('en-IN'):'',b.contactInfo||'']);
+  const rows=list.map(b=>[b.client||'',b.type||'',b.subType||'',b.specialService||'',b.date||'',b.invoice||'',parseFloat(b.amount||b.quoteAmount||0)||0,b.contactInfo||'']);
   const ws=XLSX.utils.aoa_to_sheet([headers,...rows]);
   ws['!cols']=[{wch:24},{wch:24},{wch:20},{wch:22},{wch:14},{wch:14},{wch:13},{wch:22}];
   const wb=XLSX.utils.book_new();
@@ -6237,7 +6237,7 @@ function downloadMonthlyExcel(){
   const billHeaders=['#','Client / Vendor','Service Type','Sub-Service','Description','Period','Invoice No.','Amount (₹)','PAN','GST No.','Contact','Notes'];
   const billRows=billData.map((b,i)=>{
     const dt=b.date?(b.date.includes('|')?(()=>{const[s,e]=b.date.split('|');const f=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';return[f(s),f(e)].filter(Boolean).join(' to ');})():b.date.length===7?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'}):new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})):'';
-    return[i+1,b.client||'',b.type||'',b.subType||'',b.specialService||'',dt,b.invoice||'',parseFloat(b.amount)||0,b.pan||'',b.gst||'',b.contactInfo||'',b.notes||''];
+    return[i+1,b.client||'',b.type||'',b.subType||'',b.specialService||'',dt,b.invoice||'',parseFloat(b.amount||b.quoteAmount)||0,b.pan||'',b.gst||'',b.contactInfo||'',b.notes||''];
   });
   billRows.push(['','','','','','','Total',totalBillAmt,'','','','']);
   const wsBill=XLSX.utils.aoa_to_sheet([billHeaders,...billRows]);
