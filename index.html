@@ -2628,10 +2628,12 @@ function getUniqueClients(forManager){
   const _gcName=_gcSess?(_gcSess.name||_gcSess.username||'').toLowerCase():'';
   // When a specific manager is requested (e.g. admin selected Sandeep in form), filter to that manager only
   const _fMgr=(forManager||'').toLowerCase();
+  // Admin must have a manager selected to see any clients
+  if(_gcAdmin&&!_fMgr)return[];
   agreements.forEach(a=>{
     if(!(a.client||'').trim())return;
     if(_gcAdmin){
-      if(_fMgr&&(a.manager||'').toLowerCase()!==_fMgr)return;
+      if((a.manager||'').toLowerCase()!==_fMgr)return;
     } else {
       const ok=a.createdByUserId?a.createdByUserId===_gcUid:(_gcName&&(a.manager||'').toLowerCase()===_gcName);
       if(!ok)return;
@@ -2641,7 +2643,7 @@ function getUniqueClients(forManager){
   bills.forEach(b=>{
     if(!(b.client||'').trim())return;
     if(_gcAdmin){
-      if(_fMgr&&(b.manager||'').toLowerCase()!==_fMgr)return;
+      if((b.manager||'').toLowerCase()!==_fMgr)return;
     } else {
       const ok=b.createdByUserId?b.createdByUserId===_gcUid:(_gcName&&(b.manager||'').toLowerCase()===_gcName);
       if(!ok)return;
