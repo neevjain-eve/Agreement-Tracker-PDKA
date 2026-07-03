@@ -2857,7 +2857,7 @@ function renderClientTasks(){
   const _buildClientCard=(cl)=>{
     const agCount=cl.agreements.length;
     const blCount=cl.bills.length;
-    const blTotal=cl.bills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
+    const blTotal=0; // amounts hidden in client management
     const active=cl.agreements.filter(a=>{try{return new Date(a.endDate)>=new Date();}catch(e){return false;}}).length;
     // Aggregate best client info from all agreements + bills
     const _allRecs=[...cl.agreements,...cl.bills];
@@ -2872,20 +2872,14 @@ function renderClientTasks(){
     const _phone=_phoneRaw||(_ci?_ci.replace(_emMatch,'').replace(/^[\s\/,|;]+|[\s\/,|;]+$/g,'').trim():'');
     const billRows=cl.bills.map(b=>{
       const _bSvc=esc(b.specialService||b.name||'Bill');
-      const _bActual=b.amount&&parseFloat(b.amount)?'₹'+Number(b.amount).toLocaleString('en-IN'):'';
-      const _bQuote=b.quoteAmount&&parseFloat(b.quoteAmount)?'Quote: ₹'+Number(b.quoteAmount).toLocaleString('en-IN'):'';
-      const _bAmt=_bActual||(_bQuote?_bQuote:'—');
       const _bHasInv=!!(b.invoice||'').toString().trim();
       const _bSt=_bHasInv?'billed':(b.taskStatus||'');
       const _stBg=_bSt==='billed'?'#fef9c3':_bSt==='completed'?'#dcfce7':'#ffedd5';
       const _stCol=_bSt==='billed'?'#a16207':_bSt==='completed'?'#15803d':'#c2410c';
-      const _stLabel=_bSt==='billed'?'🧾 Billed':_bSt==='completed'?'✅ Done':_bSt==='in_progress'?'🔄 In Progress':'';
-      return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:#fffbeb;border-radius:7px;margin-top:4px;font-size:.72rem">
-        <div style="min-width:0;flex:1">
-          <span style="font-weight:600">${_bSvc}</span>
-          ${_stLabel?`<span style="margin-left:6px;font-size:.65rem;padding:1px 6px;border-radius:8px;background:${_stBg};color:${_stCol}">${_stLabel}</span>`:''}
-        </div>
-        <span style="font-weight:700;color:#d97706;flex-shrink:0;margin-left:8px">${_bAmt}</span>
+      const _stLabel=_bSt==='billed'?'🧾 Billed':_bSt==='completed'?'✅ Done':_bSt==='in_progress'?'🔄 In Progress':'⏳ Pending';
+      return`<div style="display:flex;align-items:center;padding:5px 8px;background:#fffbeb;border-radius:7px;margin-top:4px;font-size:.72rem">
+        <span style="font-weight:600;flex:1">${_bSvc}</span>
+        ${_stLabel?`<span style="font-size:.65rem;padding:1px 6px;border-radius:8px;background:${_stBg};color:${_stCol}">${_stLabel}</span>`:''}
       </div>`;
     }).join('');
     return`<div style="background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid #fed7aa">
@@ -2899,9 +2893,9 @@ function renderClientTasks(){
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:.72rem;margin-bottom:${blCount?'6px':'0'}">
         <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 <b>${agCount}</b> agr${agCount!==1?'s':''} · <b>${active}</b> active</span>
-        ${blCount?`<span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 <b>${blCount}</b> bill${blCount!==1?'s':''} · ₹<b>${blTotal.toLocaleString('en-IN')}</b></span>`:''}
+        ${blCount?`<span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 <b>${blCount}</b> bill${blCount!==1?'s':''}</span>`:''}
       </div>
-      ${billRows?`<div style="border-top:1px solid #ffedd5;padding-top:4px;margin-top:4px"><div style="font-size:.65rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">💰 One-Time Bills</div>${billRows}</div>`:''}
+      ${billRows?`<div style="border-top:1px solid #ffedd5;padding-top:4px;margin-top:4px"><div style="font-size:.65rem;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">One-Time Bills</div>${billRows}</div>`:''}
     </div>`;
   };
   // ── Helper: build clientMap from filtered agrs+bills ──
@@ -2942,13 +2936,12 @@ function renderClientTasks(){
             if(_ctFilter!=='all')mAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
             const clients=Object.values(cm);
             if(!clients.length)return'';
-            const totalAmt=mBills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
             return`<details style="margin-bottom:10px;border-radius:12px;overflow:hidden;border:1.5px solid #fed7aa" open>
               <summary style="background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:10px 14px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.85rem">
                 <span>👤 ${esc(mgr)}</span>
                 <div style="display:flex;gap:8px;font-size:.72rem;font-weight:600">
                   <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 ${mAgrs.length} agrs</span>
-                  <span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 ${mBills.length} bills · ₹${totalAmt.toLocaleString('en-IN')}</span>
+                  <span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 ${mBills.length} bills</span>
                   <span style="background:#f5f5f5;padding:2px 8px;border-radius:8px">${clients.length} clients</span>
                 </div>
               </summary>
