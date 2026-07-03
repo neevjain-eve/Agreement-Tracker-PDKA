@@ -2892,12 +2892,14 @@ function renderClientTasks(){
     const _emMatch=_ci?(_ci.match(/[\w.+-]+@[\w-]+\.[\w.]+/)||[''])[0]:'';
     const _email=_emailRaw||_emMatch;
     const _phone=_phoneRaw||(_ci?_ci.replace(_emMatch,'').replace(/^[\s\/,|;]+|[\s\/,|;]+$/g,'').trim():'');
+    const _addr=_allRecs.map(r=>fmtAddr(r.address)).find(v=>v)||'';
     return`<tr style="border-bottom:1px solid #fff3e0">
       <td style="padding:9px 10px;font-weight:700;font-size:.82rem;color:#111;white-space:nowrap">🏢 ${esc(cl.name)}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${_gstCell}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${esc(_pan)||'<span style="color:#ccc">—</span>'}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${esc(_phone)||'<span style="color:#ccc">—</span>'}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555">${esc(_email)||'<span style="color:#ccc">—</span>'}</td>
+      <td style="padding:9px 10px;font-size:.74rem;color:#555;max-width:200px">${esc(_addr)||'<span style="color:#ccc">—</span>'}</td>
     </tr>`;
   };
   // ── Helper: wrap client rows in a styled table ──
@@ -2910,6 +2912,7 @@ function renderClientTasks(){
           <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">PAN</th>
           <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">Phone</th>
           <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">Email</th>
+          <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">Address</th>
         </tr>
       </thead>
       <tbody>
