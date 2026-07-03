@@ -2872,40 +2872,32 @@ function renderClientTasks(){
   }
   // ── Helper: build client table row HTML ──
   const _buildClientCard=(cl)=>{
-    const agCount=cl.agreements.length;
-    const active=cl.agreements.filter(a=>{try{return new Date(a.endDate)>=new Date();}catch(e){return false;}}).length;
     // Aggregate best client info from all agreements + bills
     const _allRecs=[...cl.agreements,...cl.bills];
     const _pan=_allRecs.map(r=>r.pan||'').find(v=>v)||'';
-    const _gst=_allRecs.filter(r=>r.gstRegistered).map(r=>r.gst||'').find(v=>v)||'';
+    // GST: check registration status across records
+    const _gstNum=_allRecs.filter(r=>r.gstRegistered).map(r=>r.gst||'').find(v=>v)||'';
+    const _gstRegistered=_allRecs.some(r=>r.gstRegistered===true||r.gstRegistered==='true');
+    const _gstNotReg=!_gstRegistered&&_allRecs.some(r=>r.gstRegistered===false||r.gstRegistered==='false');
+    const _gstCell=_gstNum
+      ?`<span>${esc(_gstNum)}</span>`
+      :_gstRegistered
+        ?'<span style="color:#ccc">—</span>'
+        :_gstNotReg
+          ?'<span style="color:#b45309;font-style:italic;font-size:.7rem">Not Registered</span>'
+          :'<span style="color:#ccc">—</span>';
     const _phoneRaw=_allRecs.map(r=>r.phone||'').find(v=>v)||'';
     const _emailRaw=_allRecs.map(r=>r.email||'').find(v=>v)||'';
     const _ci=(!_phoneRaw&&!_emailRaw)?(_allRecs.map(r=>r.contactInfo||'').find(v=>v)||''):'';
     const _emMatch=_ci?(_ci.match(/[\w.+-]+@[\w-]+\.[\w.]+/)||[''])[0]:'';
     const _email=_emailRaw||_emMatch;
     const _phone=_phoneRaw||(_ci?_ci.replace(_emMatch,'').replace(/^[\s\/,|;]+|[\s\/,|;]+$/g,'').trim():'');
-    const billBadges=cl.bills.map(b=>{
-      const _bSvc=esc(b.specialService||b.name||'Bill');
-      const _bHasInv=!!(b.invoice||'').toString().trim();
-      const _bSt=_bHasInv?'billed':(b.taskStatus||'');
-      const _stBg=_bSt==='billed'?'#fef9c3':_bSt==='completed'?'#dcfce7':'#ffedd5';
-      const _stCol=_bSt==='billed'?'#a16207':_bSt==='completed'?'#15803d':'#c2410c';
-      const _stLabel=_bSt==='billed'?'Billed':_bSt==='completed'?'Done':_bSt==='in_progress'?'In Progress':'Pending';
-      return`<div style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px;background:#fffbeb;border-radius:6px;border:1px solid #fed7aa;margin:2px 2px;font-size:.67rem;max-width:200px">
-        <span style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${_bSvc}</span>
-        <span style="padding:1px 5px;border-radius:4px;background:${_stBg};color:${_stCol};font-weight:700;white-space:nowrap;flex-shrink:0">${_stLabel}</span>
-      </div>`;
-    }).join('');
     return`<tr style="border-bottom:1px solid #fff3e0">
       <td style="padding:9px 10px;font-weight:700;font-size:.82rem;color:#111;white-space:nowrap">🏢 ${esc(cl.name)}</td>
-      <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${esc(_gst)||'<span style="color:#ccc">—</span>'}</td>
+      <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${_gstCell}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${esc(_pan)||'<span style="color:#ccc">—</span>'}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555;white-space:nowrap">${esc(_phone)||'<span style="color:#ccc">—</span>'}</td>
       <td style="padding:9px 10px;font-size:.74rem;color:#555">${esc(_email)||'<span style="color:#ccc">—</span>'}</td>
-      <td style="padding:9px 10px;font-size:.72rem;white-space:nowrap">
-        <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 <b>${agCount}</b> · <b>${active}</b> active</span>
-      </td>
-      <td style="padding:9px 10px">${billBadges||'<span style="color:#ccc;font-size:.72rem">—</span>'}</td>
     </tr>`;
   };
   // ── Helper: wrap client rows in a styled table ──
@@ -2918,8 +2910,6 @@ function renderClientTasks(){
           <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">PAN</th>
           <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">Phone</th>
           <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">Email</th>
-          <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem;white-space:nowrap">Agreements</th>
-          <th style="padding:8px 10px;border-bottom:2px solid #fed7aa;font-weight:700;color:#92400e;text-align:left;font-size:.74rem">Bills</th>
         </tr>
       </thead>
       <tbody>
