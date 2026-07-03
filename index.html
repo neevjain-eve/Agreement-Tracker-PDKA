@@ -1163,6 +1163,7 @@
           <button class="filter-btn" onclick="setClientTaskFilter('in_progress')" id="ct-filter-inprogress" style="background:#ffedd5;border-color:#f97316">🔄 In Progress</button>
           <button class="filter-btn" onclick="setClientTaskFilter('completed')" id="ct-filter-completed" style="background:#fff3d6;border-color:#f8a006">✅ Completed</button>
         </div>
+        <div id="clientOverviewPanel"></div>
         <div id="clientTaskList" style="padding-bottom:90px"></div>
       </div>
     </div>
@@ -2819,6 +2820,7 @@ function setClientTaskFilter(f){
 
 function renderClientTasks(){
   const el=document.getElementById('clientTaskList');if(!el)return;
+  const elOverview=document.getElementById('clientOverviewPanel');
   populateCtManagerFilter();
   const sess=getSession();const isAdmin=sess&&(sess.userId==='admin'||(!getUserAllowedCats(sess.userId||'').length&&sess.role==='admin'));
   let list=isAdmin?clientTasks:clientTasks.filter(t=>{
@@ -2873,77 +2875,78 @@ function renderClientTasks(){
     filtBills.forEach(b=>{const k=(b.client||'').trim().toLowerCase();if(!k)return;if(!cm[k])cm[k]={name:b.client.trim(),agreements:[],bills:[]};cm[k].bills.push(b);});
     return cm;
   };
-  // ── Client overview panel (only when no task filter active) ──
-  let overviewHtml='';
-  if(_ctFilter==='all'&&isAdmin&&!_ctManagerFilter){
-    // SHOW ALL MANAGERS grouped
-    const allMgrNames=new Set();
-    agreements.forEach(a=>{if(a.manager)allMgrNames.add(a.manager);});
-    bills.forEach(b=>{if(b.manager)allMgrNames.add(b.manager);});
-    const sortedMgrs=[...allMgrNames].sort();
-    if(sortedMgrs.length){
-      overviewHtml=`<div style="margin-bottom:16px">
-        <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:10px">👥 All Managers — Client Overview</div>
-        ${sortedMgrs.map(mgr=>{
-          const mLow=mgr.toLowerCase();
-          const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
-          const mBills=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
-          const cm=_buildClientMap(mAgrs,mBills);
-          const clients=Object.values(cm);
-          if(!clients.length)return'';
-          const totalAmt=mBills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
-          return`<details style="margin-bottom:10px;border-radius:12px;overflow:hidden;border:1.5px solid #fed7aa" open>
-            <summary style="background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:10px 14px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.85rem">
-              <span>👤 ${esc(mgr)}</span>
-              <div style="display:flex;gap:8px;font-size:.72rem;font-weight:600">
-                <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 ${mAgrs.length} agrs</span>
-                <span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 ${mBills.length} bills · ₹${totalAmt.toLocaleString('en-IN')}</span>
-                <span style="background:#f5f5f5;padding:2px 8px;border-radius:8px">${clients.length} clients</span>
+  // ── Client overview panel — always render into separate div ──
+  if(elOverview){
+    let overviewHtml='';
+    if(isAdmin&&!_ctManagerFilter){
+      const allMgrNames=new Set();
+      agreements.forEach(a=>{if(a.manager)allMgrNames.add(a.manager);});
+      bills.forEach(b=>{if(b.manager)allMgrNames.add(b.manager);});
+      const sortedMgrs=[...allMgrNames].sort();
+      if(sortedMgrs.length){
+        overviewHtml=`<div style="margin-bottom:16px">
+          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:10px">👥 All Managers — Client Overview</div>
+          ${sortedMgrs.map(mgr=>{
+            const mLow=mgr.toLowerCase();
+            const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
+            const mBills=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
+            const cm=_buildClientMap(mAgrs,mBills);
+            const clients=Object.values(cm);
+            if(!clients.length)return'';
+            const totalAmt=mBills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
+            return`<details style="margin-bottom:10px;border-radius:12px;overflow:hidden;border:1.5px solid #fed7aa" open>
+              <summary style="background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:10px 14px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.85rem">
+                <span>👤 ${esc(mgr)}</span>
+                <div style="display:flex;gap:8px;font-size:.72rem;font-weight:600">
+                  <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 ${mAgrs.length} agrs</span>
+                  <span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 ${mBills.length} bills · ₹${totalAmt.toLocaleString('en-IN')}</span>
+                  <span style="background:#f5f5f5;padding:2px 8px;border-radius:8px">${clients.length} clients</span>
+                </div>
+              </summary>
+              <div style="padding:10px 10px 4px;background:#fafafa">
+                ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
               </div>
-            </summary>
-            <div style="padding:10px 10px 4px;background:#fafafa">
-              ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
-            </div>
-          </details>`;
-        }).join('')}
-      </div>`;
+            </details>`;
+          }).join('')}
+        </div>`;
+      }
+    } else if(isAdmin&&_ctManagerFilter){
+      const mLow=_ctManagerFilter.toLowerCase();
+      const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
+      const mBills=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
+      const cm=_buildClientMap(mAgrs,mBills);
+      const clients=Object.values(cm);
+      if(clients.length){
+        overviewHtml=`<div style="margin-bottom:16px">
+          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 Clients for ${esc(_ctManagerFilter)}</div>
+          ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
+        </div>`;
+      }
+    } else if(!isAdmin){
+      const _ovMgrId=sess?sess.userId||sess.id||'':'';
+      const _ovMgrLow=sess?(sess.name||sess.username||'').toLowerCase():'';
+      const myAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_ovMgrId:(_ovMgrLow&&(a.manager||'').toLowerCase()===_ovMgrLow));
+      const myBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_ovMgrId:(_ovMgrLow&&(b.manager||'').toLowerCase()===_ovMgrLow));
+      const cm=_buildClientMap(myAgrs,myBills);
+      const clients=Object.values(cm);
+      if(clients.length){
+        overviewHtml=`<div style="margin-bottom:16px">
+          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 My Clients</div>
+          ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
+        </div>`;
+      }
     }
-  } else if(_ctFilter==='all'&&isAdmin&&_ctManagerFilter){
-    // SELECTED MANAGER detailed view
-    const mLow=_ctManagerFilter.toLowerCase();
-    const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
-    const mBills=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
-    const cm=_buildClientMap(mAgrs,mBills);
-    const clients=Object.values(cm);
-    if(clients.length){
-      overviewHtml=`<div style="margin-bottom:16px">
-        <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 Clients for ${esc(_ctManagerFilter)}</div>
-        ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
-      </div>`;
-    }
-  } else if(_ctFilter==='all'&&!isAdmin){
-    // MANAGER's own clients
-    const _ovMgrId=sess?sess.userId||sess.id||'':'';
-    const _ovMgrLow=sess?(sess.name||sess.username||'').toLowerCase():'';
-    const myAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_ovMgrId:(_ovMgrLow&&(a.manager||'').toLowerCase()===_ovMgrLow));
-    const myBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_ovMgrId:(_ovMgrLow&&(b.manager||'').toLowerCase()===_ovMgrLow));
-    const cm=_buildClientMap(myAgrs,myBills);
-    const clients=Object.values(cm);
-    if(clients.length){
-      overviewHtml=`<div style="margin-bottom:16px">
-        <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 My Clients</div>
-        ${clients.sort((a,b)=>a.name.localeCompare(b.name)).map(_buildClientCard).join('')}
-      </div>`;
-    }
+    elOverview.innerHTML=overviewHtml;
   }
+  // ── Filter and render task list independently ──
   if(_ctFilter==='pending') list=list.filter(t=>t.status==='pending');
   else if(_ctFilter==='in_progress') list=list.filter(t=>t.status==='in_progress');
   else if(_ctFilter==='completed') list=list.filter(t=>t.status==='completed');
   else if(_ctFilter==='billed') list=list.filter(t=>t.markBilling);
-  if(!list.length){el.innerHTML=overviewHtml+'<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div><div style="font-size:.82rem;margin-top:4px">Click + Add Task to create one</div></div>';return;}
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div><div style="font-size:.82rem;margin-top:4px">Click + Add Task to create one</div></div>';return;}
   const stColors={pending:'#f97316',in_progress:'#f8a006',completed:'#16a34a'};
   const stLabels={pending:'⏳ Pending',in_progress:'🔄 In Progress',completed:'✅ Completed'};
-  el.innerHTML=overviewHtml+list.map(t=>`<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid ${stColors[t.status]||'#fed7aa'}">
+  el.innerHTML=list.map(t=>`<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid ${stColors[t.status]||'#fed7aa'}">
     <div style="display:flex;align-items:flex-start;gap:10px">
       <input type="checkbox" ${t.markBilling?'checked':''} onchange="toggleClientTaskBilling('${t.id}',this.checked)"
         style="width:18px;height:18px;accent-color:#f97316;flex-shrink:0;margin-top:2px" title="Mark for billing"/>
