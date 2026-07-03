@@ -1083,8 +1083,7 @@
       <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
         <button class="filter-btn active" onclick="setFilter('all')" id="filter-all-agr">All</button>
         <button class="filter-btn" onclick="setFilter('with_el')" id="filter-with-el" style="background:#fff3d6;border-color:#f8a006;color:#111111">✅ With EL</button>
-        <button class="filter-btn" onclick="setFilter('without_el')" id="filter-without-el" style="background:#ffedd5;border-color:#f97316;color:#111111">📄 Without EL</button>
-        <button class="filter-btn" onclick="setFilter('email')" id="filter-email-agr-view" style="background:#ffedd5;border-color:#f97316;color:#111111">📧 Email</button>
+        <button class="filter-btn" onclick="setFilter('without_el_email')" id="filter-without-el-email" style="background:#ffedd5;border-color:#f97316;color:#111111">📄 Without EL (Email)</button>
       </div>
 
       <div class="agreements-list" id="agreementsList" style="padding:0 16px 90px"></div>
@@ -4839,14 +4838,15 @@ async function renderAgreements(){
   const _raName=(!isAdmin&&session)?(session.name||session.username||""):"";
   let filtered=agreements.filter(a=>{
     const status=getStatus(a);
-    const mf=currentFilter==='all'||currentFilter==='email'||currentFilter==='with_el'||currentFilter==='without_el'||status===currentFilter;
+    const mf=currentFilter==='all'||currentFilter==='email'||currentFilter==='with_el'||currentFilter==='without_el'||currentFilter==='without_el_email'||status===currentFilter;
     const ms=!search||a.name.toLowerCase().includes(search)||a.client.toLowerCase().includes(search)||
       (a.pan&&a.pan.toLowerCase().includes(search))||(a.gst&&a.gst.toLowerCase().includes(search))||
       (a.type&&a.type.toLowerCase().includes(search));
     const cf=!_catFilter||(a.type===_catFilter||(_catFilter==='__email__'&&a.isEmail));
     // Non-admins see all records in their assigned categories (consistent with dashboard)
     const af=isAdmin||(()=>{const _aUid=session?session.userId||session.id||'':'';const _aName=(session?session.name||session.username||'':'').toLowerCase();if(a.createdByUserId)return a.createdByUserId===_aUid;if(_aName&&(a.manager||'').toLowerCase()===_aName)return true;return !!a.isEmail;})();
-    const ef=currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
+    const ef=currentFilter==='without_el_email'?(a.elType==='without'||!a.elType||a.isEmail||!!a.emailAttachName)
+      :currentFilter==='email'?(a.isEmail||!!a.emailAttachName)
       :currentFilter==='with_el'?(a.elType==='with')
       :currentFilter==='without_el'?(a.elType==='without'||!a.elType)
       :true;
@@ -5736,13 +5736,11 @@ function setFilter(f){
   if(dashBtn)dashBtn.classList.add('active');
   // Sync agreement section filter buttons
   const agr_all=document.getElementById('filter-all-agr');
-  const agr_email=document.getElementById('filter-email-agr-view');
   const agr_with=document.getElementById('filter-with-el');
-  const agr_without=document.getElementById('filter-without-el');
+  const agr_without_email=document.getElementById('filter-without-el-email');
   if(agr_all)agr_all.classList.toggle('active',f==='all');
-  if(agr_email)agr_email.classList.toggle('active',f==='email');
   if(agr_with)agr_with.classList.toggle('active',f==='with_el');
-  if(agr_without)agr_without.classList.toggle('active',f==='without_el');
+  if(agr_without_email)agr_without_email.classList.toggle('active',f==='without_el_email'||f==='without_el'||f==='email');
   renderAgreements();
 }
 
