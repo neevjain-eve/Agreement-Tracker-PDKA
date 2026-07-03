@@ -2875,12 +2875,18 @@ function renderClientTasks(){
     filtBills.forEach(b=>{const k=(b.client||'').trim().toLowerCase();if(!k)return;if(!cm[k])cm[k]={name:b.client.trim(),agreements:[],bills:[]};cm[k].bills.push(b);});
     return cm;
   };
-  // ── Client overview panel — hide when a task filter is active ──
+  // ── Bill status filter helper (mirrors how Billing section filters) ──
+  const _filterBillsByStatus=(bl)=>{
+    if(_ctFilter==='all')return bl;
+    if(_ctFilter==='billed')return bl.filter(b=>!!(b.invoice||'').toString().trim());
+    if(_ctFilter==='in_progress')return bl.filter(b=>b.taskStatus==='in_progress');
+    if(_ctFilter==='completed')return bl.filter(b=>b.taskStatus==='completed');
+    if(_ctFilter==='pending')return bl.filter(b=>!b.taskStatus||b.taskStatus==='pending');
+    return bl;
+  };
+  // ── Client overview panel — always visible, filtered by bill status ──
   if(elOverview){
-    if(_ctFilter!=='all'){elOverview.innerHTML='';elOverview.style.display='none';}
-    else{elOverview.style.display='';}
-  }
-  if(elOverview&&_ctFilter==='all'){
+    elOverview.style.display='';
     let overviewHtml='';
     if(isAdmin&&!_ctManagerFilter){
       const allMgrNames=new Set();
@@ -2893,8 +2899,11 @@ function renderClientTasks(){
           ${sortedMgrs.map(mgr=>{
             const mLow=mgr.toLowerCase();
             const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
-            const mBills=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
-            const cm=_buildClientMap(mAgrs,mBills);
+            const mBillsAll=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
+            const mBills=_filterBillsByStatus(mBillsAll);
+            if(_ctFilter!=='all'&&!mBills.length)return'';
+            const cm=_buildClientMap(_ctFilter==='all'?mAgrs:[],mBills);
+            if(_ctFilter!=='all')mAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
             const clients=Object.values(cm);
             if(!clients.length)return'';
             const totalAmt=mBills.reduce((s,b)=>s+(parseFloat(b.amount)||parseFloat(b.quoteAmount)||0),0);
@@ -2917,8 +2926,9 @@ function renderClientTasks(){
     } else if(isAdmin&&_ctManagerFilter){
       const mLow=_ctManagerFilter.toLowerCase();
       const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
-      const mBills=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
-      const cm=_buildClientMap(mAgrs,mBills);
+      const mBills=_filterBillsByStatus(bills.filter(b=>(b.manager||'').toLowerCase()===mLow));
+      const cm=_buildClientMap(_ctFilter==='all'?mAgrs:[],mBills);
+      if(_ctFilter!=='all')mAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
       const clients=Object.values(cm);
       if(clients.length){
         overviewHtml=`<div style="margin-bottom:16px">
@@ -2930,8 +2940,9 @@ function renderClientTasks(){
       const _ovMgrId=sess?sess.userId||sess.id||'':'';
       const _ovMgrLow=sess?(sess.name||sess.username||'').toLowerCase():'';
       const myAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_ovMgrId:(_ovMgrLow&&(a.manager||'').toLowerCase()===_ovMgrLow));
-      const myBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_ovMgrId:(_ovMgrLow&&(b.manager||'').toLowerCase()===_ovMgrLow));
-      const cm=_buildClientMap(myAgrs,myBills);
+      const myBills=_filterBillsByStatus(bills.filter(b=>b.createdByUserId?b.createdByUserId===_ovMgrId:(_ovMgrLow&&(b.manager||'').toLowerCase()===_ovMgrLow)));
+      const cm=_buildClientMap(_ctFilter==='all'?myAgrs:[],myBills);
+      if(_ctFilter!=='all')myAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
       const clients=Object.values(cm);
       if(clients.length){
         overviewHtml=`<div style="margin-bottom:16px">
@@ -2940,7 +2951,7 @@ function renderClientTasks(){
         </div>`;
       }
     }
-    elOverview.innerHTML=overviewHtml;
+    elOverview.innerHTML=overviewHtml||(_ctFilter!=='all'?`<div style="text-align:center;padding:30px 20px;color:var(--muted)"><div style="font-size:1.5rem;margin-bottom:6px">🔍</div><div style="font-weight:700">No clients with matching bills</div></div>`:'');
   }
   // ── Filter and render task list independently ──
   if(_ctFilter==='pending') list=list.filter(t=>t.status==='pending');
