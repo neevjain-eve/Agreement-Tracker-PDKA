@@ -2875,8 +2875,12 @@ function renderClientTasks(){
     filtBills.forEach(b=>{const k=(b.client||'').trim().toLowerCase();if(!k)return;if(!cm[k])cm[k]={name:b.client.trim(),agreements:[],bills:[]};cm[k].bills.push(b);});
     return cm;
   };
-  // ── Client overview panel — always render into separate div ──
+  // ── Client overview panel — hide when a task filter is active ──
   if(elOverview){
+    if(_ctFilter!=='all'){elOverview.innerHTML='';elOverview.style.display='none';}
+    else{elOverview.style.display='';}
+  }
+  if(elOverview&&_ctFilter==='all'){
     let overviewHtml='';
     if(isAdmin&&!_ctManagerFilter){
       const allMgrNames=new Set();
