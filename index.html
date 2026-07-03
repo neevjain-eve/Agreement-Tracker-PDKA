@@ -3896,6 +3896,9 @@ function openAddBillModal(){
 
 function openEditBillModal(id){
   const b=bills.find(x=>x.id===id); if(!b)return;
+  const _lockSess=getSession();const _lockAdmin=_lockSess&&(_lockSess.userId==='admin'||(!getUserAllowedCats(_lockSess.userId||'').length&&_lockSess.role==='admin'));
+  // Once an invoice number is set, only admin can edit the bill
+  if(!_lockAdmin&&(b.invoice||'').toString().trim()){showToast('⚠️ This bill has been invoiced. Only admin can edit it.');return;}
   resetBillForm();
   populateAddrCountries('bill');
   const _editSess=getSession();const _editAdmin=_editSess&&_editSess.role==='admin';
@@ -4173,7 +4176,7 @@ function renderBills(){
       ${b.notes?`<div class="card-notes" style="margin-top:6px;font-size:.74rem;color:var(--muted);padding-top:6px;border-top:1px solid var(--border-light)">📝 ${esc(b.notes)}</div>`:''}
       <div class="card-actions" style="margin-top:8px;display:flex;gap:8px">
         <button class="btn-action btn-view" onclick="openBillDetail('${b.id}')">👁️ Open</button>
-        <button class="btn-action btn-edit" onclick="openEditBillModal('${b.id}')">✏️ Edit</button>
+        ${(!_bAdmin&&(b.invoice||'').toString().trim())?`<button class="btn-action btn-edit" style="opacity:.4;cursor:not-allowed" disabled title="Invoiced — only admin can edit">🔒 Edit</button>`:`<button class="btn-action btn-edit" onclick="openEditBillModal('${b.id}')">✏️ Edit</button>`}
         <button class="btn-action btn-history" onclick="downloadBillPdf('${b.id}')" style="background:#fff3d6;color:#111111;border:none;border-radius:10px;padding:8px 6px;font-size:.76rem;font-weight:700;cursor:pointer">📄 PDF</button>
         <button class="btn-action btn-danger" onclick="deleteBill('${b.id}')">🗑️ Delete</button>
       </div>
@@ -7018,38 +7021,57 @@ async function odLoadWithToken(token){
       throw new Error((errMsg||r.statusText)+' ('+r.status+')');
     }
     const cloud=await r.json();
-    // Load agreements — cloud is authoritative: write cloud records and DELETE any local records not in cloud
+    // Cloud lastUpdated timestamp — used to detect locally-pending records (saved locally but not yet uploaded)
+    const _cloudTs=cloud.lastUpdated?new Date(cloud.lastUpdated).getTime():0;
+    let _needsResync=false;
+    // Load agreements — cloud is authoritative for records it knows about; keep local-only records that are NEWER than cloud (pending upload)
     if(cloud.agreements&&Array.isArray(cloud.agreements)){
       const cloudIds=new Set(cloud.agreements.map(a=>a.id));
       for(const agr of cloud.agreements)await dbPut('agreements',agr);
-      // Remove any locally-stored agreements that were deleted in cloud
       const _localAgrs=await dbGetAll('agreements');
-      for(const la of _localAgrs){if(!cloudIds.has(la.id))await dbDelete('agreements',la.id);}
+      for(const la of _localAgrs){
+        if(!cloudIds.has(la.id)){
+          const _laTs=la.createdAt?new Date(la.createdAt).getTime():0;
+          if(_laTs>_cloudTs){_needsResync=true;} // newer than cloud → pending upload, keep it
+          else{await dbDelete('agreements',la.id);} // deleted remotely, purge locally
+        }
+      }
       agreements=await dbGetAll('agreements');
       renderAgreements();
     } else if(Array.isArray(cloud)){
-      // Legacy format — still purge deleted local records
+      // Legacy format
       const _legIds=new Set(cloud.map(a=>a.id));
       for(const agr of cloud)await dbPut('agreements',agr);
       const _legLocal=await dbGetAll('agreements');
-      for(const la of _legLocal){if(!_legIds.has(la.id))await dbDelete('agreements',la.id);}
+      for(const la of _legLocal){
+        if(!_legIds.has(la.id)){
+          const _laTs2=la.createdAt?new Date(la.createdAt).getTime():0;
+          if(_laTs2>_cloudTs){_needsResync=true;}
+          else{await dbDelete('agreements',la.id);}
+        }
+      }
       agreements=await dbGetAll('agreements');
       renderAgreements();
     }
-    // Load bills — cloud is fully authoritative for all users
-    // Store ALL cloud bills locally; renderBills() filters per-manager at display time
+    // Load bills — preserve local-only bills newer than cloud's last update (pending upload)
     if(cloud.bills&&Array.isArray(cloud.bills)){
-      bills=cloud.bills;
+      const _cloudBillIds=new Set(cloud.bills.map(b=>b.id));
+      // Bills saved locally but not yet in cloud (e.g. sync failed due to expired token)
+      const _pendingBills=bills.filter(b=>!_cloudBillIds.has(b.id)&&(b.createdAt?new Date(b.createdAt).getTime():0)>_cloudTs);
+      if(_pendingBills.length)_needsResync=true;
+      bills=[...cloud.bills,..._pendingBills];
       saveBillsToStorage();
-      // Mirror bills in IndexedDB (cloud-authoritative: purge any deleted records)
       try{
-        const _cloudBillIds=new Set(cloud.bills.map(b=>b.id));
         for(const _cb of cloud.bills) await dbPut('bills',_cb).catch(()=>{});
+        for(const _pb of _pendingBills) await dbPut('bills',_pb).catch(()=>{});
         const _localIdbBills=await dbGetAll('bills').catch(()=>[]);
-        for(const _lb of _localIdbBills){if(!_cloudBillIds.has(_lb.id)) await dbDelete('bills',_lb.id).catch(()=>{});}
+        const _mergedBillIds=new Set(bills.map(b=>b.id));
+        for(const _lb of _localIdbBills){if(!_mergedBillIds.has(_lb.id)) await dbDelete('bills',_lb.id).catch(()=>{});}
       }catch(e){}
       renderBills();
     }
+    // If there are local-only pending records, re-upload after a short delay
+    if(_needsResync){setTimeout(()=>odSyncToOneDrive().catch(()=>{}),3000);}
     // Load client tasks
     if(cloud.clientTasks&&Array.isArray(cloud.clientTasks)){
       {const _oct=getSession();if(_oct&&_oct.userId!=='admin'){const _ocu=_oct.userId||_oct.id||'';const _oFiltered=cloud.clientTasks.filter(t=>t.createdByUserId?t.createdByUserId===_ocu:false);const _oLocal=(()=>{try{return JSON.parse(localStorage.getItem('elClientTasks')||'[]').filter(t=>!t.createdByUserId||t.createdByUserId===_ocu);}catch(e){return[];}})();const _oIds=new Set(_oFiltered.map(t=>t.id));clientTasks=[..._oFiltered,..._oLocal.filter(t=>!_oIds.has(t.id))];}else{clientTasks=cloud.clientTasks;}}saveClientTasksToStorage();
