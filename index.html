@@ -4141,7 +4141,7 @@ function renderBills(){
     return;
   }
   el.innerHTML=list.map(b=>{
-    const amt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—';
+    const amt=b.quoteAmount?'₹'+Number(b.quoteAmount).toLocaleString('en-IN'):(b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—');
     const dt=_fmtBillDate(b);
     const ini=(b.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
     const sub=[b.type,b.subType,b.specialService].filter(Boolean).join(' › ');
@@ -4692,7 +4692,7 @@ function renderManagerList(){
     const uBills=bills.filter(b=>b.createdByUserId?b.createdByUserId===_uId:(_uName&&(b.manager||'').toLowerCase()===_uName));
     const cat=(u.allowedCats||[]).map(catDisplayName).join(', ')||'—';
     const agrAmt=uAgrs.reduce((s,a)=>s+(parseFloat(a.amount||0)),0);
-    const billAmt=uBills.reduce((s,b)=>s+(parseFloat(b.amount||0)),0);
+    const billAmt=uBills.reduce((s,b)=>s+(parseFloat(b.quoteAmount||b.amount||0)),0);
     const _now=new Date();_now.setHours(0,0,0,0);
     const _soon=new Date(_now);_soon.setDate(_soon.getDate()+30);
     const uActive=uAgrs.filter(a=>{if(!a.endDate)return true;const d=new Date(a.endDate);return d>=_now;}).length;
@@ -4713,7 +4713,7 @@ function renderManagerList(){
     </tr>`;
   }).join('');
   const html=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr><th style="${th}">Manager</th><th style="${th}">Service</th><th style="${th};text-align:center">Active</th><th style="${th};text-align:center">Expiring</th><th style="${th};text-align:center">Expired</th><th style="${th};text-align:center">Renewed</th><th style="${th}">Agr. Amount</th><th style="${th}">Bill Amount</th><th style="${th}"></th></tr></thead>
+    <thead><tr><th style="${th}">Manager</th><th style="${th}">Service</th><th style="${th};text-align:center">Active</th><th style="${th};text-align:center">Expiring</th><th style="${th};text-align:center">Expired</th><th style="${th};text-align:center">Renewed</th><th style="${th}">Agr. Amount</th><th style="${th}">Quote Amount</th><th style="${th}"></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
   targets.forEach(t=>t.innerHTML=html);
 }
