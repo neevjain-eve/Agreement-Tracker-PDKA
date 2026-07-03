@@ -2095,16 +2095,20 @@ function onAgrManagerSel(){
   const sel=document.getElementById('agrManagerSel');
   const opt=sel.options[sel.selectedIndex];
   if(!opt||!opt.value)return;
-  // Manager is separate from client contact person
   const mf=document.getElementById('agrManager');if(mf)mf.value=opt.value;
+  // Clear client field so user picks from this manager's clients
+  const cf=document.getElementById('agrClient');if(cf)cf.value='';
+  const drop=document.getElementById('agrClientDrop');if(drop)drop.style.display='none';
 }
 
 function onBillManagerSel(){
   const sel=document.getElementById('billManagerSel');
   const opt=sel.options[sel.selectedIndex];
   if(!opt||!opt.value)return;
-  // Manager goes to its own field — not contact person
   const mf=document.getElementById('billManager');if(mf)mf.value=opt.value;
+  // Clear client field so user picks from this manager's clients
+  const cf=document.getElementById('billClient');if(cf)cf.value='';
+  const drop=document.getElementById('billClientDrop');if(drop)drop.style.display='none';
 }
 
 // ══ FORGOT PASSWORD — EMAIL RESET ══════════════════
@@ -2602,13 +2606,12 @@ function _parsePhoneEmail(rec){
   const ph=ci.replace(em,'').replace(/^[\s\/,|;]+|[\s\/,|;]+$/g,'').trim();
   return{phone:ph,email:em};
 }
-function getUniqueClients(){
+function getUniqueClients(forManager){
   const map={};
   const addRec=(name,rec)=>{
     const k=name.toLowerCase();
     if(!map[k])map[k]={name,pan:'',gst:'',gstRegistered:false,contact:'',phone:'',email:'',address:{},createdAt:''};
     const cl=map[k];
-    // Aggregate: take first non-empty value for each field across all records
     if(!cl.pan&&rec.pan)cl.pan=rec.pan;
     if(!cl.gst&&rec.gst)cl.gst=rec.gst;
     if(!cl.gstRegistered&&rec.gstRegistered)cl.gstRegistered=true;
@@ -2623,9 +2626,13 @@ function getUniqueClients(){
   const _gcAdmin=_gcSess&&(_gcSess.userId==='admin'||(!getUserAllowedCats(_gcSess.userId||'').length&&_gcSess.role==='admin'));
   const _gcUid=_gcSess?(_gcSess.userId||_gcSess.id||''):'';
   const _gcName=_gcSess?(_gcSess.name||_gcSess.username||'').toLowerCase():'';
+  // When a specific manager is requested (e.g. admin selected Sandeep in form), filter to that manager only
+  const _fMgr=(forManager||'').toLowerCase();
   agreements.forEach(a=>{
     if(!(a.client||'').trim())return;
-    if(!_gcAdmin){
+    if(_gcAdmin){
+      if(_fMgr&&(a.manager||'').toLowerCase()!==_fMgr)return;
+    } else {
       const ok=a.createdByUserId?a.createdByUserId===_gcUid:(_gcName&&(a.manager||'').toLowerCase()===_gcName);
       if(!ok)return;
     }
@@ -2633,7 +2640,9 @@ function getUniqueClients(){
   });
   bills.forEach(b=>{
     if(!(b.client||'').trim())return;
-    if(!_gcAdmin){
+    if(_gcAdmin){
+      if(_fMgr&&(b.manager||'').toLowerCase()!==_fMgr)return;
+    } else {
       const ok=b.createdByUserId?b.createdByUserId===_gcUid:(_gcName&&(b.manager||'').toLowerCase()===_gcName);
       if(!ok)return;
     }
@@ -2641,11 +2650,17 @@ function getUniqueClients(){
   });
   return Object.values(map).sort((a,b)=>a.name.localeCompare(b.name));
 }
+// Read currently selected manager from an add/edit form
+function _getFormManager(prefix){
+  const selVal=(document.getElementById(prefix+'ManagerSel')||{value:''}).value;
+  const txtVal=(document.getElementById(prefix+'Manager')||{value:''}).value;
+  return selVal||txtVal||'';
+}
 
 function showClientDrop(inputId,dropId,prefix){
   const inp=document.getElementById(inputId);const drop=document.getElementById(dropId);if(!inp||!drop)return;
   const q=(inp.value||'').trim().toLowerCase();
-  const all=getUniqueClients();
+  const all=getUniqueClients(_getFormManager(prefix));
   const matches=q?all.filter(c=>c.name.toLowerCase().includes(q)):all;
   if(!matches.length){drop.style.display='none';return;}
   drop.innerHTML=matches.map(c=>`<div onmousedown="fillClientData('${c.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}','${prefix}')" style="padding:8px 12px;cursor:pointer;font-size:.82rem;border-bottom:1px solid #ffedd5;display:flex;justify-content:space-between;align-items:center" onmouseover="this.style.background='#fff7ed'" onmouseout="this.style.background=''"><span style="font-weight:600">${esc(c.name)}</span>${c.pan?`<span style="font-size:.7rem;color:#888">PAN: ${c.pan}</span>`:''}</div>`).join('');
@@ -2653,7 +2668,7 @@ function showClientDrop(inputId,dropId,prefix){
 }
 
 function fillClientData(clientName,prefix){
-  const all=getUniqueClients();
+  const all=getUniqueClients(_getFormManager(prefix));
   const c=all.find(x=>x.name.toLowerCase()===clientName.toLowerCase());
   if(!c)return;
   // Set name
