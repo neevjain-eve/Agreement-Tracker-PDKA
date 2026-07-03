@@ -3891,7 +3891,7 @@ function saveBill(){
   const _billSess=getSession();const _billIsAdmin=_billSess&&_billSess.role==='admin';
   if(!client){showToast('⚠️ Please enter client name');return;}
   const _billMgrVal=_billIsAdmin?(document.getElementById('billManager').value||document.getElementById('billManagerSel').value||''):(_billSess.name||_billSess.username||'');
-  if(_billIsAdmin&&!_billMgrVal){showToast('⚠️ Please assign a manager');return;}
+  if(!_billMgrVal){showToast('⚠️ Please assign a manager');return;}
   if(_billIsAdmin&&(!date||!amount)){showToast('⚠️ Please fill billed date and amount');return;}
   const pan=document.getElementById('billPan').value.trim().toUpperCase();
   if(pan&&!validatePAN(pan)){showToast('⚠️ Invalid PAN format');return;}
@@ -5646,6 +5646,10 @@ async function saveAgreement(){
   const renewFromId=document.getElementById('renewFromId').value;
   const existing=editId?agreements.find(a=>a.id===editId):null;
   const session=getSession();
+  const _agrIsAdmin=session&&(session.userId==='admin'||(!getUserAllowedCats(session.userId||'').length&&session.role==='admin'));
+  let _agrMgrVal=(document.getElementById('agrManager')||{value:''}).value||(document.getElementById('agrManagerSel')||{value:''}).value||'';
+  if(!_agrMgrVal&&!_agrIsAdmin){_agrMgrVal=session?(session.name||session.username||''):'';} // auto-fill for managers
+  if(!_agrMgrVal){showToast('⚠️ Please assign a manager');return;}
   const agr={
     id:editId||Date.now().toString(),name,client,startDate,endDate,
     type:document.getElementById('agrType').value==='__email__'?'':document.getElementById('agrType').value,
@@ -5661,7 +5665,7 @@ async function saveAgreement(){
     billingFreq:document.getElementById('agrBillingFreq').value,
     billingFrom:(document.getElementById('agrBillingFrom')||{value:''}).value,
     contact:document.getElementById('agrContact').value.trim(),
-    manager:document.getElementById('agrManager').value||document.getElementById('agrManagerSel').value||'',
+    manager:_agrMgrVal,
     contactInfo:document.getElementById('agrContactInfo').value.trim(),
     pan,gstRegistered,gst:gstRegistered?gst:'',
     address:{
