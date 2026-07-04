@@ -3000,7 +3000,7 @@ function renderClientTasks(){
   else if(_ctFilter==='in_progress') list=list.filter(t=>t.status==='in_progress');
   else if(_ctFilter==='completed') list=list.filter(t=>t.status==='completed');
   else if(_ctFilter==='billed') list=list.filter(t=>t.markBilling);
-  if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div><div style="font-size:.82rem;margin-top:4px">Click + Add Task to create one</div></div>';return;}
+  if(!list.length){el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">📋</div><div style="font-weight:700">No tasks found</div></div>';return;}
   const stColors={pending:'#f97316',in_progress:'#f8a006',completed:'#16a34a'};
   const stLabels={pending:'⏳ Pending',in_progress:'🔄 In Progress',completed:'✅ Completed'};
   el.innerHTML=list.map(t=>`<div style="background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid ${stColors[t.status]||'#fed7aa'}">
@@ -3374,7 +3374,7 @@ function renderUserCatDash(){
     const billList=bills.filter(b=>{if(b.type!==cat)return false;if(b.createdByUserId)return b.createdByUserId===_uid;return _name&&(b.manager||'').toLowerCase()===_name;});
     const totalAgr=agrList.length;
     const totalBill=billList.length;
-    const totalAmt=agrList.reduce((s,a)=>s+(parseFloat(a.amount)||0),0)+billList.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+    const totalAmt=agrList.reduce((s,a)=>s+(parseFloat(a.amount)||0),0)+billList.reduce((s,b)=>s+(parseFloat(b.quoteAmount||b.amount)||0),0);
     const active=agrList.filter(a=>getStatus(a)==='active').length;
     const expiring=agrList.filter(a=>getStatus(a)==='expiring').length;
     const expired=agrList.filter(a=>getStatus(a)==='expired').length;
@@ -3403,7 +3403,7 @@ function renderUserCatDash(){
           <div style="font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.specialService||b.type||'Bill')}</div>
           <div style="font-size:.68rem;color:var(--muted)">${esc(b.client||'')}</div>
         </div>
-        <span style="font-size:.75rem;font-weight:800;color:#111111">${b.amount?fmt(b.amount):'—'}</span>
+        <span style="font-size:.75rem;font-weight:800;color:#111111">${(b.quoteAmount||b.amount)?fmt(b.quoteAmount||b.amount):'—'}</span>
       </div>`).join('')||'<div style="font-size:.8rem;color:var(--muted);text-align:center;padding:16px">No bills yet</div>';
 
     el.innerHTML=`
@@ -3791,7 +3791,9 @@ async function zohoSyncNow(){
 // Bills are loaded from localStorage for all users; cloud is always authoritative on sync
 let bills=(function(){try{return JSON.parse(localStorage.getItem('agrBills')||'[]');}catch(e){return[];}})();
 // Track bill IDs saved locally but not yet confirmed in cloud (guards against multi-user timestamp race)
-window._dirtyBillIds=window._dirtyBillIds||new Set();
+// Persisted in localStorage so the set survives page reloads before cloud upload completes
+window._dirtyBillIds=window._dirtyBillIds||(()=>{try{return new Set(JSON.parse(localStorage.getItem('_elDirtyBills')||'[]'));}catch(e){return new Set();}})();
+function _saveDirtyBills(){try{localStorage.setItem('_elDirtyBills',JSON.stringify([...window._dirtyBillIds]));}catch(e){}}
 
 function saveBillsToStorage(){try{localStorage.setItem('agrBills',JSON.stringify(bills));}catch(e){}}
 
@@ -3896,16 +3898,17 @@ function openEditBillModal(id){
   const _bd=b.date||'';
   document.getElementById('billDate').value=_bd;
   if(_bd&&_bd.length===7){
-    document.getElementById('billPeriodYear').value=_bd.slice(0,4);
-
-    document.getElementById('billDateCustomStart').value='';
-    document.getElementById('billDateCustomEnd').value='';
+    const _pyEl=document.getElementById('billPeriodYear');if(_pyEl)_pyEl.value=_bd.slice(0,4);
+    const _csEl=document.getElementById('billDateCustomStart');if(_csEl)_csEl.value='';
+    const _ceEl=document.getElementById('billDateCustomEnd');if(_ceEl)_ceEl.value='';
+    // Convert YYYY-MM to a valid date input value for display
+    document.getElementById('billDate').value=_bd+'-01';
   } else if(_bd&&_bd.includes('|')){
     const [_s,_e]=_bd.split('|');
-    document.getElementById('billDateCustomStart').value=_s||'';
-    document.getElementById('billDateCustomEnd').value=_e||'';
-
-    document.getElementById('billPeriodYear').value='';
+    const _csEl=document.getElementById('billDateCustomStart');if(_csEl)_csEl.value=_s||'';
+    const _ceEl=document.getElementById('billDateCustomEnd');if(_ceEl)_ceEl.value=_e||'';
+    const _pyEl=document.getElementById('billPeriodYear');if(_pyEl)_pyEl.value='';
+    document.getElementById('billDate').value=_s||'';
   }
   document.getElementById('billAmount').value=b.amount||'';
   const _bqa=document.getElementById('billQuoteAmount');if(_bqa)_bqa.value=b.quoteAmount||'';
@@ -3960,13 +3963,13 @@ function saveBill(){
   if(!client){showToast('⚠️ Please enter client name');return;}
   const _billMgrVal=_billIsAdmin?(document.getElementById('billManager').value||document.getElementById('billManagerSel').value||''):(_billSess.name||_billSess.username||'');
   if(!_billMgrVal){showToast('⚠️ Please assign a manager');return;}
-  if(_billIsAdmin&&(!date||!amount)){showToast('⚠️ Please fill billed date and amount');return;}
+  const editId=document.getElementById('billEditId').value;
+  if(_billIsAdmin&&!editId&&(!date||!amount)){showToast('⚠️ Please fill billed date and amount');return;}
   const pan=document.getElementById('billPan').value.trim().toUpperCase();
   if(pan&&!validatePAN(pan)){showToast('⚠️ Invalid PAN format');return;}
   const gstRegistered=document.getElementById('billGstToggle').checked;
   const gst=document.getElementById('billGst').value.trim().toUpperCase();
   if(gstRegistered&&gst&&!validateGST(gst)){showToast('⚠️ Invalid GST format');return;}
-  const editId=document.getElementById('billEditId').value;
   if(!editId&&!(document.getElementById('billAddrLine1')||{value:''}).value.trim()){showToast('⚠️ Address is required');return;}
   const bill={
     id: editId||Date.now().toString(),
@@ -4002,6 +4005,7 @@ function saveBill(){
   if(editId){ const idx=bills.findIndex(b=>b.id===editId); if(idx>-1)bills[idx]=bill; else bills.unshift(bill); }
   else { bills.unshift(bill); }
   window._dirtyBillIds.add(bill.id); // mark as pending cloud confirmation
+  _saveDirtyBills();
   saveBillsToStorage();
   dbPut('bills',bill).catch(()=>{});
   odSyncToOneDrive();
@@ -4016,6 +4020,7 @@ function deleteBill(id){
   if(!confirm('Delete this bill?'))return;
   bills=bills.filter(b=>b.id!==id);
   window._dirtyBillIds.delete(id);
+  _saveDirtyBills();
   saveBillsToStorage();
   dbDelete('bills',id).catch(()=>{});
   odSyncToOneDrive();
@@ -4080,7 +4085,7 @@ function renderBills(){
       const done=catBills.filter(b=>b.taskStatus==='completed').length;
       const billRows=catBills.map(b=>{
         const ini=(b.client||'?').split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
-        const amt=b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):(b.quoteAmount?'Q:₹'+Number(b.quoteAmount).toLocaleString('en-IN'):'—');
+        const amt=b.quoteAmount?'₹'+Number(b.quoteAmount).toLocaleString('en-IN'):(b.amount?'₹'+Number(b.amount).toLocaleString('en-IN'):'—');
         const dt=_fmtBillDate(b);
         const sub=[b.subType,b.specialService].filter(Boolean).join(' › ');
         const _createdStr=b.createdAt?new Date(b.createdAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true}):'—';
@@ -6317,7 +6322,7 @@ function getMonthlyData(){
 function renderMonthly(){
   const{m,y,agrData,billData}=getMonthlyData();
   const totalAgrAmt=agrData.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
-  const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.quoteAmount||b.amount)||0),0);
   const grandTotal=totalAgrAmt+totalBillAmt;
   const fmt=n=>'₹'+Math.round(n).toLocaleString('en-IN');
 
@@ -6355,7 +6360,7 @@ function renderMonthly(){
   const cr=(client,amt,color)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border-light);font-size:.8rem"><span style="color:var(--text)">${esc(client||'—')}</span><span style="font-weight:700;color:${color}">${amt}</span></div>`;
 
   const agrClients=agrData.map(a=>cr(a.client,a.amount?fmt(parseFloat(a.amount)):'—','#3b82f6')).join('');
-  const billClients=billData.map(b=>cr(b.client,b.amount?fmt(parseFloat(b.amount)):'—','#d97706')).join('');
+  const billClients=billData.map(b=>{const _bAmt=b.quoteAmount||b.amount;return cr(b.client,_bAmt?fmt(parseFloat(_bAmt)):'—','#d97706');}).join('');
 
   const html=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;align-items:start">
     ${colCard('#fff','#bfdbfe','#eff6ff','#3b82f6','📋','EL / Agreements',agrData.length,fmt(totalAgrAmt),agrClients,'No agreements this month','#eff6ff')}
@@ -6378,7 +6383,7 @@ function downloadMonthlyExcel(){
   const mn=new Date(y,m-1,1).toLocaleString('en-IN',{month:'long',year:'numeric'});
   const fmt=n=>n?'₹'+Math.round(Number(n)).toLocaleString('en-IN'):'—';
   const totalAgrAmt=agrData.reduce((s,a)=>s+(parseFloat(a.amount)||0),0);
-  const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.amount)||0),0);
+  const totalBillAmt=billData.reduce((s,b)=>s+(parseFloat(b.quoteAmount||b.amount)||0),0);
   const wb=XLSX.utils.book_new();
 
   // Summary sheet
@@ -6411,7 +6416,7 @@ function downloadMonthlyExcel(){
   const billHeaders=['#','Client / Vendor','Service Type','Sub-Service','Description','Period','Invoice No.','Amount (₹)','PAN','GST No.','Contact','Notes'];
   const billRows=billData.map((b,i)=>{
     const dt=b.date?(b.date.includes('|')?(()=>{const[s,e]=b.date.split('|');const f=d=>d?new Date(d+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}):'';return[f(s),f(e)].filter(Boolean).join(' to ');})():b.date.length===7?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{month:'long',year:'numeric'}):new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})):'';
-    return[i+1,b.client||'',b.type||'',b.subType||'',b.specialService||'',dt,b.invoice||'',parseFloat(b.amount||b.quoteAmount)||0,b.pan||'',b.gst||'',b.contactInfo||'',b.notes||''];
+    return[i+1,b.client||'',b.type||'',b.subType||'',b.specialService||'',dt,b.invoice||'',parseFloat(b.quoteAmount||b.amount)||0,b.pan||'',b.gst||'',b.contactInfo||'',b.notes||''];
   });
   billRows.push(['','','','','','','Total',totalBillAmt,'','','','']);
   const wsBill=XLSX.utils.aoa_to_sheet([billHeaders,...billRows]);
@@ -7051,6 +7056,7 @@ async function odLoadWithToken(token){
       const _cloudBillIds=new Set(cloud.bills.map(b=>b.id));
       // Clear dirty flag for bills now confirmed in cloud
       for(const _cid of _cloudBillIds) window._dirtyBillIds.delete(_cid);
+      _saveDirtyBills();
       // Bills saved locally but not yet in cloud: keep if marked dirty OR newer than cloud timestamp
       const _pendingBills=bills.filter(b=>!_cloudBillIds.has(b.id)&&(window._dirtyBillIds.has(b.id)||(b.createdAt?new Date(b.createdAt).getTime():0)>_cloudTs));
       if(_pendingBills.length)_needsResync=true;
