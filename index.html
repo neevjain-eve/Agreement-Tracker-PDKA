@@ -1062,7 +1062,7 @@
       </div>
             <div class="fd-card" id="dashManagerList" style="margin:14px 0 4px;padding:16px 16px 8px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <h3 style="font-size:.92rem;font-weight:800;color:var(--text)">&#128101; Manager List</h3>
+          <h3 style="font-size:.92rem;font-weight:800;color:var(--text)">&#128101; SR. Manager List</h3>
           <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#11015; Download All</button>
           <button onclick="odLoadFromOneDrive(false).then(()=>setTimeout(renderManagerList,200))" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:.76rem;font-weight:700;cursor:pointer">&#8635; Refresh</button>
         </div>
@@ -1149,9 +1149,9 @@
       <div style="padding:0 16px">
         <!-- Manager filter -->
         <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-size:.78rem;font-weight:700;color:#888">Manager:</span>
+          <span style="font-size:.78rem;font-weight:700;color:#888">SR. Manager:</span>
           <select id="ctManagerFilter" onchange="setCtManagerFilter(this.value)" style="font-family:inherit;font-size:.8rem;padding:5px 10px;border:1.5px solid #fed7aa;border-radius:9px;background:#fff7ed;outline:none;cursor:pointer">
-            <option value="">All Managers</option>
+            <option value="">All SR. Managers</option>
           </select>
         </div>
         <div id="clientOverviewPanel"></div>
@@ -1169,7 +1169,7 @@
             <div id="ctClientDrop" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid #fed7aa;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.13);z-index:2999;max-height:210px;overflow-y:auto;margin-top:2px"></div>
           </div>
         </div>
-        <div class="form-group"><label>Assigned Manager</label>
+        <div class="form-group"><label>Assigned SR. Manager</label>
           <div style="display:flex;gap:6px">
             <select id="ctManagerSel" style="font-family:inherit;flex:1" onchange="const _ctmf=document.getElementById('ctManager');if(_ctmf)_ctmf.value=this.value"></select>
             <input type="text" id="ctManager" placeholder="Or type name..." style="flex:1" oninput="const _s=document.getElementById('ctManagerSel');if(_s)_s.value=''"/>
@@ -1437,7 +1437,7 @@
         </div>
 
         <div class="admin-panel" id="managerListAdminPanel">
-          <div class="admin-panel-title">&#128101; Manager List</div>
+          <div class="admin-panel-title">&#128101; SR. Manager List</div>
           <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
             <button onclick="downloadAllManagersExcel()" style="background:linear-gradient(135deg,#f8a006,#f97316);color:#fff;border:none;border-radius:10px;padding:8px 16px;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">&#11015; Download All</button>
           </div>
@@ -1657,9 +1657,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Assigned Manager</label>
+          <label>Assigned SR. Manager</label>
           <select id="agrManagerSel" onchange="onAgrManagerSel()" style="font-family:inherit">
-            <option value="">— Select Manager —</option>
+            <option value="">— Select SR. Manager —</option>
           </select>
           <input type="hidden" id="agrManager"/>
         </div>
@@ -1812,9 +1812,9 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Assigned Manager</label>
+          <label>Assigned SR. Manager</label>
           <select id="billManagerSel" onchange="onBillManagerSel()" style="font-family:inherit">
-            <option value="">— Select Manager —</option>
+            <option value="">— Select SR. Manager —</option>
           </select>
           <input type="hidden" id="billManager"/>
         </div>
@@ -2062,7 +2062,7 @@ function getManagers(category){
 function populateManagerDropdown(selId, category){
   const sel=document.getElementById(selId);if(!sel)return;
   const cur=sel.value;
-  sel.innerHTML='<option value="">— Select Manager —</option>';
+  sel.innerHTML='<option value="">— Select SR. Manager —</option>';
   getManagers(category).forEach(u=>{
     const opt=document.createElement('option');
     opt.value=u.name;
@@ -2256,7 +2256,7 @@ function downloadAgrPdf(id){
     ['Contact Person',esc(a.contact||'—')],
     ['Contact Info',esc(a.contactInfo||'—')],
     ['Address',addr||'—'],
-    ['Assigned Manager',esc(a.manager||'—')],
+    ['Assigned SR. Manager',esc(a.manager||'—')],
     ['Notes',esc(a.notes||'—')],
     ['Created',a.createdAt?new Date(a.createdAt).toLocaleDateString('en-IN'):'—'],
   ].map(([l,v])=>`<tr><td class="label">${l}</td><td>${v}</td></tr>`).join('');
@@ -2281,7 +2281,7 @@ function openBillDetail(id){
     ['Billed Amount',fmt(b.amount)],
     ['Billed Date',b.date?new Date(b.date+'T12:00:00').toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'}):'—'],
     ['Invoice / Ref No.',esc(b.invoice||'—')],
-    ['Manager',esc(b.manager||'—')],
+    ['SR. Manager',esc(b.manager||'—')],
     ['PAN',b.pan||'—'],
     ['GST',b.gstRegistered?(b.gst||'Registered'):'Not Registered'],
     ['Contact Person',esc(b.contact||'—')],
@@ -2336,7 +2336,7 @@ function downloadBillPdf(id){
     ['Contact Person',esc(b.contact||'—')],
     ['Contact Info',esc(b.contactInfo||'—')],
     ['Address',addr||'—'],
-    ['Assigned Manager',esc(b.manager||'—')],
+    ['Assigned SR. Manager',esc(b.manager||'—')],
     ['Notes',esc(b.notes||'—')],
   ].map(([l,v])=>`<tr><td class="label">${l}</td><td>${v}</td></tr>`).join('');
   const titleName=b.client?esc(b.client):('Bill #'+id.slice(-6));
@@ -2710,7 +2710,7 @@ function populateCtManagerFilter(){
   agreements.forEach(a=>{if(a.manager)mgrs.add(a.manager);});
   bills.forEach(b=>{if(b.manager)mgrs.add(b.manager);});
   const sorted=[...mgrs].sort();
-  sel.innerHTML='<option value="">All Managers</option>'+sorted.map(m=>`<option value="${esc(m)}"${_ctManagerFilter===m?' selected':''}>${esc(m)}</option>`).join('');
+  sel.innerHTML='<option value="">All SR. Managers</option>'+sorted.map(m=>`<option value="${esc(m)}"${_ctManagerFilter===m?' selected':''}>${esc(m)}</option>`).join('');
 }
 
 function onAgrNameSelect(){
@@ -2938,7 +2938,7 @@ function renderClientTasks(){
       const sortedMgrs=[...allMgrNames].sort();
       if(sortedMgrs.length){
         overviewHtml=`<div style="margin-bottom:16px">
-          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:10px">👥 All Managers — Client Overview</div>
+          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:10px">👥 All SR. Managers — Client Overview</div>
           ${sortedMgrs.map(mgr=>{
             const mLow=mgr.toLowerCase();
             const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
@@ -4146,7 +4146,7 @@ function renderBills(){
           <div class="card-name">${esc(b.name)}</div>
           <div class="card-client">👤 ${esc(b.client)}</div>
           ${sub?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">🏷️ ${esc(sub)}</div>`:''}
-          ${b.manager?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">👤 Mgr: ${esc(b.manager)}</div>`:''}
+          ${b.manager?`<div class="card-meta" style="font-size:.7rem;color:var(--muted);margin-top:2px">👤 SR. Mgr:${esc(b.manager)}</div>`:''}
           ${b.taskStatus?`<span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${b.taskStatus==='completed'?'#fff3d6':'#ffedd5'};color:#111111;border:1px solid #fed7aa">${b.taskStatus==='completed'?'✅ Completed':'🔄 In Progress'}</span>`:''}
           ${b.clientApproval==='yes'?'<span style="font-size:.65rem;font-weight:700;padding:1px 7px;border-radius:20px;background:#fff3d6;color:#111111;border:1px solid #f8a006">👍 Approved</span>':''}
         </div>
@@ -4705,7 +4705,7 @@ function renderManagerList(){
     </tr>`;
   }).join('');
   const html=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr><th style="${th}">Manager</th><th style="${th}">Service</th><th style="${th};text-align:center">Active</th><th style="${th};text-align:center">Expiring</th><th style="${th};text-align:center">Expired</th><th style="${th};text-align:center">Renewed</th><th style="${th}">Agr. Amount</th><th style="${th}">Renewed Amount</th><th style="${th}"></th></tr></thead>
+    <thead><tr><th style="${th}">SR. Manager</th><th style="${th}">Service</th><th style="${th};text-align:center">Active</th><th style="${th};text-align:center">Expiring</th><th style="${th};text-align:center">Expired</th><th style="${th};text-align:center">Renewed</th><th style="${th}">Agr. Amount</th><th style="${th}">Renewed Amount</th><th style="${th}"></th></tr></thead>
     <tbody>${rows}</tbody></table></div>`;
   targets.forEach(t=>t.innerHTML=html);
 }
@@ -4727,7 +4727,7 @@ function downloadManagerExcel(userId,userName){
 function downloadAllManagersExcel(){
   const managers=getUsers().filter(u=>u.status==='active'&&u.id!=='admin');
   const wb=XLSX.utils.book_new();
-  const sumHdr=['Manager','Service','Agreements','Active','Expiring (30d)','Expired','Renewed','Agr. Amount'];
+  const sumHdr=['SR. Manager','Service','Agreements','Active','Expiring (30d)','Expired','Renewed','Agr. Amount'];
   const sumRows=managers.map(u=>{
     const _uName=(u.name||'').toLowerCase();const _uId=u.id||'';
     const uAgrs=agreements.filter(a=>a.createdByUserId?a.createdByUserId===_uId:(_uName&&(a.manager||'').toLowerCase()===_uName));
@@ -4748,7 +4748,7 @@ function downloadAllManagersExcel(){
     const sn=u.name.slice(0,28).replace(/[\\\/\?\*\[\]:]/g,'');
     const rows=[
       [u.name+' - Agreements'],
-      ['Client','Type','Start Date','End Date','Amount','Contact','Manager','Status'],
+      ['Client','Type','Start Date','End Date','Amount','Contact','SR. Manager','Status'],
       ...uAgrs.map(a=>[a.client||'',catDisplayName(a.type||''),a.startDate||'',a.endDate||'',parseFloat(a.amount||0)||0,a.contact||'',a.manager||'',a.isEmail?'Email':((a.endDate&&new Date(a.endDate)<new Date())?'Expired':'Active')]),
       [],
       [u.name+' - Bills'],
@@ -6696,7 +6696,7 @@ async function generateAgreementPdf(agr){
   doc.setFillColor(240,248,255);doc.rect(0,0,210,18,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(30,80,160);doc.text('AGREEMENT DETAILS',lm,12);doc.setTextColor(0,0,0);y=26;
   row('Agreement ID',agr.id);row('Client / Party',agr.client||agr.party||'');row('Type',agr.type||agr.agreementType||'');
-  row('Manager',agr.manager||'');row('Service',agr.service||agr.serviceType||'');
+  row('SR. Manager',agr.manager||'');row('Service',agr.service||agr.serviceType||'');
   row('Start Date',agr.startDate||'');row('End Date',agr.endDate||'');row('Renewal Date',agr.renewalDate||'');
   row('Amount','Rs '+(agr.amount||0));row('Status',agr.status||'');row('Contact Person',agr.contactPerson||'');
   row('Contact Email',agr.contactEmail||'');row('Contact Phone',agr.contactPhone||'');
@@ -6713,7 +6713,7 @@ async function generateBillPdf(bill){
   const row=(label,val)=>{doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text(label+':',lm,y);doc.setFont('helvetica','normal');doc.text(String(val||'-'),lm+52,y);y+=6.5;};
   doc.setFillColor(255,248,235);doc.rect(0,0,210,18,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(160,80,20);doc.text('BILL DETAILS',lm,12);doc.setTextColor(0,0,0);y=26;
-  row('Bill ID',bill.id);row('Client / Party',bill.client||bill.party||'');row('Manager',bill.manager||'');
+  row('Bill ID',bill.id);row('Client / Party',bill.client||bill.party||'');row('SR. Manager',bill.manager||'');
   row('Service',bill.service||bill.serviceType||'');row('Date',bill.date||bill.billDate||'');
   row('Amount','Rs '+(bill.amount||0));row('Status',bill.status||'');row('Description',bill.description||'');
   if(bill.notes){y+=3;doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('Notes:',lm,y);y+=6;doc.setFont('helvetica','normal');const ln=doc.splitTextToSize(bill.notes,tw);doc.text(ln,lm,y);}
