@@ -3790,6 +3790,8 @@ async function zohoSyncNow(){
 // ══════════════════════════════════════════════════
 // Bills are loaded from localStorage for all users; cloud is always authoritative on sync
 let bills=(function(){try{return JSON.parse(localStorage.getItem('agrBills')||'[]');}catch(e){return[];}})();
+// Track bill IDs saved locally but not yet confirmed in cloud (guards against multi-user timestamp race)
+window._dirtyBillIds=window._dirtyBillIds||new Set();
 
 function saveBillsToStorage(){try{localStorage.setItem('agrBills',JSON.stringify(bills));}catch(e){}}
 
@@ -3999,6 +4001,7 @@ function saveBill(){
   };
   if(editId){ const idx=bills.findIndex(b=>b.id===editId); if(idx>-1)bills[idx]=bill; else bills.unshift(bill); }
   else { bills.unshift(bill); }
+  window._dirtyBillIds.add(bill.id); // mark as pending cloud confirmation
   saveBillsToStorage();
   dbPut('bills',bill).catch(()=>{});
   odSyncToOneDrive();
@@ -4012,6 +4015,7 @@ function saveBill(){
 function deleteBill(id){
   if(!confirm('Delete this bill?'))return;
   bills=bills.filter(b=>b.id!==id);
+  window._dirtyBillIds.delete(id);
   saveBillsToStorage();
   dbDelete('bills',id).catch(()=>{});
   odSyncToOneDrive();
@@ -7045,8 +7049,10 @@ async function odLoadWithToken(token){
     // Load bills — preserve local-only bills newer than cloud's last update (pending upload)
     if(cloud.bills&&Array.isArray(cloud.bills)){
       const _cloudBillIds=new Set(cloud.bills.map(b=>b.id));
-      // Bills saved locally but not yet in cloud (e.g. sync failed due to expired token)
-      const _pendingBills=bills.filter(b=>!_cloudBillIds.has(b.id)&&(b.createdAt?new Date(b.createdAt).getTime():0)>_cloudTs);
+      // Clear dirty flag for bills now confirmed in cloud
+      for(const _cid of _cloudBillIds) window._dirtyBillIds.delete(_cid);
+      // Bills saved locally but not yet in cloud: keep if marked dirty OR newer than cloud timestamp
+      const _pendingBills=bills.filter(b=>!_cloudBillIds.has(b.id)&&(window._dirtyBillIds.has(b.id)||(b.createdAt?new Date(b.createdAt).getTime():0)>_cloudTs));
       if(_pendingBills.length)_needsResync=true;
       bills=[...cloud.bills,..._pendingBills];
       saveBillsToStorage();
