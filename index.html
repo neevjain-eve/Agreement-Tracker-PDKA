@@ -3964,8 +3964,8 @@ function saveBill(){
   const gstRegistered=document.getElementById('billGstToggle').checked;
   const gst=document.getElementById('billGst').value.trim().toUpperCase();
   if(gstRegistered&&gst&&!validateGST(gst)){showToast('⚠️ Invalid GST format');return;}
-  if(!(document.getElementById('billAddrLine1')||{value:''}).value.trim()){showToast('⚠️ Address is required');return;}
   const editId=document.getElementById('billEditId').value;
+  if(!editId&&!(document.getElementById('billAddrLine1')||{value:''}).value.trim()){showToast('⚠️ Address is required');return;}
   const bill={
     id: editId||Date.now().toString(),
     name: desc, client, date, amount,
@@ -5805,8 +5805,8 @@ async function saveAgreement(){
   const gstRegistered=document.getElementById('gstToggle').checked;
   const gst=document.getElementById('agrGst').value.trim().toUpperCase();
   if(gstRegistered&&gst&&!validateGST(gst)){showToast('⚠️ Invalid GST format (15 chars)');return}
-  if(!(document.getElementById('agrAddrLine1')||{value:''}).value.trim()){showToast('⚠️ Address is required');return}
   const editId=document.getElementById('editId').value;
+  if(!editId&&!(document.getElementById('agrAddrLine1')||{value:''}).value.trim()){showToast('⚠️ Address is required');return}
   const renewFromId=document.getElementById('renewFromId').value;
   const existing=editId?agreements.find(a=>a.id===editId):null;
   const session=getSession();
