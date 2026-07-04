@@ -4061,6 +4061,10 @@ function renderBills(){
     // Sort groups: known cats first in order, then others
     const _catOrder=['Tax Services','Accounting Retainer Services','Advisory Services','Audit & Assurance Services','CS Retainer Services'];
     const _sortedKeys=[..._catOrder.filter(k=>_groups[k]),...Object.keys(_groups).filter(k=>!_catOrder.includes(k))];
+    // Remember which category boxes were open before re-render so they stay open
+    const _openCats=new Set(_sortedKeys.filter(k=>{const _cb=document.getElementById('billcat-body-'+k);return _cb&&_cb.style.display!=='none';}));
+    // Also auto-open the category of the most recently added bill
+    if(list.length){const _newest=list.reduce((a,b)=>(a.createdAt||'')>(b.createdAt||'')?a:b,list[0]);if(_newest&&_newest.type)_openCats.add(_newest.type);}
     el.innerHTML=_sortedKeys.map(catKey=>{
       const catBills=_groups[catKey];
       const label=catDisplayName(catKey);
@@ -4123,9 +4127,9 @@ function renderBills(){
               ${pending?` · ⏳ ${pending} pending`:''}
             </div>
           </div>
-          <span id="billcat-chev-${catKey}" style="font-size:.8rem;color:${color}">▼</span>
+          <span id="billcat-chev-${catKey}" style="font-size:.8rem;color:${color}">${_openCats.has(catKey)?'▲':'▼'}</span>
         </div>
-        <div id="billcat-body-${catKey}" style="display:none;padding:10px 10px 4px;background:#fafafa">
+        <div id="billcat-body-${catKey}" style="display:${_openCats.has(catKey)?'block':'none'};padding:10px 10px 4px;background:#fafafa">
           ${billRows}
         </div>
       </div>`;
