@@ -7208,6 +7208,27 @@ async function odLoadWithToken(token){
     }
     setSyncStatus('connected','✅ Synced · '+new Date().toLocaleTimeString());
     {const _rmlS=getSession();if(_rmlS&&(_rmlS.userId==='admin'||_rmlS.id==='admin'))setTimeout(renderManagerList,0);}setTimeout(renderClientTasks,0);
+    // ── Cross-device user/password sync ───────────────────────────────────────
+    // 1. Load users.json from OD so new devices always get the latest passwords
+    // 2. Apply any locally-pending password changes on top
+    // 3. If pending changes exist, push merged users back to OD and clear the queue
+    try{
+      const _uResp=await fetch(GRAPH+'/me/drive/root:/'+encodePath(OD_USERS_FILE)+':/content',{headers:{'Authorization':'Bearer '+token}});
+      if(_uResp.ok){
+        const _cloudU=await _uResp.json();
+        if(Array.isArray(_cloudU)&&_cloudU.length>0){
+          const _ppchU=JSON.parse(localStorage.getItem('agrPendingPwChanges')||'{}');
+          let _mergedU=_cloudU.map(u=>_ppchU[u.id]?{...u,pwHash:_ppchU[u.id]}:u);
+          localStorage.setItem('agrUsers',JSON.stringify(_mergedU));
+          // If there were pending changes, push the merged list back to OD and clear queue
+          if(Object.keys(_ppchU).length){
+            const _puResp=await fetch(GRAPH+'/me/drive/root:/'+encodePath(OD_USERS_FILE)+':/content',{method:'PUT',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(_mergedU,null,2)});
+            if(_puResp.ok){localStorage.removeItem('agrPendingPwChanges');console.log('[PW] Password changes synced to OD');}
+          }
+        }
+      }
+    }catch(_ue){console.warn('[PW Sync]',_ue.message);}
+    // ── End user sync ─────────────────────────────────────────────────────────
   }catch(e){setSyncStatus('error','Load failed: '+e.message);}
 }
 
