@@ -373,6 +373,9 @@
     .section.active{display:block}
     .admin-panel{background:#fff;border-radius:var(--radius);padding:20px;margin:0 16px 14px;box-shadow:var(--shadow-sm)}
     .admin-panel-title{font-size:.78rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border-light)}
+    .notif-badge{position:absolute;top:3px;right:3px;background:#ef4444;color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;padding:1px 4px;min-width:15px;text-align:center;pointer-events:none;line-height:1.4}
+    .notif-filter-btn{padding:4px 12px;border-radius:20px;border:1.5px solid #e0e0e0;background:#fff;color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .notif-filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
     .dash-quick{padding:0 16px 4px}
     .dash-quick-title{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;padding-top:8px;display:flex;align-items:center;gap:5px}
     .quick-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:6px;box-shadow:var(--shadow-sm);border-left:3px solid var(--border);cursor:pointer;transition:box-shadow .2s}
@@ -1450,6 +1453,23 @@
     <div class="section" id="sec-notifications">
       <div style="padding:16px 0 0">
 
+        <!-- Activity Feed Panel -->
+        <div class="admin-panel">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div class="admin-panel-title" style="margin-bottom:0">🔔 Activity Feed</div>
+            <div style="display:flex;gap:6px">
+              <button onclick="markNotifsRead()" style="padding:5px 10px;border-radius:8px;border:1.5px solid #e0e0e0;background:#fff;font-size:.73rem;cursor:pointer;font-weight:600;color:var(--muted)">Mark all read</button>
+              <button onclick="clearNotifications()" style="padding:5px 10px;border-radius:8px;border:1.5px solid #fca5a5;background:#fff;font-size:.73rem;cursor:pointer;font-weight:600;color:#dc2626">Clear</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:12px">
+            <button class="notif-filter-btn active" data-filter="all" onclick="filterNotifs('all')">All</button>
+            <button class="notif-filter-btn" data-filter="bills" onclick="filterNotifs('bills')">Bills</button>
+            <button class="notif-filter-btn" data-filter="agreements" onclick="filterNotifs('agreements')">Agreements</button>
+          </div>
+          <div id="notificationFeed" style="max-height:460px;overflow-y:auto"></div>
+        </div>
+
         <div class="admin-panel">
           <div class="admin-panel-title">⏰ Alert Days Configuration</div>
           <div class="settings-item">
@@ -1465,21 +1485,6 @@
             <input type="number" id="alert3" min="1" max="365" value="7"/>
           </div>
           <button class="btn-primary" onclick="saveSettings()" style="max-width:220px;margin-top:12px">💾 Save Alert Settings</button>
-        </div>
-
-        <div class="admin-panel">
-          <div class="admin-panel-title">📧 Microsoft 365 Email</div>
-          <div style="background:#fff7ed;border:1.5px solid #fdba74;border-radius:10px;padding:12px;margin-bottom:12px;font-size:.8rem;color:#c2410c;line-height:1.6">
-            <strong>✅ Sends via your Microsoft 365 account</strong><br/>
-            No passwords needed — emails are sent using your signed-in Microsoft account. Connect OneDrive in Admin Settings first.
-          </div>
-          <div class="settings-item">
-            <div><div class="settings-label">From Account</div><div class="settings-sub">Signed-in Microsoft 365 account</div></div>
-            <span id="emailFromDisplay" style="font-size:.8rem;font-weight:600;color:var(--primary)">—</span>
-          </div>
-          <div style="height:10px"></div>
-          <button onclick="sendTestEmail()" style="width:100%;max-width:300px;padding:10px;background:#fff3d6;color:#111111;border:1.5px solid #f97316;border-radius:10px;font-size:.82rem;font-weight:700;cursor:pointer">📨 Send Test Email to myself</button>
-          <div id="emailSettingsStatus" style="margin-top:8px;font-size:.76rem;color:var(--muted)"></div>
         </div>
 
         <div class="admin-panel">
@@ -2368,7 +2373,7 @@ function showSection(name){
     const nav=document.getElementById('nav-'+s);
     if(nav) nav.classList.toggle('active',s===name);
   });
-  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',clientmgmt:'Client Management',notifications:'Notification Settings',export:'Export / Import',admin:'Admin Settings','od-user':'OneDrive Connection'};
+  const titles={userdash:'Dashboard',dashboard:'Dashboard',agreements:'Agreements',billing:'One Time Billing',monthly:'Monthly Statement',clientmgmt:'Client Management',notifications:'Notifications',export:'Export / Import',admin:'Admin Settings','od-user':'OneDrive Connection'};
   const tb=document.getElementById('topbarTitle');
   if(tb) tb.textContent=titles[name]||name;
   if(name==='admin'){renderSubReqAdmin();renderCatAccessAdmin();updateZohoStatus();updateAiApiStatus();}
@@ -2380,6 +2385,10 @@ function showSection(name){
     const a3=document.getElementById('alert3');if(a3)a3.value=s.alert3||7;
     const tog=document.getElementById('autoEmailToggle');
     if(tog)tog.checked=localStorage.getItem('autoEmailEnabled')==='1';
+    window._notifFilter='all';
+    renderNotifications('all');
+    // Delay mark-read so badge clears after render
+    setTimeout(()=>{localStorage.setItem(_NOTIF_READ_KEY,new Date().toISOString());_updateNotifBadge();},400);
   }
   if(name==='admin'){renderUserList();renderCatAccessAdmin();renderManagerList();refreshOdStatusUI();loadAdminCredsUI();odLoadUsers().catch(()=>{});updateUserSyncNote(!!(msalApp&&msalApp.getAllAccounts().length>0));}
   if(name==='dashboard'){updateDashboard();}
@@ -3797,6 +3806,105 @@ function _saveDirtyBills(){try{localStorage.setItem('_elDirtyBills',JSON.stringi
 
 function saveBillsToStorage(){try{localStorage.setItem('agrBills',JSON.stringify(bills));}catch(e){}}
 
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────────
+const _NOTIF_KEY='elNotifications';
+const _NOTIF_READ_KEY='elNotifsLastRead';
+const _NOTIF_MAX=200;
+function _loadNotifs(){try{return JSON.parse(localStorage.getItem(_NOTIF_KEY)||'[]');}catch(e){return[];}}
+function _saveNotifs(list){try{localStorage.setItem(_NOTIF_KEY,JSON.stringify(list.slice(0,_NOTIF_MAX)));}catch(e){}}
+function addNotification(type,details){
+  const list=_loadNotifs();
+  list.unshift({id:Date.now().toString()+Math.random().toString(36).slice(2),type,ts:new Date().toISOString(),...details});
+  _saveNotifs(list);
+  _updateNotifBadge();
+}
+function _updateNotifBadge(){
+  const list=_loadNotifs();
+  const lastRead=localStorage.getItem(_NOTIF_READ_KEY)||'';
+  const unread=list.filter(n=>n.ts>lastRead).length;
+  const btn=document.getElementById('nav-notifications');
+  if(!btn)return;
+  btn.style.position='relative';
+  let badge=btn.querySelector('.notif-badge');
+  if(unread>0){
+    if(!badge){badge=document.createElement('span');badge.className='notif-badge';btn.appendChild(badge);}
+    badge.textContent=unread>99?'99+':String(unread);
+  } else {
+    if(badge)badge.remove();
+  }
+}
+function renderNotifications(filter){
+  const el=document.getElementById('notificationFeed');if(!el)return;
+  const list=_loadNotifs();
+  const lastRead=localStorage.getItem(_NOTIF_READ_KEY)||'';
+  const filt=filter||window._notifFilter||'all';
+  const filtered=filt==='all'?list:list.filter(n=>{
+    if(filt==='bills')return n.type==='bill_created'||n.type==='bill_edited';
+    if(filt==='agreements')return n.type==='agreement_created'||n.type==='agreement_edited';
+    return true;
+  });
+  if(!filtered.length){
+    el.innerHTML='<div style="text-align:center;padding:32px 16px;color:var(--muted);font-size:.84rem">No activity yet.<br/>New bills and agreements will appear here when created or edited.</div>';
+    return;
+  }
+  const icons={bill_created:'🟢',bill_edited:'✏️',agreement_created:'🟣',agreement_edited:'📝'};
+  const labels={bill_created:'Bill Created',bill_edited:'Bill Edited',agreement_created:'Agreement Created',agreement_edited:'Agreement Edited'};
+  const accentColors={bill_created:'#16a34a',bill_edited:'#ca8a04',agreement_created:'#7c3aed',agreement_edited:'#db2777'};
+  const bgColors={bill_created:'#f0fdf4',bill_edited:'#fefce8',agreement_created:'#f5f3ff',agreement_edited:'#fdf2f8'};
+  const today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  const yesterday=new Date(Date.now()-864e5).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+  // Group by date
+  const groups={};const keys=[];
+  filtered.forEach(n=>{
+    const k=new Date(n.ts).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+    if(!groups[k]){groups[k]=[];keys.push(k);}
+    groups[k].push(n);
+  });
+  let html='';
+  keys.forEach(k=>{
+    const lbl=k===today?'Today':k===yesterday?'Yesterday':k;
+    html+=`<div style="font-size:.69rem;font-weight:800;color:var(--muted);letter-spacing:.09em;padding:10px 4px 5px;text-transform:uppercase;border-bottom:1px solid var(--border-light);margin-bottom:6px">${lbl}</div>`;
+    groups[k].forEach(n=>{
+      const isUnread=n.ts>lastRead;
+      const timeStr=new Date(n.ts).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+      const bg=isUnread?(bgColors[n.type]||'#f9f9f9'):'transparent';
+      const border=isUnread?`1px solid ${accentColors[n.type]||'#ccc'}`:'1px solid transparent';
+      const nameStr=esc(n.name||n.client||'');
+      const byStr=n.by?` <span style="color:var(--muted)">by</span> <strong>${esc(n.by)}</strong>`:'';
+      const catStr=n.cat?` <span style="font-size:.68rem;padding:1px 6px;border-radius:20px;background:${accentColors[n.type]||'#e5e7eb'}22;color:${accentColors[n.type]||'#666'};font-weight:700">${esc(n.cat)}</span>`:'';
+      html+=`<div style="display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:10px;background:${bg};margin-bottom:4px;border:${border}">
+        <span style="font-size:1rem;margin-top:1px;flex-shrink:0">${icons[n.type]||'📌'}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.79rem;font-weight:700;color:var(--fg)">${labels[n.type]||n.type}${catStr}</div>
+          <div style="font-size:.77rem;color:#444;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${nameStr}${byStr}</div>
+        </div>
+        <span style="font-size:.7rem;color:var(--muted);white-space:nowrap;margin-top:2px;flex-shrink:0">${timeStr}</span>
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+function markNotifsRead(){
+  localStorage.setItem(_NOTIF_READ_KEY,new Date().toISOString());
+  _updateNotifBadge();
+  renderNotifications();
+}
+function clearNotifications(){
+  if(!confirm('Clear all activity notifications?'))return;
+  _saveNotifs([]);
+  localStorage.removeItem(_NOTIF_READ_KEY);
+  _updateNotifBadge();
+  renderNotifications();
+}
+function filterNotifs(f){
+  window._notifFilter=f;
+  document.querySelectorAll('.notif-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
+  renderNotifications(f);
+}
+// initialise badge on load
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(_updateNotifBadge,500); });
+// ── END NOTIFICATIONS ─────────────────────────────────────────────────────────
+
 function onBillTypeChange(){
   const type = document.getElementById('billType').value;
   const grp = (document.getElementById('billSubTypeGroup')||{style:{display:'none'}});
@@ -4011,6 +4119,8 @@ function saveBill(){
   odSyncToOneDrive();
   // Upload bill PDF to OneDrive (non-blocking)
   (async()=>{try{const _bpdf=await generateBillPdf(bill);if(_bpdf)await odUploadToPath(OD_BILL_PDF_FOLDER+'/'+bill.id+'.pdf',_bpdf,'application/pdf');}catch(e){console.warn('[OD BillPDF]',e.message);}})();
+  const _nSess=getSession();
+  addNotification(editId?'bill_edited':'bill_created',{name:bill.name||bill.specialService||bill.client||'',client:bill.client||'',amount:bill.amount,cat:bill.type||'Other',by:_nSess?((_nSess.name||_nSess.username)||''):''});
   closeModal('billModal');
   renderBills();
   showToast(editId?'✅ Bill updated!':'✅ Bill added!');
@@ -5880,6 +5990,8 @@ async function saveAgreement(){
   if(renewFromId&&!editId){const oldAgr=agreements.find(a=>a.id===renewFromId);if(oldAgr){oldAgr.renewedTo=agr.id;await dbPut('agreements',oldAgr);}}
   await dbPut('agreements',agr);
   agreements=await dbGetAll('agreements');
+  const _agrNSess=getSession();
+  addNotification(editId?'agreement_edited':'agreement_created',{name:agr.name||agr.client||'',client:agr.client||'',cat:agr.type||agr.specialService||'',by:_agrNSess?((_agrNSess.name||_agrNSess.username)||''):''});
   closeModal('addModal');renderAgreements();
   showToast(renewFromId&&!editId?'🔄 Agreement renewed & old record preserved!':editId?'✅ Updated!':'✅ Agreement added!');
   odSyncToOneDrive();if(isZohoConnected())zohoSaveAllData().catch(()=>{});
@@ -7498,4 +7610,22 @@ openDB().then(async()=>{
   <div class="el-chooser-card" style="position:relative">
     <button onclick="document.getElementById('elTypeChooser').style.display='none'" style="position:absolute;top:10px;right:12px;background:none;border:none;font-size:20px;cursor:pointer;color:#888;line-height:1;" title="Close">&times;</button>
     <div class="el-chooser-title">📋 New Agreement</div>
-    <div class="el-chooser-sub">Is this agreement accompanied by an Engagement L
+    <div class="el-chooser-sub">Is this agreement accompanied by an Engagement Letter?</div>
+    <div class="el-chooser-btns">
+      <button class="el-choice-btn with-el" onclick="selectElType('with')">
+        <span class="el-icon">✅</span>
+        <span class="el-label">With Engagement Letter</span>
+        <span class="el-desc">Agreement has a formal engagement letter attached or on record</span>
+      </button>
+      <button class="el-choice-btn without-el" onclick="selectElType('without')">
+        <span class="el-icon">📄</span>
+        <span class="el-label">Without Engagement Letter</span>
+        <span class="el-desc">Proceeding without a formal engagement letter</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+
