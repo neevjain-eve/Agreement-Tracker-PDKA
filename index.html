@@ -1150,12 +1150,13 @@
         </div>
       </div>
       <div style="padding:0 16px">
-        <!-- Manager filter -->
-        <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span style="font-size:.78rem;font-weight:700;color:#888">SR. Manager:</span>
-          <select id="ctManagerFilter" onchange="setCtManagerFilter(this.value)" style="font-family:inherit;font-size:.8rem;padding:5px 10px;border:1.5px solid #fed7aa;border-radius:9px;background:#fff7ed;outline:none;cursor:pointer">
-            <option value="">All SR. Managers</option>
-          </select>
+        <!-- Client search bar -->
+        <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px">
+          <div style="flex:1;position:relative">
+            <span style="position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:.9rem;pointer-events:none">🔍</span>
+            <input type="text" id="ctClientSearch" placeholder="Search clients..." oninput="renderClientTasks()" style="width:100%;padding:7px 12px 7px 32px;border:1.5px solid #fed7aa;border-radius:10px;font-size:.82rem;font-family:inherit;background:#fff7ed;outline:none;box-sizing:border-box"/>
+          </div>
+          <button onclick="document.getElementById('ctClientSearch').value='';renderClientTasks()" style="padding:7px 12px;border:1.5px solid #e5e7eb;border-radius:10px;background:#fff;font-size:.78rem;font-weight:600;color:#888;cursor:pointer">Clear</button>
         </div>
         <div id="clientOverviewPanel"></div>
         <div id="clientTaskList" style="padding-bottom:90px"></div>
@@ -2628,13 +2629,10 @@ function getUniqueClients(forManager){
   const _gcName=_gcSess?(_gcSess.name||_gcSess.username||'').toLowerCase():'';
   // When a specific manager is requested (e.g. admin selected Sandeep in form), filter to that manager only
   const _fMgr=(forManager||'').toLowerCase();
-  // Admin must have a manager selected to see any clients
-  if(_gcAdmin&&!_fMgr)return[];
+  // Admin sees ALL clients across all services and managers (no manager filter for autocomplete)
   agreements.forEach(a=>{
     if(!(a.client||'').trim())return;
-    if(_gcAdmin){
-      if((a.manager||'').toLowerCase()!==_fMgr)return;
-    } else {
+    if(!_gcAdmin){
       const ok=a.createdByUserId?a.createdByUserId===_gcUid:(_gcName&&(a.manager||'').toLowerCase()===_gcName);
       if(!ok)return;
     }
@@ -2642,9 +2640,7 @@ function getUniqueClients(forManager){
   });
   bills.forEach(b=>{
     if(!(b.client||'').trim())return;
-    if(_gcAdmin){
-      if((b.manager||'').toLowerCase()!==_fMgr)return;
-    } else {
+    if(!_gcAdmin){
       const ok=b.createdByUserId?b.createdByUserId===_gcUid:(_gcName&&(b.manager||'').toLowerCase()===_gcName);
       if(!ok)return;
     }
@@ -2859,16 +2855,16 @@ function setClientTaskFilter(f){
 function renderClientTasks(){
   const el=document.getElementById('clientTaskList');if(!el)return;
   const elOverview=document.getElementById('clientOverviewPanel');
-  populateCtManagerFilter();
   const sess=getSession();const isAdmin=sess&&(sess.userId==='admin'||(!getUserAllowedCats(sess.userId||'').length&&sess.role==='admin'));
+  const _ctSearch=((document.getElementById('ctClientSearch')||{}).value||'').trim().toLowerCase();
   let list=isAdmin?clientTasks:clientTasks.filter(t=>{
     const _ctUid=sess.userId||sess.id||'';
     if(t.createdByUserId)return t.createdByUserId===_ctUid;
     return false;
   });
-  // Manager filter
-  if(_ctManagerFilter){
-    list=list.filter(t=>(t.manager||'').toLowerCase()===_ctManagerFilter.toLowerCase());
+  // Client search filter
+  if(_ctSearch){
+    list=list.filter(t=>(t.client||'').toLowerCase().includes(_ctSearch)||(t.desc||t.description||'').toLowerCase().includes(_ctSearch));
   }
   // ── Helper: build client table row HTML ──
   const _buildClientCard=(cl)=>{
@@ -2940,52 +2936,22 @@ function renderClientTasks(){
   if(elOverview){
     elOverview.style.display='';
     let overviewHtml='';
-    if(isAdmin&&!_ctManagerFilter){
-      const allMgrNames=new Set();
-      agreements.forEach(a=>{if(a.manager)allMgrNames.add(a.manager);});
-      bills.forEach(b=>{if(b.manager)allMgrNames.add(b.manager);});
-      const sortedMgrs=[...allMgrNames].sort();
-      if(sortedMgrs.length){
-        overviewHtml=`<div style="margin-bottom:16px">
-          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:10px">👥 All SR. Managers — Client Overview</div>
-          ${sortedMgrs.map(mgr=>{
-            const mLow=mgr.toLowerCase();
-            const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
-            const mBillsAll=bills.filter(b=>(b.manager||'').toLowerCase()===mLow);
-            const mBills=_filterBillsByStatus(mBillsAll);
-            if(_ctFilter!=='all'&&!mBills.length)return'';
-            const cm=_buildClientMap(_ctFilter==='all'?mAgrs:[],mBills);
-            if(_ctFilter!=='all')mAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
-            const clients=Object.values(cm);
-            if(!clients.length)return'';
-            return`<details style="margin-bottom:10px;border-radius:12px;overflow:hidden;border:1.5px solid #fed7aa" open>
-              <summary style="background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:10px 14px;cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:.85rem">
-                <span>👤 ${esc(mgr)}</span>
-                <div style="display:flex;gap:8px;font-size:.72rem;font-weight:600">
-                  <span style="background:#fff7ed;padding:2px 8px;border-radius:8px;border:1px solid #fed7aa">📄 ${mAgrs.length} agrs</span>
-                  <span style="background:#fef9c3;padding:2px 8px;border-radius:8px;border:1px solid #fcd34d">🧾 ${mBills.length} bills</span>
-                  <span style="background:#f5f5f5;padding:2px 8px;border-radius:8px">${clients.length} clients</span>
-                </div>
-              </summary>
-              <div style="padding:8px 8px 4px;background:#fafafa">
-                ${_buildClientTable(clients)}
-              </div>
-            </details>`;
-          }).join('')}
-        </div>`;
-      }
-    } else if(isAdmin&&_ctManagerFilter){
-      const mLow=_ctManagerFilter.toLowerCase();
-      const mAgrs=agreements.filter(a=>(a.manager||'').toLowerCase()===mLow);
-      const mBills=_filterBillsByStatus(bills.filter(b=>(b.manager||'').toLowerCase()===mLow));
-      const cm=_buildClientMap(_ctFilter==='all'?mAgrs:[],mBills);
-      if(_ctFilter!=='all')mAgrs.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
-      const clients=Object.values(cm);
+    if(isAdmin){
+      // Build a unified client map from ALL agreements and bills, then filter by search
+      const allAgrs=_ctFilter==='all'?agreements:[];
+      const allBills=_filterBillsByStatus(bills);
+      const cm=_buildClientMap(allAgrs,allBills);
+      if(_ctFilter!=='all')agreements.forEach(a=>{const k=(a.client||'').trim().toLowerCase();if(k&&cm[k])cm[k].agreements.push(a);});
+      let clients=Object.values(cm);
+      if(_ctSearch)clients=clients.filter(c=>c.name.toLowerCase().includes(_ctSearch));
+      clients.sort((a,b)=>a.name.localeCompare(b.name));
       if(clients.length){
         overviewHtml=`<div style="margin-bottom:16px">
-          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">📊 Clients for ${esc(_ctManagerFilter)}</div>
+          <div style="font-size:.82rem;font-weight:800;color:#f97316;margin-bottom:8px">🏢 All Clients (${clients.length})</div>
           ${_buildClientTable(clients)}
         </div>`;
+      } else if(_ctSearch){
+        overviewHtml=`<div style="text-align:center;padding:24px;color:var(--muted);font-size:.83rem">No clients match "<strong>${esc(_ctSearch)}</strong>"</div>`;
       }
     } else if(!isAdmin){
       const _ovMgrId=sess?sess.userId||sess.id||'':'';
