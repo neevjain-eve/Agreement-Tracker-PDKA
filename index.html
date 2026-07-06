@@ -4203,9 +4203,10 @@ function renderBills(){
         const _stCol=b.taskStatus==='completed'?'#92400e':b.taskStatus==='in_progress'?'#0369a1':'#555';
         const _stLabel=b.taskStatus==='completed'?'✅ Completed':b.taskStatus==='in_progress'?'🔄 In Progress':'⏳ Pending';
         const _hasInv=!!(b.invoice||'').toString().trim();
-        // Delay: days between bill creation and invoice/billing date
-        let _delayStr='',_delayBg='#fee2e2',_delayCol='#b91c1c';
-        if(b.createdAt&&b.date&&_hasInv){try{let _invD;if(b.date.includes('|'))_invD=new Date(b.date.split('|')[0]+'T12:00:00');else if(b.date.length===7)_invD=new Date(b.date+'-01T12:00:00');else _invD=new Date(b.date+'T12:00:00');const _dD=Math.round((_invD-new Date(b.createdAt))/864e5);if(_dD>0){_delayStr=`⏰ Delayed by ${_dD} day${_dD!==1?'s':''}`;_delayBg='#fee2e2';_delayCol='#b91c1c';}else if(_dD===0){_delayStr='⚡ Same day';_delayBg='#f0fdf4';_delayCol='#16a34a';}else{_delayStr=`✅ ${Math.abs(_dD)}d early`;_delayBg='#dcfce7';_delayCol='#16a34a';}}catch(e){}}
+        // Delay: if invoiced show invoice date; if not invoiced show days pending since creation
+        let _delayStr='',_delayCol='#b91c1c';
+        if(_hasInv){_delayStr=_fmtBillDate(b);_delayCol='#16a34a';}
+        else if(b.createdAt){const _dD=Math.round((Date.now()-new Date(b.createdAt))/864e5);_delayStr=_dD>0?`⏰ ${_dD}d pending`:'Created today';_delayCol=_dD>0?'#b91c1c':'#0369a1';}
         return`<div id="bill-card-${b.id}" style="border-radius:10px;border:1.5px solid #e5e7eb;margin-bottom:6px;overflow:hidden;background:#fff">
           <div onclick="toggleBillCard('${b.id}')" style="display:flex;align-items:center;gap:10px;padding:9px 12px;cursor:pointer;user-select:none">
             <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#0ea5e9,#0369a1);color:#fff;font-weight:800;font-size:.7rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
