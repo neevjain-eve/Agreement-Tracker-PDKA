@@ -4212,7 +4212,13 @@ function renderBills(){
             <div style="flex:1;min-width:0">
               <div style="font-weight:700;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(b.name||b.specialService||b.client||'(No description)')}</div>
               <div style="font-size:.7rem;color:#555;margin-top:1px">👤 ${esc(b.client)}${b.manager?` · Mgr: ${esc(b.manager)}`:''}${sub?` · ${esc(sub)}`:''}</div>
-              ${_delayStr?`<span style="font-size:.62rem;font-weight:700;padding:1px 7px;border-radius:20px;background:${_delayBg};color:${_delayCol};margin-top:3px;display:inline-block">${_delayStr}</span>`:''}
+              <div style="display:flex;align-items:center;gap:0;margin-top:5px;flex-wrap:wrap">
+                <span style="font-size:.63rem;font-weight:700;color:${_delayStr?_delayCol:'#aaa'}">${_delayStr||'— Delayed'}</span>
+                <span style="color:#d1d5db;padding:0 7px;font-size:.7rem">|</span>
+                <span style="font-size:.63rem;font-weight:700;color:${_hasInv?'#c2410c':'#aaa'}">${_hasInv?`🧾 ${esc(b.invoice)}`:'— Invoice'}</span>
+                <span style="color:#d1d5db;padding:0 7px;font-size:.7rem">|</span>
+                <span style="font-size:.63rem;font-weight:700;color:${(b.amount||b.quoteAmount)?'#0369a1':'#aaa'}">${(b.amount||b.quoteAmount)?'₹'+Number(b.quoteAmount||b.amount).toLocaleString('en-IN')+' Billed':'— Billed'}</span>
+              </div>
             </div>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0">
               <span style="font-size:.63rem;font-weight:700;padding:1px 6px;border-radius:20px;background:${_stBg};color:${_stCol}">${_stLabel}</span>
