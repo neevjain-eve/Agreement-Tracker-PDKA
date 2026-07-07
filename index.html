@@ -4177,7 +4177,9 @@ function renderBills(){
   else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
   else if(_billFilterMode==='completed') list=list.filter(b=>b.taskStatus==='completed');
   else if(_billFilterMode==='approved') list=list.filter(b=>b.clientApproval==='yes');
-  // ── Month filter: only invoiced bills from selected month ──
+  // ── Month filter logic ──
+  // No month selected → show only PENDING (uninvoiced) bills
+  // Month selected    → show only INVOICED bills from that month
   const _billMonthSel=(document.getElementById('billMonthFilter')||{}).value||'';
   if(_billMonthSel){
     list=list.filter(b=>{
@@ -4187,11 +4189,16 @@ function renderBills(){
       const _ym=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0');
       return _ym===_billMonthSel;
     });
+  } else {
+    // Default: only show bills without an invoice number (pending)
+    list=list.filter(b=>!(b.invoice||'').toString().trim());
   }
-  // ── Populate month dropdown from all bills (not filtered list) ──
+  // ── Populate month dropdown from all bills ──
   _populateBillMonthFilter();
   if(!list.length){
-    el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:12px">🧾</div><div style="font-weight:700;font-size:1rem;margin-bottom:6px">No one-time bills yet</div><div style="font-size:.82rem">Tap + to add your first bill</div></div>';
+    const _emptyMsg=_billMonthSel?'No invoiced bills for this month':'No pending bills — all caught up! 🎉';
+    const _emptySub=_billMonthSel?'Try a different month from the filter':'Select a month above to view invoiced bills';
+    el.innerHTML=`<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:12px">🧾</div><div style="font-weight:700;font-size:1rem;margin-bottom:6px">${_emptyMsg}</div><div style="font-size:.82rem">${_emptySub}</div></div>`;
     return;
   }
   const _fmtBillDate=(b)=>{
