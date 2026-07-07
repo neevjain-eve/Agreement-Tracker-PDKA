@@ -1098,11 +1098,17 @@
       <div class="search-bar" style="padding:14px 16px 10px">
         <input type="text" id="billSearchInput" placeholder="Search client, service, notes..." oninput="renderBills()"/>
       </div>
-      <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px">
+      <div style="padding:0 16px 10px;display:flex;flex-wrap:wrap;gap:7px;align-items:center">
         <button class="filter-btn active" onclick="setBillFilter('all')" id="bill-filter-all">All</button>
         <button class="filter-btn" onclick="setBillFilter('billed')" id="bill-filter-billed" style="background:#fff3d6;border-color:#f8a006">🧾 Billed</button>
         <button class="filter-btn" onclick="setBillFilter('in_progress')" id="bill-filter-inprogress" style="background:#ffedd5;border-color:#f97316">🔄 In Progress</button>
         <button class="filter-btn" onclick="setBillFilter('completed')" id="bill-filter-completed" style="background:#fff3d6;border-color:#f8a006">✅ Completed</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+          <span style="font-size:.7rem;font-weight:700;color:var(--muted);white-space:nowrap">📅 Month</span>
+          <select id="billMonthFilter" onchange="renderBills()" style="padding:5px 10px;border:1.5px solid #fed7aa;border-radius:20px;font-size:.74rem;font-family:inherit;font-weight:600;background:#fff7ed;color:#92400e;outline:none;cursor:pointer;max-width:140px">
+            <option value="">All Months</option>
+          </select>
+        </div>
       </div>
       <div class="agreements-list" id="billList" style="padding:0 16px 90px"></div>
       <button class="fab" onclick="openAddBillModal()">＋</button>
@@ -2813,6 +2819,24 @@ function hideBillAddSub(){
   const sel=(document.getElementById('billSubType')||{value:'',innerHTML:''});
   if(sel.value==='__add_new__')sel.value='';
 }
+function _populateBillMonthFilter(){
+  const sel=document.getElementById('billMonthFilter');if(!sel)return;
+  const cur=sel.value;
+  // Collect unique YYYY-MM values from bills that have createdAt and an invoice
+  const months=new Set();
+  bills.forEach(b=>{
+    if(!b.createdAt)return;
+    const _d=new Date(b.createdAt);
+    if(isNaN(_d))return;
+    months.add(_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0'));
+  });
+  const sorted=[...months].sort((a,b)=>b.localeCompare(a)); // newest first
+  sel.innerHTML='<option value="">All Months</option>'+sorted.map(m=>{
+    const [y,mo]=m.split('-');
+    const label=new Date(+y,+mo-1,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+    return`<option value="${m}"${m===cur?' selected':''}>${label}</option>`;
+  }).join('');
+}
 function setBillFilter(f){
   window._billFilter=f;
   document.querySelectorAll('[id^="bill-filter-"]').forEach(b=>b.classList.remove('active'));
@@ -4150,10 +4174,22 @@ function renderBills(){
     list=list.filter(b=>{if(b.createdByUserId)return b.createdByUserId===_bUid;if(!_bName)return false;return(b.manager||'').toLowerCase()===_bName;});
   }
   if(_billFilterMode==='billed') list=list.filter(b=>!!(b.invoice||'').toString().trim());
-
   else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
   else if(_billFilterMode==='completed') list=list.filter(b=>b.taskStatus==='completed');
   else if(_billFilterMode==='approved') list=list.filter(b=>b.clientApproval==='yes');
+  // ── Month filter: only invoiced bills from selected month ──
+  const _billMonthSel=(document.getElementById('billMonthFilter')||{}).value||'';
+  if(_billMonthSel){
+    list=list.filter(b=>{
+      if(!(b.invoice||'').toString().trim())return false; // must be invoiced
+      if(!b.createdAt)return false;
+      const _d=new Date(b.createdAt);
+      const _ym=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0');
+      return _ym===_billMonthSel;
+    });
+  }
+  // ── Populate month dropdown from all bills (not filtered list) ──
+  _populateBillMonthFilter();
   if(!list.length){
     el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:2.5rem;margin-bottom:12px">🧾</div><div style="font-weight:700;font-size:1rem;margin-bottom:6px">No one-time bills yet</div><div style="font-size:.82rem">Tap + to add your first bill</div></div>';
     return;
