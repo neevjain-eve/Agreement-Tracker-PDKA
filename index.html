@@ -4177,22 +4177,24 @@ function renderBills(){
   else if(_billFilterMode==='in_progress') list=list.filter(b=>b.taskStatus==='in_progress');
   else if(_billFilterMode==='completed') list=list.filter(b=>b.taskStatus==='completed');
   else if(_billFilterMode==='approved') list=list.filter(b=>b.clientApproval==='yes');
-  // ── Month filter logic (skipped when search query is active) ──
-  // No month selected → show only PENDING (uninvoiced) bills
-  // Month selected    → show only INVOICED bills from that month
-  // Search active     → show all bills regardless
+  // ── Month filter logic ──
+  // Only applies when filter is 'all' and no search query
+  // 'all' + no month  → pending (uninvoiced) bills only
+  // 'all' + month     → invoiced bills from that month only
+  // any other filter  → show all matching bills (no pending-only restriction)
+  // search active     → show all bills regardless
   const _billMonthSel=(document.getElementById('billMonthFilter')||{}).value||'';
-  if(!q){
+  if(!q && _billFilterMode==='all'){
     if(_billMonthSel){
       list=list.filter(b=>{
-        if(!(b.invoice||'').toString().trim())return false; // must be invoiced
+        if(!(b.invoice||'').toString().trim())return false;
         if(!b.createdAt)return false;
         const _d=new Date(b.createdAt);
         const _ym=_d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0');
         return _ym===_billMonthSel;
       });
     } else {
-      // Default: only show bills without an invoice number (pending)
+      // Default 'All' view: only pending (uninvoiced) bills
       list=list.filter(b=>!(b.invoice||'').toString().trim());
     }
   }
