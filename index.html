@@ -373,7 +373,7 @@
     .section.active{display:block}
     .admin-panel{background:#fff;border-radius:var(--radius);padding:20px;margin:0 16px 14px;box-shadow:var(--shadow-sm)}
     .admin-panel-title{font-size:.78rem;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border-light)}
-    .notif-badge{position:absolute;top:3px;right:3px;background:#ef4444;color:#fff;font-size:.6rem;font-weight:700;border-radius:999px;padding:1px 4px;min-width:15px;text-align:center;pointer-events:none;line-height:1.4}
+    .notif-badge{position:absolute;top:-5px;right:-6px;background:#ef4444;color:#fff;font-size:.58rem;font-weight:800;border-radius:999px;padding:1px 4px;min-width:15px;text-align:center;pointer-events:none;line-height:1.5;border:2px solid rgba(255,255,255,.25);box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:10}
     .notif-filter-btn{padding:4px 12px;border-radius:20px;border:1.5px solid #e0e0e0;background:#fff;color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s}
     .notif-filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
     .dash-quick{padding:0 16px 4px}
@@ -3790,10 +3790,13 @@ function _updateNotifBadge(){
   const unread=list.filter(n=>n.ts>lastRead).length;
   const btn=document.getElementById('nav-notifications');
   if(!btn)return;
-  btn.style.position='relative';
-  let badge=btn.querySelector('.notif-badge');
+  // Attach badge to the bell icon span for clean positioning
+  const iconSpan=btn.querySelector('.nav-icon');
+  const target=iconSpan||btn;
+  target.style.position='relative';target.style.display='inline-block';
+  let badge=target.querySelector('.notif-badge');
   if(unread>0){
-    if(!badge){badge=document.createElement('span');badge.className='notif-badge';btn.appendChild(badge);}
+    if(!badge){badge=document.createElement('span');badge.className='notif-badge';target.appendChild(badge);}
     badge.textContent=unread>99?'99+':String(unread);
   } else {
     if(badge)badge.remove();
