@@ -3867,8 +3867,33 @@ function filterNotifs(f){
   document.querySelectorAll('.notif-filter-btn').forEach(b=>b.classList.toggle('active',b.dataset.filter===f));
   renderNotifications(f);
 }
-// initialise badge on load
-document.addEventListener('DOMContentLoaded',()=>{ setTimeout(_updateNotifBadge,500); });
+// ── Backfill: populate feed from existing bills/agreements (runs once) ─────────
+function _backfillNotifications(){
+  const _flag='elNotifsBackfilled';
+  if(localStorage.getItem(_flag))return;
+  const existing=_loadNotifs();
+  if(existing.length){localStorage.setItem(_flag,'1');return;} // already have data, skip
+  const entries=[];
+  // Collect bills (up to last 90 days)
+  const _cutoff=Date.now()-(90*864e5);
+  (bills||[]).forEach(b=>{
+    if(!b.createdAt||new Date(b.createdAt).getTime()<_cutoff)return;
+    entries.push({id:'bf_b_'+b.id,type:'bill_created',ts:b.createdAt,name:b.name||b.specialService||b.client||'',client:b.client||'',cat:b.type||'Other',by:b.manager||''});
+  });
+  // Collect agreements (up to last 90 days)
+  (agreements||[]).forEach(a=>{
+    if(!a.createdAt||new Date(a.createdAt).getTime()<_cutoff)return;
+    entries.push({id:'bf_a_'+a.id,type:'agreement_created',ts:a.createdAt,name:a.name||a.client||'',client:a.client||'',cat:a.type||'',by:a.manager||''});
+  });
+  if(!entries.length){localStorage.setItem(_flag,'1');return;}
+  // Sort newest first and save
+  entries.sort((a,b)=>b.ts.localeCompare(a.ts));
+  _saveNotifs(entries.slice(0,_NOTIF_MAX));
+  localStorage.setItem(_flag,'1');
+  _updateNotifBadge();
+}
+// initialise badge on load; backfill after data is ready
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(()=>{_updateNotifBadge();_backfillNotifications();},1200); });
 // ── END NOTIFICATIONS ─────────────────────────────────────────────────────────
 
 function onBillTypeChange(){
