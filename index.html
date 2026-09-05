@@ -4745,7 +4745,7 @@ let agrLoginMsal=null;
 function getAgrLoginMsal(){
   if(agrLoginMsal)return agrLoginMsal;
   if(typeof msal==='undefined')return null;
-  agrLoginMsal=new msal.PublicClientApplication({auth:{clientId:AGR_MS_CLIENT_ID,authority:'https://login.microsoftonline.com/'+AGR_MS_TENANT_ID,redirectUri:getRedirectUri()},cache:{cacheLocation:'localStorage',storeAuthStateInCookie:true}});
+  agrLoginMsal=new msal.PublicClientApplication({auth:{clientId:AGR_MS_CLIENT_ID,authority:'https://login.microsoftonline.com/common',redirectUri:getRedirectUri()},cache:{cacheLocation:'localStorage',storeAuthStateInCookie:true}});
   return agrLoginMsal;
 }
 async function msLogin(){
