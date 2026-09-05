@@ -4759,8 +4759,16 @@ async function msLogin(){
   const emailLower=upn.toLowerCase();
   const localPart=emailLower.split('@')[0];
   const users=getUsers();
-  const u=users.find(x=>(x.email&&x.email.toLowerCase()===emailLower)||x.username.toLowerCase()===localPart);
-  if(!u){err.style.display='block';err.textContent='Signed in as '+upn+', but no matching account was found here. Ask admin to add you, or set your email on your existing account to match.';return}
+  let u=users.find(x=>(x.email&&x.email.toLowerCase()===emailLower)||x.username.toLowerCase()===localPart);
+  if(!u){
+    // Auto-provision: any Microsoft account from our tenant can sign in;
+    // no admin needs to pre-create the account. New accounts get the
+    // lowest-privilege role and an admin can promote them afterwards.
+    const displayName=(result.account&&result.account.name)||localPart;
+    u={id:'u'+Date.now(),username:localPart,name:displayName,email:emailLower,role:'user',pwHash:'',status:'active'};
+    users.push(u);
+    saveUsers(users);
+  }
   if(u.status==='pending'){err.style.display='block';err.textContent='Your account is pending admin approval. Please wait.';return}
   setSession(u);document.getElementById('loginScreen').style.display='none';updateUserChip(u);document.getElementById('appShell').style.display='block';showSection(u.role==='admin'?'dashboard':'userdash');showToast('Welcome, '+u.name+'!');
   if(u.role!=='admin'){setTimeout(async()=>{await loadCloudConfig().catch(()=>{});await odLoadFromOneDrive(false).catch(()=>{});startManagerAutoSync();},500);}else{setTimeout(async()=>{await odLoadFromOneDrive(false).catch(()=>{});startTokenAutoRenew();},500);}
