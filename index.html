@@ -7324,7 +7324,13 @@ function odConnect(){
   // Save under shared key so all users pick it up
   localStorage.setItem('elOdSharedConfig',JSON.stringify(odConfig));
   localStorage.setItem('odConfig',JSON.stringify(odConfig));
-  if(initMSAL()){msalApp.loginRedirect({scopes:SCOPES});}else showToast('⚠️ Could not initialize OneDrive. Check Client ID.');
+  if(!initMSAL()){showToast('⚠️ Could not initialize OneDrive. Check Client ID.');return}
+  try{
+    msalApp.loginRedirect({scopes:SCOPES}).catch(e=>{console.error('OD loginRedirect error',e);showToast('⚠️ Microsoft sign-in failed: '+(e&&e.message?e.message:e));});
+  }catch(e){
+    console.error('OD loginRedirect threw',e);
+    showToast('⚠️ Microsoft sign-in failed: '+(e&&e.message?e.message:e));
+  }
 }
 
 function odSaveClientId(){
