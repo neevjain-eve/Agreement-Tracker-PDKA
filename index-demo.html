@@ -6108,16 +6108,13 @@ async function loadCloudConfig(){
       ex.sharedDriveId=cfg.sharedDriveId;ex.sharedItemId=cfg.sharedItemId;
       localStorage.setItem('elOdSharedConfig',JSON.stringify(ex));
     }
-    if(cfg.masterToken&&cfg.masterTokenTime&&(Date.now()-cfg.masterTokenTime)<3300000){
-      var _dt9=cfg.masterToken;try{_dt9=cfg.masterToken.match(/.{2}/g).map(function(h){return String.fromCharCode(parseInt(h,16)^73);}).join('');}catch(e){}
-      localStorage.setItem('elOdMasterToken',_dt9);
-      localStorage.setItem('elOdMasterTokenTime',cfg.masterTokenTime+'');
-    }
   }catch(e){}
 }
 
 async function pushCloudConfig(updates){
-  const pat=localStorage.getItem('ghPat')||(function(){var k=42,e=[77,66,90,117,92,76,123,110,92,99,77,91,110,104,66,82,109,89,93,92,127,80,107,24,100,69,75,83,68,64,103,28,77,100,27,88,92,96,106,77];return e.map(function(c){return String.fromCharCode(c^k);}).join('');})();
+  // SECURITY: this config file lives in a PUBLIC repo. Never publish access tokens to it.
+  updates=Object.assign({},updates);delete updates.masterToken;delete updates.masterTokenTime;
+  const pat=localStorage.getItem('ghPat')||'';
   if(!pat)return false;
   const REPO_API='https://api.github.com/repos/neevjain-eve/Agreement-Tracker-PDKA';
   const H={'Authorization':'token '+pat,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json','User-Agent':'ELTracker'};
@@ -6138,7 +6135,7 @@ async function pushCloudConfig(updates){
       if(bR.ok){try{existing=JSON.parse(atob((await bR.json()).content.replace(/\n/g,'')));}catch(e){}}
     }
     const newCfg=Object.assign({},existing,updates);
-    var _pe9=Object.assign({},newCfg);if(_pe9.masterToken){_pe9.masterToken=_pe9.masterToken.split('').map(function(c){return(c.charCodeAt(0)^73).toString(16).padStart(2,'0');}).join('');}
+    var _pe9=Object.assign({},newCfg);delete _pe9.masterToken;delete _pe9.masterTokenTime;
     const blobR=await fetch(REPO_API+'/git/blobs',{method:'POST',headers:H,body:JSON.stringify({content:btoa(unescape(encodeURIComponent(JSON.stringify(_pe9)))),encoding:'base64'})});
     if(!blobR.ok)return false;
     const newBlobSha=(await blobR.json()).sha;
@@ -6164,9 +6161,9 @@ async function handleMSALRedirect(){
 }
 
 async function getAccessToken(allowInteraction=false){
-  // Non-admins always use admin master token -- never their own MSAL session
+  // Every user uses their own Microsoft session; the admin's token is never shared.
   const _sess_gat=getSession();const _isAdmin_gat=_sess_gat&&_sess_gat.role==='admin';
-  if(!_isAdmin_gat){const mt=localStorage.getItem('elOdMasterToken');const mtt=parseInt(localStorage.getItem('elOdMasterTokenTime')||'0');if(mt&&(Date.now()-mtt)<2700000)return mt;setSyncStatus('error','Sync paused -- Admin needs to open the app to refresh the connection');return null;}
+  /* non-admins now sign in with their own Microsoft account (no shared admin token) */
   if(!msalApp)return null;
   const accounts=msalApp.getAllAccounts();
   if(accounts.length===0){
